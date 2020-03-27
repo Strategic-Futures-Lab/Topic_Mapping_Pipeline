@@ -1,0 +1,30 @@
+# Putting a hash at the beginning makes a line a comment which will be ignored! It must be the FIRST character on a line, so do not add a space before it
+#
+# Please note, each individual line should be a single stop phrase, written as it appears in the original data.
+# Case will be ignored, as will white space and most punctuation!
+#
+# If the phrase appears ANYWHERE in the text which will be passed to the lemmatiser, then the entire document will be considered 'failed'.
+#
+To be confirmed
+To be comfirmed
+Abstracts are not currently available in GtR for all funded research. This is normally because the abstract was not required at the time of proposal submission, but may be because it included sensitive information such as personal details.
+Not yet recorded
+No abstract necessary
+Project to be updated
+No abstract available
+Awaiting Public Project Summary
+summary to follow
+this project has been requested but has not yet been received
+To be provided
+Summary in original application
+The public description for this project has been requested but has not yet been received.
+Not required
+Doctoral Training Partnerships: a range of postgraduate training is funded by the Research Councils. For information on current funding routes, see the common terminology at www.rcuk.ac.uk/StudentshipTerminology. Training grants may be to one organisation or to a consortia of research organisations. This portal will show the lead organisation only.
+As described in proposal submitted to Innovate UK.
+See the CG Submission. These are the details of the capital equipment bid.
+This is in the full application from the commercial partner lead
+Equipment only, agreed in relation to the previously issued GridPP5 grant.
+Equipment only, agreed in relation to the previously issued GridPP4 grant.
+Equipment only, agreed in relation to the previously issued GridPP4+ grant.
+Equipment only, agreed in relation to the previously issued GridPP5+ grant.
+Refer to ATLAS-UK upgrade proposal to PPRP: "UPGRADING THE ATLAS EXPERIMENT FOR THE LUMINOSITY FRONTIER AT THE LARGE HADRON COLLIDER" PPRP meeting, September 2012

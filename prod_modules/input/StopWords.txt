@@ -1,0 +1,8 @@
+# This stop word file behave similarly as the stop phrase file
+# Write one stop word per line
+# Lines starting with # will be discarded as comments
+# The stop words will be remove from the lemma data in document rows
+#
+ieee
+conference
+doi

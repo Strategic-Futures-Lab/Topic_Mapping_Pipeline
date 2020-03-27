@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="B2_LemmatiseJSONFile">
+    <output-path>$PROJECT_DIR$/out/artifacts/B2_LemmatiseJSONFile</output-path>
+    <root id="archive" name="B2_LemmatiseJSONFile.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/resources/manifests/B2-jar/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="SFLPCore" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/stanford-corenlp-3.7.0-models.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/json-simple-1.1.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/stanford-corenlp-3.7.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
