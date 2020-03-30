@@ -1,0 +1,5 @@
+# Put one stop word per line
+# Lines Starting with # are skiped
+#
+ieee
+conference
