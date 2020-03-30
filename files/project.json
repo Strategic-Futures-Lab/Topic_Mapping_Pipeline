@@ -1,0 +1,20 @@
+{
+  "run": {
+    "input": false,
+    "lemmatise": true
+  },
+  "input": {
+    "module": "CSV",
+    "source": "files/scot.csv",
+    "fields": {"title": "Title", "university": "Organisation", "date": "Date", "abstract": "Abstract", "url":  "Title-href"},
+    "output": "files/corpus.json"
+  },
+  "lemmatise": {
+    "corpus": "files/corpus.json",
+    "textFields": ["title", "abstract"],
+    "docFields": ["title", "university", "date", "url"],
+    "stopWords": [],
+    "minLemmas": 10,
+    "output": "files/lemmas.json"
+  }
+}
