@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: P5_Layout.E2_CreateHexMap
-
