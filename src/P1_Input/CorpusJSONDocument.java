@@ -1,4 +1,4 @@
-package PX_Helper;
+package P1_Input;
 
 import PX_Helper.JSONIOWrapper;
 import org.json.simple.JSONObject;
@@ -6,16 +6,18 @@ import org.json.simple.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CorpusDocument {
+public class CorpusJSONDocument {
     private String id;
     private HashMap<String, String> fields;
+    private int index;
 
-    public CorpusDocument(String docId){
+    public CorpusJSONDocument(String docId, int docIndex){
         id = docId;
+        index = docIndex;
         fields = new HashMap<String, String>();
     }
 
-    public CorpusDocument(JSONObject jsonDoc){
+    public CorpusJSONDocument(JSONObject jsonDoc){
         id = (String) jsonDoc.get("id");
         fields = JSONIOWrapper.getStringMap((JSONObject) jsonDoc.get("fields"));
     }
@@ -28,6 +30,8 @@ public class CorpusDocument {
         return id;
     }
 
+    public int getIndex(){ return index;}
+
     public HashMap<String, String> getFields(){
         return fields;
     }
@@ -39,6 +43,7 @@ public class CorpusDocument {
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
         root.put("id", id);
+        root.put("index", index);
         JSONObject fieldsData = new JSONObject();
         for(Map.Entry<String, String> entry: fields.entrySet()){
             fieldsData.put(entry.getKey(), entry.getValue());

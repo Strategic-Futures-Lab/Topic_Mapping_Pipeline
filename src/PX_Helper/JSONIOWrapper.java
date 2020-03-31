@@ -59,7 +59,7 @@ public class JSONIOWrapper {
     }
 
     public static JSONObject LoadJSON(String filename){
-//        System.out.println("\n**********\nLoading JSON File!\n***********\n");
+        System.out.println("Loading "+filename+" ...");
 
         JSONObject root = new JSONObject();
 
@@ -71,12 +71,13 @@ public class JSONIOWrapper {
             e.printStackTrace();
         }
         finally {
-            System.out.println("\n**********\nJSON File Loaded!\n***********\n");
+            System.out.println(filename+" Loaded!");
         }
         return root;
     }
 
     public static void SaveJSON(JSONObject obj, String filename){
+        System.out.println("Saving "+filename+" ...");
         try (FileWriter file = new FileWriter(filename)){
             String str = obj.toJSONString();
             file.write(str);
@@ -86,7 +87,7 @@ public class JSONIOWrapper {
             e.printStackTrace();
         }
         finally {
-            System.out.println("\n**********\nJSON File Saved!\n***********\n");
+            System.out.println(filename+" Saved!");
         }
     }
 }

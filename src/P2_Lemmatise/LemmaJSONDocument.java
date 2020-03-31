@@ -1,13 +1,15 @@
-package PX_Helper;
+package P2_Lemmatise;
 
+import PX_Helper.JSONIOWrapper;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LemmaDocument {
+public class LemmaJSONDocument {
     private String id;
+    private int index;
     private HashMap<String, String> textFields;
     private HashMap<String, String> docFields;
     private String lemmaString;
@@ -15,8 +17,9 @@ public class LemmaDocument {
     private boolean removed = false;
     private String removeReason = "";
 
-    public LemmaDocument(JSONObject jsonDoc, List<String> textKeys, List<String> docKeys){
+    public LemmaJSONDocument(JSONObject jsonDoc, List<String> textKeys, List<String> docKeys){
         id = (String) jsonDoc.get("id");
+        index = Math.toIntExact((long) jsonDoc.get("index"));
         HashMap<String, String> fields = JSONIOWrapper.getStringMap((JSONObject) jsonDoc.get("fields"));
         textFields = new HashMap<>();
         docFields = new HashMap<>();
@@ -30,6 +33,8 @@ public class LemmaDocument {
     public String getId(){
         return id;
     }
+
+    public int getIndex(){ return index;}
 
     public HashMap<String, String> getTextFields(){
         return textFields;
@@ -62,6 +67,7 @@ public class LemmaDocument {
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
         root.put("id", id);
+        root.put("index", index);
         JSONObject docData = new JSONObject();
         for(Map.Entry<String, String> entry: docFields.entrySet()){
             docData.put(entry.getKey(), entry.getValue());

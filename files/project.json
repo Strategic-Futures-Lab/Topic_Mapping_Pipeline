@@ -1,7 +1,8 @@
 {
   "run": {
     "input": false,
-    "lemmatise": true
+    "lemmatise": false,
+    "model": true
   },
   "input": {
     "module": "CSV",
@@ -16,5 +17,27 @@
     "stopWords": [],
     "minLemmas": 10,
     "output": "files/lemmas.json"
+  },
+  "model": {
+    "lemmas": "files/lemmas.json",
+    "module": "hierarchical",
+    "outputDir": "files/topicModel/",
+    "mainModel": {
+      "topics": 20,
+      "words": 30,
+      "docs": 50,
+      "iterations": 100,
+      "topicOutput": "mainTopics.json",
+      "similarityOutput": "mainTopicsSim.csv"
+    },
+    "subModel": {
+      "topics": 30,
+      "words": 30,
+      "docs": 50,
+      "iterations": 100,
+      "topicOutput": "subTopics.json",
+      "similarityOutput": "subTopicsSim.csv"
+    },
+    "documentOutput": "documents.json"
   }
 }
