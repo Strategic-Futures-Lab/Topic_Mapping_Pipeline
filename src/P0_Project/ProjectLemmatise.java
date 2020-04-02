@@ -1,10 +1,10 @@
 package P0_Project;
 
-import PX_Helper.JSONIOWrapper;
+import PX_Data.JSONIOWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class ProjectLemmatise {
+public class ProjectLemmatise implements ModuleSpecs{
     public String corpus;
     public String[] textFields;
     public String[] docFields;
@@ -12,7 +12,7 @@ public class ProjectLemmatise {
     public int minLemmas;
     public String output;
 
-    public void getLemmatiseSpecs(JSONObject specs){
+    public void getSpecs(JSONObject specs){
         corpus = (String) specs.get("corpus");
         textFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("textFields"));
         docFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("docFields"));

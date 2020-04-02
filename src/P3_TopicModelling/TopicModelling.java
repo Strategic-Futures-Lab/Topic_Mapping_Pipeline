@@ -2,10 +2,9 @@ package P3_TopicModelling;
 
 import P0_Project.ModelSpecs;
 import P0_Project.ProjectModel;
-import P2_Lemmatise.LemmaJSONDocument;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import P3_TopicModelling.TopicModelCore.*;
-import PX_Helper.JSONIOWrapper;
+import PX_Data.*;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
 import de.siegmar.fastcsv.writer.CsvAppender;
@@ -13,7 +12,6 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import javax.print.Doc;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -22,17 +20,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TopicModelling {
 
 
-    private ConcurrentHashMap<String, ModelJSONTopic> Topics;
-    private List<Document> DocumentList = new ArrayList<>();
-    private double[][] SimilarityMatrix;
-    private List<List<WordData>> wordsAndWeights;
-    private TopicModel tModel;
+
     private final int[] RANDOM_SEEDS = {1351727940, 1742863098, -1602079425, 1775435783, 568478633, -1728550799, -951342906, 201354591, 1964976895, 1996681054, -1470540617, 2021180607, 1963517091, -62811111, 1289694793, -1538086464, -336032733, 1785570484, 1255020924, 1973504944, 668901209, -1994103157, 1499498950, 1863986805, 767661644, 1106985431, 1044245999, -462881427, 667772453, -1412242423, 884961209, -2010762614, -958108485, -1949179036, -1730305825, 1389240794, 836782564, -785551752, 1933688975, -1999538859, -263090972, -508702554, 1140385921, 1267873921, -1344871923, -43961586, -233705489, 628409593, 899215101, 1093870969, -961964970, 771817120, 666140854, -1449071564, -1636392498, -7026344, 1974585266, -685538084, 366222201, -1186218688, 1079183802, -1051858470, 25585342, 855028013, 1678916685, 1972641650, 202789157, -1552096200, -1506270777, -1041494119, 1463369471, -1055350006, 1349843049, -1101551872, 1843673222, -644314819, -1303113477, -1069086690, 498408088, -114723521, -637117566, 1420898137, 366206483, 213561271, 1791833142, -919814411, 1104666572, 1089758161, -513481178, 291291728, -1821691956, -1915769653, 132274482, 1199014123, 1864061694, -1589540732, 295595372, -131466196, -2096364649, -699552916};
 
     private int skipCount = 0;
 
     private JSONObject metadata;
-    private ConcurrentHashMap<String, ModelJSONDocument> Documents;
+    private ConcurrentHashMap<String, JSONDocument> Documents;
+    private ConcurrentHashMap<String, JSONTopic> Topics;
+    private List<Document> DocumentList = new ArrayList<>();
+    private double[][] SimilarityMatrix;
+    private List<List<WordData>> wordsAndWeights;
+    private TopicModel tModel;
     private int nTopics;
     private int nWords;
     private int nDocs;
@@ -68,7 +67,7 @@ public class TopicModelling {
         startClass.GetAndSetTopicDetails();
         startClass.GetAndSetTopicSimilarity();
         startClass.SaveTopics();
-        startClass.SaveDocuments();
+        startClass.SaveDocuments(startClass.nTopics, -1);
 
         System.out.println( "**********************************************************\n" +
                             "* Topic Modelling COMPLETE !                             *\n" +
@@ -93,16 +92,6 @@ public class TopicModelling {
         numWordId = modelSpecs.numWordId;
     }
 
-    private void LoadLemmaFile(String lemmaFile){
-        JSONArray lemmas = (JSONArray) JSONIOWrapper.LoadJSON(lemmaFile).get("lemmas");
-        Documents = new ConcurrentHashMap<>();
-        for(JSONObject docEntry: (Iterable<JSONObject>) lemmas){
-            ModelJSONDocument doc = new ModelJSONDocument(docEntry);
-            Documents.put(doc.getId(), doc);
-        }
-        System.out.println("Loaded corpus!");
-    }
-
     private void AddLemmasToModel(){
         System.out.println("Adding Lemmas to Model ...");
         for(int i = 0; i < Documents.size(); i++){
@@ -115,9 +104,9 @@ public class TopicModelling {
         System.out.println("Lemmas Added to Model!");
     }
 
-    private void addLemmaToModel(Map.Entry<String, ModelJSONDocument> entry){
+    private void addLemmaToModel(Map.Entry<String, JSONDocument> entry){
         String key = entry.getKey();
-        ModelJSONDocument doc = entry.getValue();
+        JSONDocument doc = entry.getValue();
         if(doc.getLemmas() == null){
             System.out.println("\n************\nERROR! Cannot find Lemmas.\n************\n");
             System.exit(1);
@@ -165,7 +154,7 @@ public class TopicModelling {
         //If you change the first value to false, you get the actual number of words distributed to each topic from each document!
         double[][] distributions = tModel.model.getDocumentTopics(true, false);
 
-        for(Map.Entry<String, ModelJSONDocument> entry: Documents.entrySet()){
+        for(Map.Entry<String, JSONDocument> entry: Documents.entrySet()){
             if(tModel.stringIDtoNumID.containsKey(entry.getKey())){
                 int modelPosition = tModel.stringIDtoNumID.get(entry.getKey());
                 entry.getValue().setTopicDistribution(distributions[modelPosition]);
@@ -205,7 +194,7 @@ public class TopicModelling {
                 count++;
             }
 
-            Topics.put(Integer.toString(topic), new ModelJSONTopic(Integer.toString(topic), topic, topicWords, topicDocs));
+            Topics.put(Integer.toString(topic), new JSONTopic(Integer.toString(topic), topic, topicWords, topicDocs));
         }
 
         System.out.println("Topic Data Created!");
@@ -222,11 +211,11 @@ public class TopicModelling {
         return tModel.topicDistributions;
     }
 
-    public ConcurrentHashMap<String, ModelJSONTopic> getTopics(){
+    public ConcurrentHashMap<String, JSONTopic> getTopics(){
         return Topics;
     }
 
-    public ConcurrentHashMap<String, ModelJSONDocument> getDocuments(){
+    public ConcurrentHashMap<String, JSONDocument> getDocuments(){
         return Documents;
     }
 
@@ -267,11 +256,12 @@ public class TopicModelling {
         System.out.println("Saving Topics...");
         JSONObject root = new JSONObject();
         JSONArray topics = new JSONArray();
-        metadata.put("nTopics", nTopics);
-        metadata.put("nWords", nWords);
-        metadata.put("nDocs", nDocs);
-        root.put("metadata", metadata);
-        for(Map.Entry<String, ModelJSONTopic> entry: Topics.entrySet()){
+        JSONObject meta = (JSONObject) metadata.clone();
+        meta.put("nTopics", nTopics);
+        meta.put("nWords", nWords);
+        meta.put("nDocs", nDocs);
+        root.put("metadata", meta);
+        for(Map.Entry<String, JSONTopic> entry: Topics.entrySet()){
             topics.add(entry.getValue().toJSON());
         }
         root.put("topics", topics);
@@ -288,13 +278,21 @@ public class TopicModelling {
         System.out.println("Topics Saved!");
     }
 
-    public void SaveDocuments(){
+    public void SaveDocuments(int nTopicsMain, int nTopicsSub){
         System.out.println("Saving Documents...");
         JSONObject root = new JSONObject();
         JSONArray documents = new JSONArray();
-        metadata.put("nTopics", nTopics);
-        root.put("metadata", metadata);
-        for(Map.Entry<String, ModelJSONDocument> entry: Documents.entrySet()){
+        JSONObject meta = (JSONObject) metadata.clone();
+        if(nTopicsSub < 0){
+            meta.put("nTopics", nTopics);
+        }
+        else {
+            meta.put("nTopicsMain", nTopicsMain);
+            meta.put("nTopicsSub", nTopicsSub);
+        }
+        root.put("metadata", meta);
+        JSONDocument.PrintModel();
+        for(Map.Entry<String, JSONDocument> entry: Documents.entrySet()){
             documents.add(entry.getValue().toJSON());
         }
         root.put("documents", documents);

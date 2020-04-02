@@ -1,7 +1,8 @@
 package P2_Lemmatise;
 
 import P0_Project.ProjectLemmatise;
-import PX_Helper.*;
+import P2_Lemmatise.Lemmatizer.StanfordLemmatizer;
+import PX_Data.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Lemmatise {
 
     private JSONObject metadata;
-    private ConcurrentHashMap<String, LemmaJSONDocument> Documents;
+    private ConcurrentHashMap<String, JSONDocument> Documents;
     private int docsProcessed = 0;
     private int totalDocs = 0;
     private long startTime;
@@ -29,12 +30,6 @@ public class Lemmatise {
     private int totalRemoved = 0;
 
     public static void Lemmatise(ProjectLemmatise lemmaSpecs){
-//                                String corpusFile,
-//                                 String[] texts,
-//                                 String[] docDetails,
-//                                 String[] stopW,
-//                                 int minL,
-//                                 String outputFile){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Lemmatise !                                   *\n" +
                             "**********************************************************\n");
@@ -42,6 +37,7 @@ public class Lemmatise {
         Lemmatise startClass = new Lemmatise();
         startClass.ProcessArguments(lemmaSpecs);
         startClass.LoadCorpusFile();
+        startClass.ProcessDocuments();
         startClass.LemmatiseDocuments();
         startClass.OutputJSON();
 
@@ -65,10 +61,17 @@ public class Lemmatise {
         JSONArray corpus = (JSONArray) input.get("corpus");
         Documents = new ConcurrentHashMap<>();
         for(JSONObject docEntry: (Iterable<JSONObject>) corpus){
-            LemmaJSONDocument doc = new LemmaJSONDocument(docEntry, textFields, docFields);
+            JSONDocument doc = new JSONDocument(docEntry);
             Documents.put(doc.getId(), doc);
         }
         System.out.println("Loaded corpus!");
+    }
+
+    private void ProcessDocuments(){
+        for(Map.Entry<String, JSONDocument> doc: Documents.entrySet()){
+            doc.getValue().addTexts(textFields);
+            doc.getValue().filterData(docFields);
+        }
     }
 
     private void LemmatiseDocuments(){
@@ -96,7 +99,7 @@ public class Lemmatise {
                 Math.floorDiv(timeTaken, 60) + " minutes, " + timeTaken % 60 + " seconds.");
     }
 
-    private void LemmatiseDocument(Map.Entry<String, LemmaJSONDocument> docEntry){
+    private void LemmatiseDocument(Map.Entry<String, JSONDocument> docEntry){
 
         if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0)
         {
@@ -115,11 +118,11 @@ public class Lemmatise {
             System.out.println(timeTakenStr + " | " + timeToGoStr);
         }
 
-        LemmaJSONDocument doc = docEntry.getValue();
+        JSONDocument doc = docEntry.getValue();
         String rawText = "";
         for(int i = 0; i < textFields.size(); i++){
-            if(doc.getTextFieldValue(textFields.get(i)) != null){
-                rawText += " " + doc.getTextFieldValue(textFields.get(i));
+            if(doc.getText(textFields.get(i)) != null){
+                rawText += " " + doc.getText(textFields.get(i));
             }
         }
         rawText = rawText.trim();
@@ -152,7 +155,8 @@ public class Lemmatise {
         metadata.put("nDocsRemoved", totalRemoved);
         metadata.put("stopWords", String.join(",", stopWords));
         root.put("metadata", metadata);
-        for(Map.Entry<String, LemmaJSONDocument> entry: Documents.entrySet()){
+        JSONDocument.PrintLemmas();
+        for(Map.Entry<String, JSONDocument> entry: Documents.entrySet()){
             lemmas.add(entry.getValue().toJSON());
         }
         root.put("lemmas", lemmas);

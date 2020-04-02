@@ -1,6 +1,7 @@
 package P3_TopicModelling;
 
-import PX_Helper.JSONIOWrapper;
+import PX_Data.JSONDocument;
+import PX_Data.JSONIOWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -9,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class LemmaReader {
     private JSONObject metadata;
-    private ConcurrentHashMap<String, ModelJSONDocument> Documents;
+    private ConcurrentHashMap<String, JSONDocument> Documents;
 
     public LemmaReader(String lemmaFile){
         System.out.println("Loading corpus ...");
@@ -19,19 +20,19 @@ public class LemmaReader {
         JSONArray lemmas = (JSONArray) input.get("lemmas");
         Documents = new ConcurrentHashMap<>();
         for(JSONObject docEntry: (Iterable<JSONObject>) lemmas){
-            ModelJSONDocument doc = new ModelJSONDocument(docEntry);
+            JSONDocument doc = new JSONDocument(docEntry);
             Documents.put(doc.getId(), doc);
         }
 
         System.out.println("Loaded corpus!");
     }
 
-    public ConcurrentHashMap<String, ModelJSONDocument> getDocuments(){
-        ConcurrentHashMap<String, ModelJSONDocument> copy = new ConcurrentHashMap<>();
-        for(Map.Entry<String, ModelJSONDocument> entry: Documents.entrySet()){
+    public ConcurrentHashMap<String, JSONDocument> getDocuments(){
+        ConcurrentHashMap<String, JSONDocument> copy = new ConcurrentHashMap<>();
+        for(Map.Entry<String, JSONDocument> entry: Documents.entrySet()){
             String key = entry.getKey();
-            ModelJSONDocument doc = entry.getValue();
-            copy.put(key, new ModelJSONDocument(doc));
+            JSONDocument doc = entry.getValue();
+            copy.put(key, new JSONDocument(doc));
         }
         return copy;
     }

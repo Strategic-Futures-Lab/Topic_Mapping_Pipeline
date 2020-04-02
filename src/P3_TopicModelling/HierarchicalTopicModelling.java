@@ -2,7 +2,8 @@ package P3_TopicModelling;
 
 import P0_Project.ProjectModel;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
-import PX_Helper.Pair;
+import PX_Data.JSONDocument;
+import PX_Data.JSONTopic;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
@@ -57,20 +58,21 @@ public class HierarchicalTopicModelling {
 
     private void AssignTopicHierarchy() {
         int maxAssign = specs.maxAssign;
-        ConcurrentHashMap<String, ModelJSONTopic> mainTopics = MainTopicModel.getTopics();
-        ConcurrentHashMap<String, ModelJSONTopic> subTopics = SubTopicModel.getTopics();
+        ConcurrentHashMap<String, JSONTopic> mainTopics = MainTopicModel.getTopics();
+        ConcurrentHashMap<String, JSONTopic> subTopics = SubTopicModel.getTopics();
 
-        List<Pair<Integer, List<Pair<Integer, Double>>>> assignment = new ArrayList<>(); // [(subTopic, [(mainTopic, sim)])]
-        HashMap<String, ArrayList<String>> superSubGroups = new HashMap<>();
+//        List<Pair<Integer, List<Pair<Integer, Double>>>> assignment = new ArrayList<>(); // [(subTopic, [(mainTopic, sim)])]
+        HashMap<Integer, HashMap<Integer, Double>> assignment = new HashMap<>();
+//        HashMap<String, ArrayList<String>> superSubGroups = new HashMap<>();
 
         System.out.println("Calculating Hierarchy Assignments ...");
         for (int sT = 0; sT < SimilarityMatrix.length; sT++) {
             double[] currentRow = SimilarityMatrix[sT];
 
             // for direct assignment
-            ModelJSONTopic subTopic = subTopics.get(String.valueOf((sT)));
+            JSONTopic subTopic = subTopics.get(String.valueOf((sT)));
 
-            List<Pair<Integer, Double>> assigns = new ArrayList<>();
+            HashMap<Integer, Double> assigns = new HashMap<>();
 
             List<Integer> usedIdx = new ArrayList<>();
             for(int i = 0; i < maxAssign; i++){
@@ -84,14 +86,14 @@ public class HierarchicalTopicModelling {
                 }
                 usedIdx.add(currentMaxIdx);
 
-                assigns.add(new Pair<>(currentMaxIdx, currentMax));
+                assigns.put(currentMaxIdx, currentMax);
 
                 // if no difference check: assign directly
-                ModelJSONTopic mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
+                JSONTopic mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
                 mainTopic.addSubTopicId(subTopic.getId());
                 subTopic.addMainTopicId(mainTopic.getId());
             }
-            assignment.add(new Pair<>(sT,assigns));
+            assignment.put(sT,assigns);
         }
         System.out.println("Hierarchy Assignments Completed!");
 
@@ -101,13 +103,13 @@ public class HierarchicalTopicModelling {
     }
 
     private void MergeDocuments(){
-        ConcurrentHashMap<String, ModelJSONDocument> mainDocs = MainTopicModel.getDocuments();
-        ConcurrentHashMap<String, ModelJSONDocument> subDocs = SubTopicModel.getDocuments();
-        for(Map.Entry<String, ModelJSONDocument> docEntry: mainDocs.entrySet()){
+        ConcurrentHashMap<String, JSONDocument> mainDocs = MainTopicModel.getDocuments();
+        ConcurrentHashMap<String, JSONDocument> subDocs = SubTopicModel.getDocuments();
+        for(Map.Entry<String, JSONDocument> docEntry: mainDocs.entrySet()){
             String docKey = docEntry.getKey();
             docEntry.getValue().setSubTopicDistribution(subDocs.get(docKey).getTopicDistribution());
         }
-        MainTopicModel.SaveDocuments();
+        MainTopicModel.SaveDocuments(specs.mainModel.topics, specs.subModel.topics);
     }
 
     private void SaveSimilarityMatrix(){
@@ -139,7 +141,7 @@ public class HierarchicalTopicModelling {
         System.out.println("Model Similarity Saved!");
     }
 
-    private void SaveAssignment(List<Pair<Integer, List<Pair<Integer, Double>>>> assignment){
+    private void SaveAssignment(HashMap<Integer, HashMap<Integer, Double>> assignment){
         System.out.println("Saving Hierarchy Assignments ...");
 
         File file = new File(specs.assignmentOutput);
@@ -149,18 +151,19 @@ public class HierarchicalTopicModelling {
         try (CsvAppender appender = writer.append(file, StandardCharsets.UTF_8)) {
             String[] mainLabels = MainTopicModel.getTopicsLabels();
             String[] subLabels = SubTopicModel.getTopicsLabels();
-            for(Pair<Integer, List<Pair<Integer, Double>>> p1: assignment){
-                int sT = p1.getLeft();
-                List<Pair<Integer, Double>> assigns = p1.getRight();
+            for(Map.Entry<Integer, HashMap<Integer, Double>> a : assignment.entrySet()){
+                int sT = a.getKey();
+                HashMap<Integer, Double> b = a.getValue();
                 appender.appendField(subLabels[sT]);
-                for(int j = 0; j < assigns.size(); j++){
-                    Pair<Integer, Double> p2 = assigns.get(j);
-                    int mT = p2.getLeft();
-                    double sim = p2.getRight();
-                    if(j > 0) appender.appendField("");
+                boolean skipFirstCol = false;
+                for(Map.Entry<Integer, Double> c : b.entrySet()){
+                    int mT = c.getKey();
+                    double sim = c.getValue();
+                    if(skipFirstCol) appender.appendField("");
                     appender.appendField(mainLabels[mT]);
                     appender.appendField(String.valueOf(sim));
                     appender.endLine();
+                    skipFirstCol = true;
                 }
             }
         } catch (Exception e) {

@@ -1,8 +1,9 @@
 {
   "run": {
-    "input": true,
-    "lemmatise": true,
-    "model": true
+    "input": false,
+    "lemmatise": false,
+    "model": false,
+    "labelIndex": true
   },
   "input": {
     "module": "CSV",
@@ -46,5 +47,10 @@
       "maxAssign": 3,
       "assignmentOutput": "assignment.csv"
     }
+  },
+  "labelIndex": {
+    "mainTopics": "files/topicModel/mainTopics.json",
+    "subTopics": "files/topicModel/subTopics.json",
+    "output": "files/output/labelIndex.json"
   }
 }

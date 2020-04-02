@@ -5,6 +5,7 @@ import P3_TopicModelling.HierarchicalTopicModelling;
 import P3_TopicModelling.LemmaReader;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import P3_TopicModelling.TopicModelling;
+import P4_Analysis.LabelIndexing;
 
 public class TopicMapping {
 
@@ -38,6 +39,9 @@ public class TopicMapping {
         if(projectManager.runModel){
             this.RunModel();
         }
+        if(projectManager.runLabelIndex){
+            this.RunLabelIndex();
+        }
     }
 
     private void RunInput(){
@@ -58,5 +62,9 @@ public class TopicMapping {
             HierarchicalTopicModelling.HierarchicalModel(projectManager.model);
         }
 
+    }
+
+    private void RunLabelIndex(){
+        LabelIndexing.Index(projectManager.labelIndex);
     }
 }

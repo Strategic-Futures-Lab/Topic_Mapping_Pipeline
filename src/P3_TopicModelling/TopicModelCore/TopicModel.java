@@ -1,6 +1,6 @@
 package P3_TopicModelling.TopicModelCore;
 
-import PX_Helper.StanfordLemmatizer;
+import P2_Lemmatise.Lemmatizer.StanfordLemmatizer;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.SerialPipes;

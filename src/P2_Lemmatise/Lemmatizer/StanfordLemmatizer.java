@@ -5,7 +5,7 @@
  * Agreed for use inside EPSRC
  */
 
-package PX_Helper;
+package P2_Lemmatise.Lemmatizer;
 
 /*
  * Using CoreNLP Library from Stanford

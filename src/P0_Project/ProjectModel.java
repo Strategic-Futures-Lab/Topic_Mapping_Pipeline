@@ -2,7 +2,7 @@ package P0_Project;
 
 import org.json.simple.JSONObject;
 
-public class ProjectModel {
+public class ProjectModel implements ModuleSpecs {
     public String lemmas;
     public String module;
     public String outputDir;
@@ -15,7 +15,7 @@ public class ProjectModel {
     public boolean outputAssignment = false;
     public int maxAssign;
 
-    public void getModelSpecs(JSONObject specs){
+    public void getSpecs(JSONObject specs){
         lemmas = (String) specs.get("lemmas");
         module = (String) specs.get("module");
         outputDir = (String) specs.get("outputDir");
