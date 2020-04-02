@@ -1,13 +1,21 @@
 package P3_TopicModelling;
 
+import P0_Project.ModelSpecs;
+import P0_Project.ProjectModel;
 import P2_Lemmatise.LemmaJSONDocument;
+import P3_TopicModelling.Similarity.TopicsSimilarity;
 import P3_TopicModelling.TopicModelCore.*;
 import PX_Helper.JSONIOWrapper;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
+import de.siegmar.fastcsv.writer.CsvAppender;
+import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import javax.print.Doc;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,42 +37,60 @@ public class TopicModelling {
     private int nWords;
     private int nDocs;
     private int nIterations;
+    private String outputDir;
+    private String docOutput;
+    private String topicOutput;
+    private String simOutput = null;
+    private int numWordId;
 
-    public static TopicModelling Model(ConcurrentHashMap<String, ModelJSONDocument> inputDocs,
-                             JSONObject meta,
-                             int topics,
-                             int words,
-                             int docs,
-                             int iterations,
-                             String outputDir){
+    public static TopicModelling Model(ProjectModel specs, ModelSpecs modelSpecs, LemmaReader reader){
+        TopicModelling startClass = new TopicModelling();
+        startClass.ProcessArguments(specs, modelSpecs, reader);
+        startClass.AddLemmasToModel();
+        startClass.RunTopicModel(0);
+        startClass.GetAndSetDocumentDistributions();
+        startClass.GetAndSetTopicDetails();
+        startClass.GetAndSetTopicSimilarity();
+        return startClass;
+    }
+
+    public static void SingleModel(ProjectModel specs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Topic Modelling !                             *\n" +
                             "**********************************************************\n");
 
         TopicModelling startClass = new TopicModelling();
-        startClass.ProcessArguments(inputDocs, meta, topics, words, docs, iterations);
+        LemmaReader reader = new LemmaReader(specs.lemmas);
+        startClass.ProcessArguments(specs, specs.mainModel, reader);
         startClass.AddLemmasToModel();
-        startClass.RunTopicModel(0, outputDir);
+        startClass.RunTopicModel(0);
         startClass.GetAndSetDocumentDistributions();
         startClass.GetAndSetTopicDetails();
-//        startClass.LemmatiseDocuments();
-//        startClass.OutputJSON(outputFile);
+        startClass.GetAndSetTopicSimilarity();
+        startClass.SaveTopics();
+        startClass.SaveDocuments();
 
         System.out.println( "**********************************************************\n" +
                             "* Topic Modelling COMPLETE !                             *\n" +
                             "**********************************************************\n");
-        return startClass;
     }
 
-    private void ProcessArguments(ConcurrentHashMap<String, ModelJSONDocument> inputDocs,
-                                  JSONObject meta,
-                                  int topics, int words, int docs, int iterations){
-        Documents = inputDocs;
-        metadata = meta;
-        nTopics = topics;
-        nWords = words;
-        nDocs = docs;
-        nIterations = iterations;
+    private void ProcessArguments(ProjectModel specs, ModelSpecs modelSpecs, LemmaReader reader){
+        outputDir = specs.outputDir;
+        docOutput = specs.documentOutput;
+
+        Documents = reader.getDocuments();
+        metadata = reader.getMetadata();
+
+        nTopics = modelSpecs.topics;
+        nWords = modelSpecs.words;
+        nDocs = modelSpecs.docs;
+        nIterations = modelSpecs.iterations;
+        topicOutput = modelSpecs.topicOutput;
+        if(modelSpecs.outputSimilarity){
+            simOutput = modelSpecs.similarityOutput;
+        }
+        numWordId = modelSpecs.numWordId;
     }
 
     private void LoadLemmaFile(String lemmaFile){
@@ -108,7 +134,7 @@ public class TopicModelling {
         }
     }
 
-    private void RunTopicModel(int number, String corpusLoc){
+    private void RunTopicModel(int number){
         System.out.println("Starting Topic Modelling ...\nFollowing output from Mallet.");
 
         tModel = new TopicModel(DocumentList);
@@ -118,14 +144,14 @@ public class TopicModelling {
         tModel.ITER = nIterations;
 
         if(number == 0){
-            tModel.Model(false, true, corpusLoc);
+            tModel.Model(false, true, outputDir);
         } else {
-            tModel.Model(false, false, corpusLoc);
+            tModel.Model(false, false, outputDir);
         }
 
         if(tModel.topicDistributions == null || tModel.topicDistributions.isEmpty()){
             System.out.println("Model "+number+" failed!\nTrying again...");
-            RunTopicModel(number, corpusLoc);
+            RunTopicModel(number);
         } else {
             System.out.println("Model "+number+" completed!");
         }
@@ -185,15 +211,60 @@ public class TopicModelling {
         System.out.println("Topic Data Created!");
     }
 
+    private void GetAndSetTopicSimilarity(){
+        SimilarityMatrix = TopicsSimilarity.GetSimilarityMatrix(nTopics, tModel.topicDistributions);
+        if(simOutput != null){
+            SaveSimilarityMatrix();
+        }
+    }
+
     public List<TopicData> getTopicDistributions(){
         return tModel.topicDistributions;
     }
 
-    public void setTopicsSimilarity(double[][] matrix){
-        SimilarityMatrix = matrix;
+    public ConcurrentHashMap<String, ModelJSONTopic> getTopics(){
+        return Topics;
     }
 
-    public void SaveTopics(String topicFile){
+    public ConcurrentHashMap<String, ModelJSONDocument> getDocuments(){
+        return Documents;
+    }
+
+    public String[] getTopicsLabels(){
+        String[] labels = new String[nTopics];
+        for(int t = 0; t < nTopics; t++){
+            labels[t] = Topics.get(Integer.toString(t)).getLabelString(numWordId);
+        }
+        return labels;
+    }
+
+    public void SaveSimilarityMatrix(){
+        System.out.println("Saving Topic Similarities ...");
+        File file = new File(simOutput);
+        CsvWriter writer = new CsvWriter();
+        writer.setAlwaysDelimitText(true);
+        try(CsvAppender appender = writer.append(file, StandardCharsets.UTF_8)){
+            String[] labels = getTopicsLabels();
+            appender.appendField("");
+            for(int t = 0; t < nTopics; t++){
+                appender.appendField(labels[t]);
+            }
+            appender.endLine();
+            for(int y = 0; y < SimilarityMatrix.length; y++){
+                appender.appendField(labels[y]);
+                for(int x = 0; x < SimilarityMatrix.length; x++){
+                    appender.appendField(String.valueOf(SimilarityMatrix[x][y]));
+                }
+                appender.endLine();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        System.out.println("Topic Similarities Saved!");
+    }
+
+    public void SaveTopics(){
+        System.out.println("Saving Topics...");
         JSONObject root = new JSONObject();
         JSONArray topics = new JSONArray();
         metadata.put("nTopics", nTopics);
@@ -213,10 +284,12 @@ public class TopicModelling {
             topicSimilarity.add(SimRow);
         }
         root.put("topicSimilarity", topicSimilarity);
-        JSONIOWrapper.SaveJSON(root, topicFile);
+        JSONIOWrapper.SaveJSON(root, topicOutput);
+        System.out.println("Topics Saved!");
     }
 
-    public void SaveDocuments(String documentFile){
+    public void SaveDocuments(){
+        System.out.println("Saving Documents...");
         JSONObject root = new JSONObject();
         JSONArray documents = new JSONArray();
         metadata.put("nTopics", nTopics);
@@ -225,6 +298,7 @@ public class TopicModelling {
             documents.add(entry.getValue().toJSON());
         }
         root.put("documents", documents);
-        JSONIOWrapper.SaveJSON(root, documentFile);
+        JSONIOWrapper.SaveJSON(root, docOutput);
+        System.out.println("Documents Saved!");
     }
 }

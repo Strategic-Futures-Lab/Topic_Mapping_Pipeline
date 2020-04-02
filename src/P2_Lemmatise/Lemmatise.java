@@ -1,5 +1,6 @@
 package P2_Lemmatise;
 
+import P0_Project.ProjectLemmatise;
 import PX_Helper.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -19,41 +20,46 @@ public class Lemmatise {
     private final static int UPDATE_FREQUENCY = 100;
     private final static boolean RUN_IN_PARALLEL = true;
 
+    private String corpusFile;
+    private String outputFile;
     private List<String> textFields;
     private List<String> docFields;
     private List<String> stopWords;
     private int minLemmas;
     private int totalRemoved = 0;
 
-    public static void Lemmatise(String corpusFile,
-                                 String[] texts,
-                                 String[] docDetails,
-                                 String[] stopW,
-                                 int minL,
-                                 String outputFile){
+    public static void Lemmatise(ProjectLemmatise lemmaSpecs){
+//                                String corpusFile,
+//                                 String[] texts,
+//                                 String[] docDetails,
+//                                 String[] stopW,
+//                                 int minL,
+//                                 String outputFile){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Lemmatise !                                   *\n" +
                             "**********************************************************\n");
 
         Lemmatise startClass = new Lemmatise();
-        startClass.ProcessArguments(texts, docDetails, stopW, minL);
-        startClass.LoadCorpusFile(corpusFile);
+        startClass.ProcessArguments(lemmaSpecs);
+        startClass.LoadCorpusFile();
         startClass.LemmatiseDocuments();
-        startClass.OutputJSON(outputFile);
+        startClass.OutputJSON();
 
         System.out.println( "**********************************************************\n" +
                             "* Lemmatise COMPLETE !                                   *\n" +
                             "**********************************************************\n");
     }
 
-    private void ProcessArguments(String[] texts, String[] docDetails, String[] stopW, int minL){
-        textFields = Arrays.asList(texts);
-        docFields = Arrays.asList(docDetails);
-        stopWords = Arrays.asList(stopW);
-        minLemmas = minL;
+    private void ProcessArguments(ProjectLemmatise lemmaSpecs){
+        corpusFile = lemmaSpecs.corpus;
+        outputFile = lemmaSpecs.output;
+        textFields = Arrays.asList(lemmaSpecs.textFields);
+        docFields = Arrays.asList(lemmaSpecs.docFields);
+        stopWords = Arrays.asList(lemmaSpecs.stopWords);
+        minLemmas = lemmaSpecs.minLemmas;
     }
 
-    private void LoadCorpusFile(String corpusFile){
+    private void LoadCorpusFile(){
         JSONObject input = JSONIOWrapper.LoadJSON(corpusFile);
         metadata = (JSONObject) input.get("metadata");
         JSONArray corpus = (JSONArray) input.get("corpus");
@@ -140,7 +146,7 @@ public class Lemmatise {
         docsProcessed++;
     }
 
-    private void OutputJSON(String outputFile){
+    private void OutputJSON(){
         JSONObject root = new JSONObject();
         JSONArray lemmas = new JSONArray();
         metadata.put("nDocsRemoved", totalRemoved);

@@ -1,7 +1,7 @@
 {
   "run": {
-    "input": false,
-    "lemmatise": false,
+    "input": true,
+    "lemmatise": true,
     "model": true
   },
   "input": {
@@ -24,20 +24,27 @@
     "outputDir": "files/topicModel/",
     "mainModel": {
       "topics": 20,
-      "words": 30,
-      "docs": 50,
-      "iterations": 100,
+      "words": 10,
+      "docs": 20,
+      "iterations": 50,
       "topicOutput": "mainTopics.json",
-      "similarityOutput": "mainTopicsSim.csv"
+      "topicSimOutput": "mainTopicsSim.csv",
+      "numWordId": 5
     },
     "subModel": {
       "topics": 30,
-      "words": 30,
-      "docs": 50,
-      "iterations": 100,
+      "words": 10,
+      "docs": 20,
+      "iterations": 50,
       "topicOutput": "subTopics.json",
-      "similarityOutput": "subTopicsSim.csv"
+      "topicSimOutput": "subTopicsSim.csv",
+      "numWordId": 5
     },
-    "documentOutput": "documents.json"
+    "documentOutput": "documents.json",
+    "hierarchy": {
+      "modelSimOutput": "modelSim.csv",
+      "maxAssign": 3,
+      "assignmentOutput": "assignment.csv"
+    }
   }
 }

@@ -10,6 +10,7 @@ public class ModelSpecs {
     public String topicOutput;
     public String similarityOutput;
     public boolean outputSimilarity = false;
+    public int numWordId;
 
     public ModelSpecs(JSONObject specs, String outputDir){
         topics = Math.toIntExact((long) specs.get("topics"));
@@ -17,10 +18,11 @@ public class ModelSpecs {
         docs = Math.toIntExact((long) specs.get("docs"));
         iterations = Math.toIntExact((long) specs.get("iterations"));
         topicOutput = outputDir + (String) specs.get("topicOutput");
-        similarityOutput = (String) specs.getOrDefault("similarityOutput", "");
+        similarityOutput = (String) specs.getOrDefault("topicSimOutput", "");
         if(!similarityOutput.equals("")){
             outputSimilarity = true;
             similarityOutput = outputDir+similarityOutput;
         }
+        numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", 3));
     }
 }

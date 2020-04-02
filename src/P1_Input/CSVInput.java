@@ -1,5 +1,6 @@
 package P1_Input;
 
+import P0_Project.ProjectInput;
 import PX_Helper.JSONIOWrapper;
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
@@ -21,20 +22,32 @@ public class CSVInput {
     private ConcurrentHashMap<String, CorpusJSONDocument> Docs = new ConcurrentHashMap<>();
     private int numDocs;
 
-    public static void CSVInput(String sourceFile, HashMap<String, String> fields, String outputFile){
+    // project specs
+    private String sourceFile;
+    private HashMap<String, String> fields;
+    private String outputFile;
+
+    public static void CSVInput(ProjectInput inputSpecs){ // String sourceFile, HashMap<String, String> fields, String outputFile){
         System.out.println( "**********************************************************\n" +
                             "* STARTING CSV Input !                                   *\n" +
                             "**********************************************************\n");
         CSVInput startClass = new CSVInput();
-        startClass.LoadCSVFile(sourceFile, fields);
-        startClass.OutputJSON(outputFile);
+        startClass.processSpecs(inputSpecs);
+        startClass.LoadCSVFile();
+        startClass.OutputJSON();
         System.out.println( "**********************************************************\n" +
                             "* CSV Input: COMPLETE !                                  *\n" +
                             "**********************************************************\n");
     }
 
+    private void processSpecs(ProjectInput inputSpecs){
+        sourceFile = inputSpecs.source;
+        fields = inputSpecs.fields;
+        outputFile = inputSpecs.output;
+    }
 
-    private void LoadCSVFile(String sourceFile, HashMap<String, String> fields){
+
+    private void LoadCSVFile(){
         File file = new File(sourceFile);
         CsvReader csvReader = new CsvReader();
         csvReader.setContainsHeader(true);
@@ -63,7 +76,7 @@ public class CSVInput {
         }
     }
 
-    private void OutputJSON(String outputFile){
+    private void OutputJSON(){
         JSONObject root = new JSONObject();
         JSONArray corpus = new JSONArray();
         JSONObject meta = new JSONObject();

@@ -18,7 +18,7 @@ public class LemmaJSONDocument {
     private String removeReason = "";
 
     public LemmaJSONDocument(JSONObject jsonDoc, List<String> textKeys, List<String> docKeys){
-        id = (String) jsonDoc.get("id");
+        id = (String) jsonDoc.get("docId");
         index = Math.toIntExact((long) jsonDoc.get("index"));
         HashMap<String, String> fields = JSONIOWrapper.getStringMap((JSONObject) jsonDoc.get("fields"));
         textFields = new HashMap<>();
@@ -66,7 +66,7 @@ public class LemmaJSONDocument {
 
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
-        root.put("id", id);
+        root.put("docId", id);
         root.put("index", index);
         JSONObject docData = new JSONObject();
         for(Map.Entry<String, String> entry: docFields.entrySet()){

@@ -18,7 +18,7 @@ public class CorpusJSONDocument {
     }
 
     public CorpusJSONDocument(JSONObject jsonDoc){
-        id = (String) jsonDoc.get("id");
+        id = (String) jsonDoc.get("docId");
         fields = JSONIOWrapper.getStringMap((JSONObject) jsonDoc.get("fields"));
     }
 
@@ -42,7 +42,7 @@ public class CorpusJSONDocument {
 
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
-        root.put("id", id);
+        root.put("docId", id);
         root.put("index", index);
         JSONObject fieldsData = new JSONObject();
         for(Map.Entry<String, String> entry: fields.entrySet()){
