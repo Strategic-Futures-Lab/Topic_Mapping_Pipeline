@@ -107,15 +107,15 @@ public class TopicModelling {
     private void addLemmaToModel(Map.Entry<String, JSONDocument> entry){
         String key = entry.getKey();
         JSONDocument doc = entry.getValue();
-        if(doc.getLemmas() == null){
+        if(doc.getLemmaString() == null){
             System.out.println("\n************\nERROR! Cannot find Lemmas.\n************\n");
             System.exit(1);
         } else {
-            if(doc.getLemmas().length() > 0){
+            if(doc.getLemmaString().length() > 0){
                 if(doc.isRemoved()){
                     skipCount++;
                 } else {
-                    DocumentList.set(doc.getIndex(), new Document(doc.getId(), doc.getLemmas()));
+                    DocumentList.set(doc.getIndex(), new Document(doc.getId(), doc.getLemmaString()));
                 }
             } else {
                 skipCount++;

@@ -25,6 +25,7 @@ public class JSONDocument {
     private HashMap<String, String> docTexts;
     private int numLemmas;
     private String lemmaString;
+    private List<String> lemmas;
     private boolean removed = false;
     private String removeReason = "";
     // used or set by topic modelling module
@@ -151,10 +152,39 @@ public class JSONDocument {
 
     /**
      * Setter method for the document lemma string
-     * @param lemmas list of lemmas to add
+     * @param inputLemmas list of lemmas to add
      */
-    public void setLemmas(List<String> lemmas){
+    public void setLemmas(List<String> inputLemmas){
+        numLemmas = inputLemmas.size();
+        lemmas = inputLemmas;
+    }
+
+    /**
+     * Getter method for the list of lemmas
+     * @return lemmas list
+     */
+    public List<String> getLemmas(){
+        return lemmas;
+    }
+
+    /**
+     * Removes a single lemma from the lemmas list
+     * @param lemmaToRemove lemma to remove
+     */
+    public void removeLemma(String lemmaToRemove){
+        lemmas.removeIf(lemmaToRemove::equals);
         numLemmas = lemmas.size();
+    }
+
+    public void filterOutLemmas(List<String> lemmasToRemove){
+        lemmas.removeIf(lemmasToRemove::contains);
+        numLemmas = lemmas.size();
+    }
+
+    /**
+     * Construct the lemma string from the list of lemmas
+     */
+    public void makeLemmaString(){
         lemmaString = "";
         lemmas.forEach(text -> lemmaString += text + " ");
         lemmaString = lemmaString.trim();
@@ -164,7 +194,7 @@ public class JSONDocument {
      * Getter for lemmas
      * @return lemma string
      */
-    public String getLemmas(){
+    public String getLemmaString(){
         return lemmaString;
     }
 

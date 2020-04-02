@@ -1,9 +1,9 @@
 {
   "run": {
     "input": false,
-    "lemmatise": false,
+    "lemmatise": true,
     "model": false,
-    "labelIndex": true
+    "labelIndex": false
   },
   "input": {
     "module": "CSV",
@@ -17,6 +17,7 @@
     "docFields": ["title", "university", "date", "url"],
     "stopWords": [],
     "minLemmas": 10,
+    "removeLowCounts": 1,
     "output": "files/lemmas.json"
   },
   "model": {

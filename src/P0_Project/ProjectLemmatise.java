@@ -10,6 +10,7 @@ public class ProjectLemmatise implements ModuleSpecs{
     public String[] docFields;
     public String[] stopWords;
     public int minLemmas;
+    public int removeLowCounts;
     public String output;
 
     public void getSpecs(JSONObject specs){
@@ -18,6 +19,7 @@ public class ProjectLemmatise implements ModuleSpecs{
         docFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("docFields"));
         stopWords = JSONIOWrapper.getStringArray((JSONArray) specs.get("stopWords"));
         minLemmas = Math.toIntExact((long) specs.get("minLemmas"));
+        removeLowCounts = Math.toIntExact((long) specs.get("removeLowCounts"));
         output = (String) specs.get("output");
     }
 }

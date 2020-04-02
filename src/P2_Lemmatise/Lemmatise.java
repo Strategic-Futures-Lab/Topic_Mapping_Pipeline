@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Lemmatise {
 
@@ -17,6 +18,7 @@ public class Lemmatise {
     private int totalDocs = 0;
     private long startTime;
     private StanfordLemmatizer slem;
+    private HashMap<String, Integer> lemmaCounts = new HashMap<>();
 
     private final static int UPDATE_FREQUENCY = 100;
     private final static boolean RUN_IN_PARALLEL = true;
@@ -27,7 +29,8 @@ public class Lemmatise {
     private List<String> docFields;
     private List<String> stopWords;
     private int minLemmas;
-    private int totalRemoved = 0;
+    private int removeLowCounts;
+    private int totalDocRemoved = 0;
 
     public static void Lemmatise(ProjectLemmatise lemmaSpecs){
         System.out.println( "**********************************************************\n" +
@@ -39,6 +42,7 @@ public class Lemmatise {
         startClass.LoadCorpusFile();
         startClass.ProcessDocuments();
         startClass.LemmatiseDocuments();
+        startClass.CleanLemmas();
         startClass.OutputJSON();
 
         System.out.println( "**********************************************************\n" +
@@ -53,6 +57,7 @@ public class Lemmatise {
         docFields = Arrays.asList(lemmaSpecs.docFields);
         stopWords = Arrays.asList(lemmaSpecs.stopWords);
         minLemmas = lemmaSpecs.minLemmas;
+        removeLowCounts = lemmaSpecs.removeLowCounts;
     }
 
     private void LoadCorpusFile(){
@@ -143,16 +148,50 @@ public class Lemmatise {
         doc.setLemmas(inputLemmas);
         if(inputLemmas.size() < minLemmas){
             doc.remove("Too short");
-            totalRemoved++;
+            totalDocRemoved++;
         }
 
         docsProcessed++;
     }
 
+    private void CleanLemmas(){
+        if(removeLowCounts > 0){
+            System.out.println("Cleaning Low Count Lemmas ...");
+            startTime = System.currentTimeMillis();
+            for(Map.Entry<String, JSONDocument> doc: Documents.entrySet()){
+                for(String l: doc.getValue().getLemmas()){
+                    if(lemmaCounts.containsKey(l)){
+                        int v = lemmaCounts.get(l);
+                        lemmaCounts.put(l, v+1);
+                    } else {
+                        lemmaCounts.put(l, 1);
+                    }
+                }
+            }
+            List<String> lowCounts = lemmaCounts.entrySet().stream()
+                    .filter(e -> e.getValue() <= removeLowCounts)
+                    .map(e->e.getKey())
+                    .collect(Collectors.toList());
+            System.out.println("Found "+lowCounts.size()+" lemmas with count less or equal to "+removeLowCounts);
+            Documents.entrySet().parallelStream().forEach(e->e.getValue().filterOutLemmas(lowCounts));
+            long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+            System.out.println("Low Count Lemmas Cleaned!"  +
+                    Math.floorDiv(timeTaken, 60) + " minutes, " + timeTaken % 60 + " seconds.");
+        }
+        Documents.entrySet().parallelStream().forEach(e->{
+            JSONDocument doc = e.getValue();
+            if(doc.getLemmas().size() < minLemmas && !doc.isRemoved()){
+                doc.remove("Too short");
+                totalDocRemoved++;
+            }
+            doc.makeLemmaString();
+        });
+    }
+
     private void OutputJSON(){
         JSONObject root = new JSONObject();
         JSONArray lemmas = new JSONArray();
-        metadata.put("nDocsRemoved", totalRemoved);
+        metadata.put("nDocsRemoved", totalDocRemoved);
         metadata.put("stopWords", String.join(",", stopWords));
         root.put("metadata", metadata);
         JSONDocument.PrintLemmas();
