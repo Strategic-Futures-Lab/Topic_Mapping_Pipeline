@@ -14,6 +14,8 @@ public class ProjectManager {
     public ProjectModel model;
     public boolean runLabelIndex;
     public ProjectLabelIndex labelIndex;
+    public boolean runTopicCluster;
+    public ProjectTopicCluster topicCluster;
 
     public ProjectManager(String projectFile){
         JSONObject projectSpec = JSONIOWrapper.LoadJSON(projectFile);
@@ -25,7 +27,8 @@ public class ProjectManager {
         runInput = (boolean) specs.get("input");
         runLemmatise = (boolean) specs.get("lemmatise");
         runModel = (boolean) specs.get("model");
-        runLabelIndex = (boolean) specs.get("labelIndex");
+        runLabelIndex = (boolean) specs.get("indexLabels");
+        runTopicCluster = (boolean) specs.get("clusterTopics");
     }
 
     private void getSpecs(JSONObject projectSpec){
@@ -43,7 +46,11 @@ public class ProjectManager {
         }
         if(runLabelIndex){
             labelIndex = new ProjectLabelIndex();
-            labelIndex.getSpecs((JSONObject) projectSpec.get("labelIndex"));
+            labelIndex.getSpecs((JSONObject) projectSpec.get("indexLabels"));
+        }
+        if(runTopicCluster){
+            topicCluster = new ProjectTopicCluster();
+            topicCluster.getSpecs((JSONObject) projectSpec.get("clusterTopics"));
         }
     }
 

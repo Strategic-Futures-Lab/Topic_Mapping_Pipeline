@@ -1,4 +1,4 @@
-package P4_Analysis;
+package P4_Analysis.LabelIndex;
 
 import P0_Project.ProjectLabelIndex;
 import PX_Data.JSONIOWrapper;
@@ -17,8 +17,8 @@ public class LabelIndexing {
     private String subTopicsFile;
     private String outputFile;
 
-    private JSONObject mainTopicsMetadata;
-    private JSONObject subTopicsMetadata;
+    // private JSONObject mainTopicsMetadata;
+    // private JSONObject subTopicsMetadata;
 
     private ConcurrentHashMap<String, JSONTopic> mainTopics;
     private ConcurrentHashMap<String, JSONTopic> subTopics;
@@ -52,7 +52,7 @@ public class LabelIndexing {
 
     private void LoadTopics(){
         JSONObject input = JSONIOWrapper.LoadJSON(mainTopicsFile);
-        mainTopicsMetadata = (JSONObject) input.get("metadata");
+        // mainTopicsMetadata = (JSONObject) input.get("metadata");
         JSONArray topics = (JSONArray) input.get("topics");
         mainTopics = new ConcurrentHashMap<>();
         for(JSONObject topicEntry: (Iterable<JSONObject>) topics){
@@ -61,7 +61,7 @@ public class LabelIndexing {
         }
         if(indexSubTopics){
             input = JSONIOWrapper.LoadJSON(subTopicsFile);
-            subTopicsMetadata = (JSONObject) input.get("metadata");
+            // subTopicsMetadata = (JSONObject) input.get("metadata");
             topics = (JSONArray) input.get("topics");
             subTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) topics){

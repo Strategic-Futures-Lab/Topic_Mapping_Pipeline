@@ -1,9 +1,10 @@
 {
   "run": {
     "input": false,
-    "lemmatise": true,
+    "lemmatise": false,
     "model": false,
-    "labelIndex": false
+    "indexLabels": false,
+    "clusterTopics": true
   },
   "input": {
     "module": "CSV",
@@ -49,9 +50,16 @@
       "assignmentOutput": "assignment.csv"
     }
   },
-  "labelIndex": {
+  "indexLabels": {
     "mainTopics": "files/topicModel/mainTopics.json",
     "subTopics": "files/topicModel/subTopics.json",
     "output": "files/output/labelIndex.json"
+  },
+  "clusterTopics": {
+    "mainTopics": "files/topicModel/mainTopics.json",
+    "subTopics": "files/topicModel/subTopics.json",
+    "linkageMethod": "max",
+    "mainOutput": "files/output/mainTopics.json",
+    "subOutput": "files/output/subTopics.json"
   }
 }

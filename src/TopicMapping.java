@@ -2,10 +2,9 @@ import P1_Input.CSVInput;
 import P2_Lemmatise.Lemmatise;
 import P0_Project.ProjectManager;
 import P3_TopicModelling.HierarchicalTopicModelling;
-import P3_TopicModelling.LemmaReader;
-import P3_TopicModelling.Similarity.TopicsSimilarity;
 import P3_TopicModelling.TopicModelling;
-import P4_Analysis.LabelIndexing;
+import P4_Analysis.LabelIndex.LabelIndexing;
+import P4_Analysis.TopicClustering.TopicClustering;
 
 public class TopicMapping {
 
@@ -42,6 +41,9 @@ public class TopicMapping {
         if(projectManager.runLabelIndex){
             this.RunLabelIndex();
         }
+        if(projectManager.runTopicCluster){
+            this.RunTopicCluster();
+        }
     }
 
     private void RunInput(){
@@ -66,5 +68,9 @@ public class TopicMapping {
 
     private void RunLabelIndex(){
         LabelIndexing.Index(projectManager.labelIndex);
+    }
+
+    private void RunTopicCluster(){
+        TopicClustering.Cluster(projectManager.topicCluster);
     }
 }

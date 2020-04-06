@@ -67,6 +67,6 @@ public class TopicsSimilarity {
             normA += Math.pow(vectorA[i], 2);
             normB += Math.pow(vectorB[i], 2);
         }
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        return Math.min(dotProduct / (Math.sqrt(normA) * Math.sqrt(normB)), 1.0);
     }
 }

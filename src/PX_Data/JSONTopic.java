@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 public class JSONTopic {
 
     private String topicId;
+    private String groupTopicId = "";
     private int topicIndex;
+    private int groupTopicIndex = -1;
     private List<WordWeight> words;
     private List<DocWeight> docs;
     private List<String> mainTopicIds;
@@ -39,6 +41,8 @@ public class JSONTopic {
     public JSONTopic(JSONObject jsonTopic){
         this.topicId = (String) jsonTopic.get("topicId");
         this.topicIndex = Math.toIntExact((long)jsonTopic.get("topicIndex"));
+        this.groupTopicId = (String) jsonTopic.getOrDefault("subTopicId", "");
+        this.groupTopicIndex = Math.toIntExact((long)jsonTopic.getOrDefault("topicIndex", (long) -1));
         JSONArray words = (JSONArray) jsonTopic.get("topWords");
         this.words = new ArrayList<>();
         for(JSONObject w: (Iterable<JSONObject>) words){
@@ -62,6 +66,21 @@ public class JSONTopic {
     }
 
     /**
+     * Copy constructor, used by topic clsutering for sub topics
+     * @param topic topic to copy
+     */
+    public JSONTopic(JSONTopic topic){
+        this.topicId = topic.topicId;
+        this.topicIndex = topic.topicIndex;
+        this.groupTopicId = topic.groupTopicId;
+        this.groupTopicIndex = topic.groupTopicIndex;
+        this.docs = topic.docs;
+        this.words = topic.words;
+        this.mainTopicIds = topic.mainTopicIds;
+        this.subTopicIds = topic.subTopicIds;
+    }
+
+    /**
      * Getter method for the topic id
      * @return topic id
      */
@@ -75,6 +94,38 @@ public class JSONTopic {
      */
     public int getIndex(){
         return topicIndex;
+    }
+
+    /**
+     * Setter method for the topic index
+     * @param index index to set
+     */
+    public void setGroupTopicIndex(int index){
+        groupTopicIndex = index;
+    }
+
+    /**
+     * Getter method for the index if topic is sub-topic
+     * @return sub topic index
+     */
+    public int getGroupTopicIndex(){
+        return groupTopicIndex;
+    }
+
+    /**
+     * Setter method for the id if topic is sub-topic
+     * @param id sup topic id to set
+     */
+    public void setGroupTopicId(String id){
+        groupTopicId = id;
+    }
+
+    /**
+     * Getter method for the id if topic is sub-topic
+     * @return sub topic id
+     */
+    public String getGroupTopicId(){
+        return groupTopicId;
     }
 
     /**
@@ -119,6 +170,14 @@ public class JSONTopic {
     }
 
     /**
+     * Getter method for the sub topic ids
+     * @return sub topic ids
+     */
+    public List<String> getSubTopicIds(){
+        return subTopicIds;
+    }
+
+    /**
      * Create a JSON object of the topic to save in a JSON file
      * @return JSON object of the topic
      */
@@ -136,6 +195,12 @@ public class JSONTopic {
             docArray.add(docs.get(d).toJSON());
         }
         root.put("topDocs", docArray);
+        if(groupTopicId.length() > 0){
+            root.put("groupTopicId", groupTopicId);
+        }
+        if(groupTopicIndex > -1){
+            root.put("groupTopicIndex", groupTopicIndex);
+        }
         if(!mainTopicIds.isEmpty()){
             JSONArray mainTopics = new JSONArray();
             mainTopicIds.forEach(id->mainTopics.add(id));

@@ -1,4 +1,4 @@
-package P4_Analysis;
+package P4_Analysis.LabelIndex;
 
 import java.util.ArrayList;
 import java.util.HashSet;
