@@ -174,22 +174,22 @@ public class TopicModelling {
         ArrayList<TreeSet<IDSorter>> topicDocuments = tModel.model.getTopicDocuments(0);
 
         for(int topic = 0; topic < sortedWords.size(); topic++){
-            List<WordWeight> topicWords = new ArrayList<>();
+            List<JSONTopic.JSONTopicWeight> topicWords = new ArrayList<>();
             int count = 0;
             for(IDSorter word: sortedWords.get(topic)){
                 if(count >= nWords) break;
                 if(word.getWeight() > 0){
-                    topicWords.add(new WordWeight((String) alphabet.lookupObject(word.getID()), word.getWeight()));
+                    topicWords.add(new JSONTopic.JSONTopicWeight((String) alphabet.lookupObject(word.getID()), word.getWeight()));
                 }
                 count++;
             }
 
-            List<DocWeight> topicDocs = new ArrayList<>();
+            List<JSONTopic.JSONTopicWeight> topicDocs = new ArrayList<>();
             count = 0;
             for(IDSorter document: topicDocuments.get(topic)){
                 if(count >= nDocs) break;
                 if(document.getWeight() > 0){
-                    topicDocs.add(new DocWeight(tModel.numIDtoStringID.get(document.getID()), document.getWeight()));
+                    topicDocs.add(new JSONTopic.JSONTopicWeight(tModel.numIDtoStringID.get(document.getID()), document.getWeight()));
                 }
                 count++;
             }

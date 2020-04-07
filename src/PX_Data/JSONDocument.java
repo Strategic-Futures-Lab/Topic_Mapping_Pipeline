@@ -56,6 +56,22 @@ public class JSONDocument {
         this.removeReason = (String) jsonDoc.getOrDefault("removeReason", "");
         this.lemmaString = (String) jsonDoc.getOrDefault("lemmas", "");
         this.numLemmas = Math.toIntExact((long) jsonDoc.getOrDefault("numLemmas", (long) 0));
+        // set by model module
+        if(!this.removed){
+            JSONArray distrib = (JSONArray) jsonDoc.getOrDefault("topicDistribution", null);
+            if(distrib != null){
+                this.topicDistribution = JSONIOWrapper.getDoubleArray(distrib);
+            } else {
+                distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicDistribution", null);
+                if(distrib != null){
+                    this.topicDistribution = JSONIOWrapper.getDoubleArray(distrib);
+                    distrib = (JSONArray) jsonDoc.getOrDefault("subTopicDistribution", null);
+                    if(distrib != null){
+                        this.subTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -71,6 +87,12 @@ public class JSONDocument {
         this.numLemmas = doc.numLemmas;
         this.removed = doc.removed;
         this.removeReason = doc.removeReason;
+        if(doc.topicDistribution != null){
+            this.topicDistribution = doc.topicDistribution;
+            if(doc.subTopicDistribution != null){
+                this.subTopicDistribution = doc.subTopicDistribution;
+            }
+        }
     }
 
     /**
@@ -243,6 +265,14 @@ public class JSONDocument {
     public void setSubTopicDistribution(double[] distribution){
         // sub topic model should have already formatted values
         subTopicDistribution = distribution;
+    }
+
+    /**
+     * Getter for the distribution over sub topics
+     * @return sub topic distribution
+     */
+    public double[] getSubTopicDistribution(){
+        return topicDistribution;
     }
 
     /**

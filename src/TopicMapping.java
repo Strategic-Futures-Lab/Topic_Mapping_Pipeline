@@ -5,6 +5,7 @@ import P3_TopicModelling.HierarchicalTopicModelling;
 import P3_TopicModelling.TopicModelling;
 import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
+import P4_Analysis.TopicDistribution.TopicDistribution;
 
 public class TopicMapping {
 
@@ -41,6 +42,9 @@ public class TopicMapping {
         if(projectManager.runLabelIndex){
             this.RunLabelIndex();
         }
+        if(projectManager.runTopicDistrib){
+            this.RunTopicDistrib();
+        }
         if(projectManager.runTopicCluster){
             this.RunTopicCluster();
         }
@@ -72,5 +76,9 @@ public class TopicMapping {
 
     private void RunTopicCluster(){
         TopicClustering.Cluster(projectManager.topicCluster);
+    }
+
+    private void RunTopicDistrib(){
+        TopicDistribution.Distribute(projectManager.topicDistrib);
     }
 }

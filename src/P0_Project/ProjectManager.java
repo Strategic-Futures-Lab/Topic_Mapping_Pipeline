@@ -14,6 +14,8 @@ public class ProjectManager {
     public ProjectModel model;
     public boolean runLabelIndex;
     public ProjectLabelIndex labelIndex;
+    public boolean runTopicDistrib;
+    public ProjectTopicDistrib topicDistrib;
     public boolean runTopicCluster;
     public ProjectTopicCluster topicCluster;
 
@@ -28,6 +30,7 @@ public class ProjectManager {
         runLemmatise = (boolean) specs.get("lemmatise");
         runModel = (boolean) specs.get("model");
         runLabelIndex = (boolean) specs.get("indexLabels");
+        runTopicDistrib = (boolean) specs.get("distributeTopics");
         runTopicCluster = (boolean) specs.get("clusterTopics");
     }
 
@@ -47,6 +50,10 @@ public class ProjectManager {
         if(runLabelIndex){
             labelIndex = new ProjectLabelIndex();
             labelIndex.getSpecs((JSONObject) projectSpec.get("indexLabels"));
+        }
+        if(runTopicDistrib){
+            topicDistrib = new ProjectTopicDistrib();
+            topicDistrib.getSpecs((JSONObject) projectSpec.get("distributeTopics"));
         }
         if(runTopicCluster){
             topicCluster = new ProjectTopicCluster();

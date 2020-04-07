@@ -3,7 +3,6 @@ package P4_Analysis.LabelIndex;
 import P0_Project.ProjectLabelIndex;
 import PX_Data.JSONIOWrapper;
 import PX_Data.JSONTopic;
-import PX_Data.WordWeight;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -85,9 +84,9 @@ public class LabelIndexing {
     private void indexLabelsFromTopics(ConcurrentHashMap<String, JSONTopic> topics, boolean isMain){
         for(Map.Entry<String, JSONTopic> topic: topics.entrySet()){
             String topicId = topic.getKey();
-            List<WordWeight> words = topic.getValue().getWords();
-            for(WordWeight word: words){
-                String label = word.label;
+            List<JSONTopic.JSONTopicWeight> words = topic.getValue().getWords();
+            for(JSONTopic.JSONTopicWeight word: words){
+                String label = word.ID;
                 if(Index.containsKey(label)){
                     if(isMain) Index.get(label).mainTopics.add(topicId);
                     else {

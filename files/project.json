@@ -2,23 +2,24 @@
   "run": {
     "input": false,
     "lemmatise": false,
-    "model": false,
-    "indexLabels": false,
+    "model": true,
+    "indexLabels": true,
+    "distributeTopics": true,
     "clusterTopics": true
   },
   "input": {
     "module": "CSV",
-    "source": "files/scot.csv",
-    "fields": {"title": "Title", "university": "Organisation", "date": "Date", "abstract": "Abstract", "url":  "Title-href"},
+    "source": "files/test.csv",
+    "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract", "authors": "Authors", "url":  "Title-href"},
     "output": "files/corpus.json"
   },
   "lemmatise": {
     "corpus": "files/corpus.json",
     "textFields": ["title", "abstract"],
-    "docFields": ["title", "university", "date", "url"],
+    "docFields": ["title", "university", "url", "authors"],
     "stopWords": [],
     "minLemmas": 10,
-    "removeLowCounts": 1,
+    "removeLowCounts": 0,
     "output": "files/lemmas.json"
   },
   "model": {
@@ -54,6 +55,22 @@
     "mainTopics": "files/topicModel/mainTopics.json",
     "subTopics": "files/topicModel/subTopics.json",
     "output": "files/output/labelIndex.json"
+  },
+  "distributeTopics": {
+    "documents": "files/topicModel/documents.json",
+    "mainTopics": "files/topicModel/mainTopics.json",
+    "subTopics": "files/topicModel/subTopics.json",
+    "fields": [{
+      "fieldName": "university",
+      "fieldSeparator": "",
+      "output": "files/output/uniDistributions.json",
+      "valueField": ""
+    },{
+      "fieldName": "authors",
+      "fieldSeparator": "&",
+      "topPerTopic": 5,
+      "valueField": ""
+    }]
   },
   "clusterTopics": {
     "mainTopics": "files/topicModel/mainTopics.json",

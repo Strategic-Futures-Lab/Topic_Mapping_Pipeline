@@ -33,6 +33,20 @@ public class JSONIOWrapper {
         return res;
     }
 
+    public static JSONArray[] getJSONArrayArray(JSONArray array){
+        JSONArray[] res = new JSONArray[array.size()];
+        for(int i = 0; i < array.size(); i++)
+            res[i] = (JSONArray) array.get(i);
+        return res;
+    }
+
+    public static JSONObject[] getJSONObjectArray(JSONArray array){
+        JSONObject[] res = new JSONObject[array.size()];
+        for(int i = 0; i < array.size(); i++)
+            res[i] = (JSONObject) array.get(i);
+        return res;
+    }
+
     public static HashMap<String, Integer> getIntMap(JSONObject map){
         HashMap<String, Integer> res = new HashMap<String, Integer>();
         for(String key: (Iterable<String>) map.keySet()){
