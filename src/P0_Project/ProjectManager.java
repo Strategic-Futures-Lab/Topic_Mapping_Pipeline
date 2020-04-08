@@ -3,28 +3,52 @@ package P0_Project;
 import PX_Data.JSONIOWrapper;
 import org.json.simple.JSONObject;
 
-
+/**
+ * Project Manager Class:
+ *  - reads project specs from file
+ *  - distribute specs across modules
+ */
 public class ProjectManager {
 
+    /** If Input module should run */
     public boolean runInput;
-    public ProjectInput input;
+    /** Input module specifications */
+    public InputModuleSpecs input;
+    /** If Lemmatise module should run */
     public boolean runLemmatise;
-    public ProjectLemmatise lemmatise;
+    /** Lemmatise module specifications */
+    public LemmatiseModuleSpecs lemmatise;
+    /** If Topic Model module should run */
     public boolean runModel;
-    public ProjectModel model;
+    /** Topic Model module specifications */
+    public TopicModelModuleSpecs model;
+    /** If Index Label module should run */
     public boolean runLabelIndex;
-    public ProjectLabelIndex labelIndex;
+    /** Label Index module specifications */
+    public LabelIndexModuleSpecs labelIndex;
+    /** If Topic Distribution module should run */
     public boolean runTopicDistrib;
-    public ProjectTopicDistrib topicDistrib;
+    /** Topic Distribution module specifications */
+    public TopicDistribModuleSpecs topicDistrib;
+    /** If Topic Cluster module should run */
     public boolean runTopicCluster;
-    public ProjectTopicCluster topicCluster;
+    /** Topic Cluster module specifications */
+    public TopicClusterModuleSpecs topicCluster;
 
+    /**
+     * Constructor, also triggers reading the project file and setting up the specs
+     * @param projectFile filename for the project file
+     */
     public ProjectManager(String projectFile){
         JSONObject projectSpec = JSONIOWrapper.LoadJSON(projectFile);
         getRuns((JSONObject) projectSpec.get("run"));
         getSpecs(projectSpec);
     }
 
+    /**
+     * Reads the "run" entry in project file to know which module should be executed
+     * @param specs JSON object attached to "run" in project file
+     */
     private void getRuns(JSONObject specs){
         runInput = (boolean) specs.get("input");
         runLemmatise = (boolean) specs.get("lemmatise");
@@ -34,30 +58,28 @@ public class ProjectManager {
         runTopicCluster = (boolean) specs.get("clusterTopics");
     }
 
+    /**
+     * Sets up the different module specs instances needed (only for modules to be run)
+     * @param projectSpec JSON object from the project file, specific module entries are then distributed
+     */
     private void getSpecs(JSONObject projectSpec){
         if(runInput){
-            input = new ProjectInput();
-            input.getSpecs((JSONObject) projectSpec.get("input"));
+            input = new InputModuleSpecs((JSONObject) projectSpec.get("input"));
         }
         if(runLemmatise){
-            lemmatise = new ProjectLemmatise();
-            lemmatise.getSpecs((JSONObject) projectSpec.get("lemmatise"));
+            lemmatise = new LemmatiseModuleSpecs((JSONObject) projectSpec.get("lemmatise"));
         }
         if(runModel){
-            model = new ProjectModel();
-            model.getSpecs((JSONObject) projectSpec.get("model"));
+            model = new TopicModelModuleSpecs((JSONObject) projectSpec.get("model"));
         }
         if(runLabelIndex){
-            labelIndex = new ProjectLabelIndex();
-            labelIndex.getSpecs((JSONObject) projectSpec.get("indexLabels"));
+            labelIndex = new LabelIndexModuleSpecs((JSONObject) projectSpec.get("indexLabels"));
         }
         if(runTopicDistrib){
-            topicDistrib = new ProjectTopicDistrib();
-            topicDistrib.getSpecs((JSONObject) projectSpec.get("distributeTopics"));
+            topicDistrib = new TopicDistribModuleSpecs((JSONObject) projectSpec.get("distributeTopics"));
         }
         if(runTopicCluster){
-            topicCluster = new ProjectTopicCluster();
-            topicCluster.getSpecs((JSONObject) projectSpec.get("clusterTopics"));
+            topicCluster = new TopicClusterModuleSpecs((JSONObject) projectSpec.get("clusterTopics"));
         }
     }
 

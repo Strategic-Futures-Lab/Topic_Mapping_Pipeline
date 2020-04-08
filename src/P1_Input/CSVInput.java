@@ -1,7 +1,7 @@
 package P1_Input;
 
-import P0_Project.ProjectInput;
-import PX_Data.JSONDocument;
+import P0_Project.InputModuleSpecs;
+import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
@@ -20,7 +20,7 @@ public class CSVInput {
 
     private final static int PROCESS_MAX_ROWS = Integer.MAX_VALUE;
 
-    private ConcurrentHashMap<String, JSONDocument> Docs = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, DocIOWrapper> Docs = new ConcurrentHashMap<>();
     private int numDocs;
 
     // project specs
@@ -28,7 +28,7 @@ public class CSVInput {
     private HashMap<String, String> fields;
     private String outputFile;
 
-    public static void CSVInput(ProjectInput inputSpecs){
+    public static void CSVInput(InputModuleSpecs inputSpecs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING CSV Input !                                   *\n" +
                             "**********************************************************\n");
@@ -41,7 +41,7 @@ public class CSVInput {
                             "**********************************************************\n");
     }
 
-    private void processSpecs(ProjectInput inputSpecs){
+    private void processSpecs(InputModuleSpecs inputSpecs){
         sourceFile = inputSpecs.source;
         fields = inputSpecs.fields;
         outputFile = inputSpecs.output;
@@ -59,7 +59,7 @@ public class CSVInput {
         try(CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)){
             CsvRow row;
             while((row = csvParser.nextRow()) != null && rowNum < PROCESS_MAX_ROWS){
-                JSONDocument doc = new JSONDocument(Integer.toString(rowNum), rowNum);
+                DocIOWrapper doc = new DocIOWrapper(Integer.toString(rowNum), rowNum);
                 for(Map.Entry<String, String> entry: fields.entrySet()){
                     doc.addData(entry.getKey(), row.getField(entry.getValue()));
                 }
@@ -83,7 +83,7 @@ public class CSVInput {
         JSONObject meta = new JSONObject();
         meta.put("totalDocs", numDocs);
         root.put("metadata", meta);
-        for(Map.Entry<String, JSONDocument> entry: Docs.entrySet()){
+        for(Map.Entry<String, DocIOWrapper> entry: Docs.entrySet()){
             corpus.add(entry.getValue().toJSON());
         }
         root.put("corpus", corpus);

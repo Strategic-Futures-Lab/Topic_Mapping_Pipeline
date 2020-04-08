@@ -1,8 +1,8 @@
 package P4_Analysis.TopicClustering;
 
-import P0_Project.ProjectTopicCluster;
+import P0_Project.TopicClusterModuleSpecs;
 import PX_Data.JSONIOWrapper;
-import PX_Data.JSONTopic;
+import PX_Data.TopicIOWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -13,11 +13,11 @@ public class TopicClustering {
 
     public static class TopicGroup{
 
-        public ConcurrentHashMap<String, JSONTopic> topics;
+        public ConcurrentHashMap<String, TopicIOWrapper> topics;
         public SimilarityMatrix similarities;
         public List<AgglomerativeClustering.ClusterRow> linkageTable;
 
-        public TopicGroup(ConcurrentHashMap<String, JSONTopic> topics, SimilarityMatrix similarities){
+        public TopicGroup(ConcurrentHashMap<String, TopicIOWrapper> topics, SimilarityMatrix similarities){
             this.topics = topics;
             this.similarities = similarities;
         }
@@ -25,7 +25,7 @@ public class TopicClustering {
         public JSONObject toJSON(){
             JSONObject root = new JSONObject();
             JSONArray t = new JSONArray();
-            for(Map.Entry<String, JSONTopic> entry: topics.entrySet()){
+            for(Map.Entry<String, TopicIOWrapper> entry: topics.entrySet()){
                 t.add(entry.getValue().toJSON());
             }
             root.put("topics", t);
@@ -51,16 +51,16 @@ public class TopicClustering {
     private String subOutput;
 
     private JSONObject mainTopicsMetadata;
-    private ConcurrentHashMap<String, JSONTopic> mainTopics;
+    private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
     private SimilarityMatrix mainSimilarityMatrix;
     private JSONObject subTopicsMetadata;
-    private ConcurrentHashMap<String, JSONTopic> subTopics;
+    private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
     private SimilarityMatrix subSimilarityMatrix;
 
     private TopicGroup mainTopicGroup;
     private HashMap<String, TopicGroup> subTopicGroups;
 
-    public static void Cluster(ProjectTopicCluster clusterSpecs){
+    public static void Cluster(TopicClusterModuleSpecs clusterSpecs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Topic Cluster !                               *\n" +
                             "**********************************************************\n");
@@ -80,7 +80,7 @@ public class TopicClustering {
                             "**********************************************************\n");
     }
 
-    private void ProcessArguments(ProjectTopicCluster clusterSpecs){
+    private void ProcessArguments(TopicClusterModuleSpecs clusterSpecs){
         switch (clusterSpecs.linkageMethod){
             case "max":
                 linkageMethod = AgglomerativeClustering.LINKAGE_TYPE.MAX;
@@ -110,7 +110,7 @@ public class TopicClustering {
         JSONArray topics = (JSONArray) input.get("topics");
         mainTopics = new ConcurrentHashMap<>();
         for(JSONObject topicEntry: (Iterable<JSONObject>) topics){
-            JSONTopic topic = new JSONTopic(topicEntry);
+            TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
             mainTopics.put(topic.getId(), topic);
         }
         mainSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("topicSimilarity"));
@@ -120,7 +120,7 @@ public class TopicClustering {
             topics = (JSONArray) input.get("topics");
             subTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) topics){
-                JSONTopic topic = new JSONTopic(topicEntry);
+                TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
                 subTopics.put(topic.getId(), topic);
             }
             subSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("topicSimilarity"));
@@ -133,17 +133,17 @@ public class TopicClustering {
         mainTopicGroup = new TopicGroup(mainTopics, mainSimilarityMatrix);
         if(clusterSubTopics){
             subTopicGroups = new HashMap<>();
-            for(Map.Entry<String, JSONTopic> mainTopic: mainTopics.entrySet()){
-                ConcurrentHashMap<String, JSONTopic> subs = new ConcurrentHashMap<>();
+            for(Map.Entry<String, TopicIOWrapper> mainTopic: mainTopics.entrySet()){
+                ConcurrentHashMap<String, TopicIOWrapper> subs = new ConcurrentHashMap<>();
                 List<String> subTopicIds = mainTopic.getValue().getSubTopicIds();
                 int[] indices = new int[subTopicIds.size()];
                 for(int i = 0; i < subTopicIds.size(); i++){
-                    subs.put(subTopicIds.get(i), new JSONTopic(subTopics.get(subTopicIds.get(i))));
+                    subs.put(subTopicIds.get(i), new TopicIOWrapper(subTopics.get(subTopicIds.get(i))));
                     indices[i] = subTopics.get(subTopicIds.get(i)).getIndex();
                 }
                 Arrays.sort(indices);
                 for(int i = 0; i < indices.length; i++){
-                    for(Map.Entry<String, JSONTopic> sub: subs.entrySet()){
+                    for(Map.Entry<String, TopicIOWrapper> sub: subs.entrySet()){
                         if(sub.getValue().getIndex() == indices[i]){
                             sub.getValue().setGroupTopicIndex(i);
                             sub.getValue().setGroupTopicId(String.valueOf(i));

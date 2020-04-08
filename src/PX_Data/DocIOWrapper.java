@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Wrapper class to store document data and write JSON files
  */
-public class JSONDocument {
+public class DocIOWrapper {
 
     private static String ToPrint = "";
     public static void PrintLemmas(){ToPrint = "Lemmas";}
@@ -37,7 +37,7 @@ public class JSONDocument {
      * @param docId document id
      * @param docIndex document index
      */
-    public JSONDocument(String docId, int docIndex){
+    public DocIOWrapper(String docId, int docIndex){
         this.docId = docId;
         this.docIndex = docIndex;
         this.docData = new HashMap<>();
@@ -47,7 +47,7 @@ public class JSONDocument {
      * Constructor to load document from an existing JSON file
      * @param jsonDoc document as JSON object
      */
-    public JSONDocument(JSONObject jsonDoc){
+    public DocIOWrapper(JSONObject jsonDoc){
         this.docId = (String) jsonDoc.get("docId");
         this.docIndex = Math.toIntExact((long) jsonDoc.get("docIndex"));
         this.docData = JSONIOWrapper.getStringMap((JSONObject) jsonDoc.get("docData"));
@@ -79,7 +79,7 @@ public class JSONDocument {
      * across multiple topic models, not all fields required
      * @param doc document to copy
      */
-    public JSONDocument(JSONDocument doc){
+    public DocIOWrapper(DocIOWrapper doc){
         this.docId = doc.docId;
         this.docIndex = doc.docIndex;
         this.docData = doc.docData;

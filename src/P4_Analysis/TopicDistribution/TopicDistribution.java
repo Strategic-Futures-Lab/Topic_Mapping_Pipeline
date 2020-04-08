@@ -1,17 +1,15 @@
 package P4_Analysis.TopicDistribution;
 
 import P0_Project.DistribSpecs;
-import P0_Project.ProjectTopicDistrib;
-import P3_TopicModelling.TopicModelCore.Topic;
-import PX_Data.JSONDocument;
+import P0_Project.TopicDistribModuleSpecs;
+import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
-import PX_Data.JSONTopic;
+import PX_Data.TopicIOWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class TopicDistribution {
 
@@ -23,11 +21,11 @@ public class TopicDistribution {
     // private List<String> values;
     // private String distribOutputFile;
 
-    private ConcurrentHashMap<String, JSONDocument> documents;
-    private ConcurrentHashMap<Integer, JSONTopic> mainTopics;
+    private ConcurrentHashMap<String, DocIOWrapper> documents;
+    private ConcurrentHashMap<Integer, TopicIOWrapper> mainTopics;
     private JSONObject mainTopicsMetadata;
     private JSONArray mainTopicSimilarity;
-    private ConcurrentHashMap<Integer, JSONTopic> subTopics;
+    private ConcurrentHashMap<Integer, TopicIOWrapper> subTopics;
     private JSONObject subTopicsMetadata;
     private JSONArray subTopicSimilarity;
 
@@ -38,7 +36,7 @@ public class TopicDistribution {
     // private ConcurrentHashMap<Integer, TopicDistrib> mainTopicDistrib;
     // private ConcurrentHashMap<Integer, TopicDistrib> subTopicDistrib;
 
-    public static void Distribute(ProjectTopicDistrib distribSpecs){
+    public static void Distribute(TopicDistribModuleSpecs distribSpecs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Topic Distribution !                          *\n" +
                             "**********************************************************\n");
@@ -65,7 +63,7 @@ public class TopicDistribution {
                             "**********************************************************\n");
     }
 
-    private void ProcessArguments(ProjectTopicDistrib distribSpecs){
+    private void ProcessArguments(TopicDistribModuleSpecs distribSpecs){
         documentsFile = distribSpecs.documents;
         mainTopicsFile = distribSpecs.mainTopics;
         distributeSubTopics = distribSpecs.distributeSubTopics;
@@ -83,7 +81,7 @@ public class TopicDistribution {
         JSONArray docs = (JSONArray) input.get("documents");
         documents = new ConcurrentHashMap<>();
         for(JSONObject docEntry: (Iterable<JSONObject>) docs){
-            JSONDocument doc = new JSONDocument(docEntry);
+            DocIOWrapper doc = new DocIOWrapper(docEntry);
             documents.put(doc.getId(), doc);
         }
         input = JSONIOWrapper.LoadJSON(mainTopicsFile);
@@ -91,7 +89,7 @@ public class TopicDistribution {
         mainTopicSimilarity = (JSONArray) input.get("topicSimilarity");
         mainTopics = new ConcurrentHashMap<>();
         for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
-            JSONTopic topic = new JSONTopic(topicEntry);
+            TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
             mainTopics.put(topic.getIndex(), topic);
         }
         if(distributeSubTopics){
@@ -100,7 +98,7 @@ public class TopicDistribution {
             subTopicSimilarity = (JSONArray) input.get("topicSimilarity");
             subTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
-                JSONTopic topic = new JSONTopic(topicEntry);
+                TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
                 subTopics.put(topic.getIndex(), topic);
             }
         }
@@ -111,8 +109,8 @@ public class TopicDistribution {
         System.out.println("Checking Document Data ...");
         Set<String> ignoreFields = new HashSet<>();
         Set<String> ignoreValues = new HashSet<>();
-        for(Map.Entry<String, JSONDocument> documentEntry: documents.entrySet()){
-            JSONDocument document = documentEntry.getValue();
+        for(Map.Entry<String, DocIOWrapper> documentEntry: documents.entrySet()){
+            DocIOWrapper document = documentEntry.getValue();
             if(!document.isRemoved()){
                 HashMap<String, String> docData = document.getDocData();
                 for(Distribution distrib: distributions){
@@ -153,8 +151,8 @@ public class TopicDistribution {
 
     private void GetUniqueFields(){
         System.out.println("Finding Unique Field Values ...");
-        for(Map.Entry<String, JSONDocument> documentEntry: documents.entrySet()){
-            JSONDocument doc = documentEntry.getValue();
+        for(Map.Entry<String, DocIOWrapper> documentEntry: documents.entrySet()){
+            DocIOWrapper doc = documentEntry.getValue();
             for(Distribution distrib: distributions){
                 String fieldValue = doc.getData(distrib.getFieldName());
                 distrib.addUniqueFieldValues(fieldValue);
@@ -177,7 +175,7 @@ public class TopicDistribution {
 
     private void CalculateDistributions(){
         System.out.println("Calculating Distributions ...");
-        for(JSONDocument doc: documents.values()){
+        for(DocIOWrapper doc: documents.values()){
             if(!doc.isRemoved()){
                 for(Distribution distrib: distributions){
                     distrib.updateDistributions(doc);
@@ -207,7 +205,7 @@ public class TopicDistribution {
         root.put("metadata", mainTopicsMetadata);
         root.put("topicSimilarity", mainTopicSimilarity);
         JSONArray topics = new JSONArray();
-        for(Map.Entry<Integer, JSONTopic> entry: mainTopics.entrySet()){
+        for(Map.Entry<Integer, TopicIOWrapper> entry: mainTopics.entrySet()){
             topics.add(entry.getValue().toJSON());
         }
         root.put("topics", topics);
@@ -217,7 +215,7 @@ public class TopicDistribution {
             root.put("metadata", subTopicsMetadata);
             root.put("topicSimilarity", subTopicSimilarity);
             topics = new JSONArray();
-            for(Map.Entry<Integer, JSONTopic> entry: subTopics.entrySet()){
+            for(Map.Entry<Integer, TopicIOWrapper> entry: subTopics.entrySet()){
                 topics.add(entry.getValue().toJSON());
             }
             root.put("topics", topics);

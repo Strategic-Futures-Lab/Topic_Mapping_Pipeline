@@ -1,8 +1,8 @@
 package P4_Analysis.LabelIndex;
 
-import P0_Project.ProjectLabelIndex;
+import P0_Project.LabelIndexModuleSpecs;
 import PX_Data.JSONIOWrapper;
-import PX_Data.JSONTopic;
+import PX_Data.TopicIOWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -19,12 +19,12 @@ public class LabelIndexing {
     // private JSONObject mainTopicsMetadata;
     // private JSONObject subTopicsMetadata;
 
-    private ConcurrentHashMap<String, JSONTopic> mainTopics;
-    private ConcurrentHashMap<String, JSONTopic> subTopics;
+    private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
+    private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
 
     private ConcurrentHashMap<String, LabelIndexEntry> Index;
 
-    public static void Index(ProjectLabelIndex indexSpecs){
+    public static void Index(LabelIndexModuleSpecs indexSpecs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Label Index !                                 *\n" +
                             "**********************************************************\n");
@@ -40,7 +40,7 @@ public class LabelIndexing {
                             "**********************************************************\n");
     }
 
-    private void ProcessArguments(ProjectLabelIndex indexSpecs){
+    private void ProcessArguments(LabelIndexModuleSpecs indexSpecs){
         mainTopicsFile = indexSpecs.mainTopics;
         outputFile = indexSpecs.indexOutput;
         indexSubTopics = indexSpecs.indexSubTopics;
@@ -55,7 +55,7 @@ public class LabelIndexing {
         JSONArray topics = (JSONArray) input.get("topics");
         mainTopics = new ConcurrentHashMap<>();
         for(JSONObject topicEntry: (Iterable<JSONObject>) topics){
-            JSONTopic topic = new JSONTopic(topicEntry);
+            TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
             mainTopics.put(topic.getId(), topic);
         }
         if(indexSubTopics){
@@ -64,7 +64,7 @@ public class LabelIndexing {
             topics = (JSONArray) input.get("topics");
             subTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) topics){
-                JSONTopic topic = new JSONTopic(topicEntry);
+                TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
                 subTopics.put(topic.getId(), topic);
             }
         }
@@ -81,11 +81,11 @@ public class LabelIndexing {
         System.out.println("Labels Indexed!");
     }
 
-    private void indexLabelsFromTopics(ConcurrentHashMap<String, JSONTopic> topics, boolean isMain){
-        for(Map.Entry<String, JSONTopic> topic: topics.entrySet()){
+    private void indexLabelsFromTopics(ConcurrentHashMap<String, TopicIOWrapper> topics, boolean isMain){
+        for(Map.Entry<String, TopicIOWrapper> topic: topics.entrySet()){
             String topicId = topic.getKey();
-            List<JSONTopic.JSONTopicWeight> words = topic.getValue().getWords();
-            for(JSONTopic.JSONTopicWeight word: words){
+            List<TopicIOWrapper.JSONTopicWeight> words = topic.getValue().getWords();
+            for(TopicIOWrapper.JSONTopicWeight word: words){
                 String label = word.ID;
                 if(Index.containsKey(label)){
                     if(isMain) Index.get(label).mainTopics.add(topicId);

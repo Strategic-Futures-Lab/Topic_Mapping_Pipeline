@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JSONTopic {
+public class TopicIOWrapper {
 
     /**
      * Class to represent an instance with weight in a topic, e.g.: words or document.
@@ -36,7 +36,7 @@ public class JSONTopic {
          */
         public JSONTopicWeight(JSONObject jsonWeight){
             this.ID = (String) jsonWeight.get("id");
-            this.weight = (double) jsonWeight.get("weight");
+            this.weight = (double) jsonWeight.get("w");
         }
 
         /**
@@ -46,7 +46,7 @@ public class JSONTopic {
          */
         public JSONTopicWeight(JSONObject jsonWeight, String customName){
             this.ID = (String) jsonWeight.get(customName);
-            this.weight = (double) jsonWeight.get("weight");
+            this.weight = (double) jsonWeight.get("w");
         }
 
         /**
@@ -56,7 +56,7 @@ public class JSONTopic {
         public JSONObject toJSON(){
             JSONObject obj = new JSONObject();
             obj.put("id", ID);
-            obj.put("weight", weight);
+            obj.put("w", weight);
             return obj;
         }
 
@@ -68,7 +68,7 @@ public class JSONTopic {
         public JSONObject toJSON(String customName){
             JSONObject obj = new JSONObject();
             obj.put(customName, ID);
-            obj.put("weight", weight);
+            obj.put("w", weight);
             return obj;
         }
     }
@@ -80,7 +80,6 @@ public class JSONTopic {
         public String distributionField;
         public List<JSONTopicWeight> values;
         public String distributionValue = "";
-        public double total;
 
         /**
          * Basic Constructor, only sets id
@@ -89,7 +88,6 @@ public class JSONTopic {
         public JSONTopicDistribution(String distributionField){
             this.distributionField = distributionField;
             this.values = new ArrayList<>();
-            this.total = 0.0;
         }
 
         /**
@@ -100,9 +98,6 @@ public class JSONTopic {
         public JSONTopicDistribution(String distributionField, List<JSONTopicWeight> values){
             this.distributionField = distributionField;
             this.values = values;
-            DecimalFormat df = new DecimalFormat("#.####");
-            df.setRoundingMode(RoundingMode.UP);
-            this.total = Double.parseDouble(df.format(values.stream().map(e->e.weight).reduce(0.0, (acc, val)->acc + val)));
         }
 
         /**
@@ -110,25 +105,13 @@ public class JSONTopic {
          * @param jsonDistribution JSON object
          */
         public JSONTopicDistribution(JSONObject jsonDistribution){
-            distributionField = (String) jsonDistribution.get("distributionField");
-            total = (double) jsonDistribution.get("total");
+            distributionField = (String) jsonDistribution.get("field");
             values = new ArrayList<>();
-            JSONArray jsonValues = (JSONArray) jsonDistribution.get("values");
+            JSONArray jsonValues = (JSONArray) jsonDistribution.get("topWeights");
             for(JSONObject d: (Iterable<JSONObject>) jsonValues){
                 values.add(new JSONTopicWeight(d));
             }
-            distributionValue = (String) jsonDistribution.getOrDefault("distributionValue", "");
-        }
-
-        /**
-         * Adds weight entry to values
-         * @param w weight entry to add
-         */
-        public void addWeight(JSONTopicWeight w){
-            values.add(w);
-            DecimalFormat df = new DecimalFormat("#.####");
-            df.setRoundingMode(RoundingMode.UP);
-            total = Double.parseDouble(df.format(total+w.weight));
+            distributionValue = (String) jsonDistribution.getOrDefault("value", "");
         }
 
         /**
@@ -137,27 +120,40 @@ public class JSONTopic {
          */
         public JSONObject toJSON(){
             JSONObject obj = new JSONObject();
-            obj.put("distributionField", distributionField);
-            obj.put("total", total);
+            obj.put("field", distributionField);
+            obj.put("value", distributionValue);
             JSONArray array = new JSONArray();
             for(int v = 0; v < values.size(); v++){
                 array.add(values.get(v).toJSON());
             }
-            obj.put("values", array);
+            obj.put("topWeights", array);
             return obj;
         }
     }
 
-    private String topicId;
-    private String groupTopicId = "";
-    private int topicIndex;
-    private int groupTopicIndex = -1;
-    private List<JSONTopicWeight> words;
-    private List<JSONTopicWeight> docs;
-    private List<String> mainTopicIds;
-    private List<String> subTopicIds;
+    /**
+     * MAIN JSON TOPIC OBJECT
+     */
 
-    private List<JSONTopicDistribution> distributions;
+    // set by topic modelling module:
+    private String topicId; // id of topic
+    private int topicIndex; // index of topic (in similarity matrix and doc distribution arrays)
+    private List<JSONTopicWeight> words; // list of top words: labels + weights
+    private List<JSONTopicWeight> docs; // list of top docs: ids + weights
+    // set by hierarchical topic module:
+    // default: empty list, only saved to JSON if filled
+    private List<String> mainTopicIds = new ArrayList<>(); // list of main topic ids topic belongs to if topic is sub
+    private List<String> subTopicIds = new ArrayList<>(); // list of sub topic ids topic has if topic is main
+
+    // set by distribution module:
+    // default: empty list, only saved to JSON if filled
+    private List<JSONTopicDistribution> distributions = new ArrayList<>(); // list of distribution to save in topic data
+    private List<JSONTopicWeight> distributionTotals = new ArrayList<>(); // list of distribution totals to save in topic data
+
+    // set by clustering module if sub-topic:
+    // default: empty string and non-possible group, only saved to JSON if changed
+    private String groupTopicId = ""; // id of topic inside a sub-group
+    private int groupTopicIndex = -1; // index of topic inside a sub-group
 
     /**
      * Basic constructor, typically used by Topic Modelling modules
@@ -166,25 +162,22 @@ public class JSONTopic {
      * @param words list of top words
      * @param docs list of top documents
      */
-    public JSONTopic(String id, int index, List<JSONTopicWeight> words, List<JSONTopicWeight> docs){
+    public TopicIOWrapper(String id, int index, List<JSONTopicWeight> words, List<JSONTopicWeight> docs){
+        // necessary data
         this.topicId = id;
         this.topicIndex = index;
         this.words = words;
         this.docs = docs;
-        this.mainTopicIds = new ArrayList<>();
-        this.subTopicIds = new ArrayList<>();
-        this.distributions = new ArrayList<>();
     }
 
     /**
      * Constructor to load topic from an existing JSON file
      * @param jsonTopic topic as JSON object
      */
-    public JSONTopic(JSONObject jsonTopic){
+    public TopicIOWrapper(JSONObject jsonTopic){
+        // necessary data
         this.topicId = (String) jsonTopic.get("topicId");
         this.topicIndex = Math.toIntExact((long)jsonTopic.get("topicIndex"));
-        this.groupTopicId = (String) jsonTopic.getOrDefault("subTopicId", "");
-        this.groupTopicIndex = Math.toIntExact((long)jsonTopic.getOrDefault("groupTopicIndex", (long) -1));
         JSONArray words = (JSONArray) jsonTopic.get("topWords");
         this.words = new ArrayList<>();
         for(JSONObject w: (Iterable<JSONObject>) words){
@@ -195,37 +188,42 @@ public class JSONTopic {
         for(JSONObject d: (Iterable<JSONObject>) docs){
             this.docs.add(new JSONTopicWeight(d, "docId"));
         }
+        // non-necessary data only fill if exists in JSON
         JSONArray mainTopicIds = (JSONArray) jsonTopic.getOrDefault("mainTopicIds", new JSONArray());
-        this.mainTopicIds = new ArrayList<>();
         for(String id: (Iterable<String>) mainTopicIds){
             this.mainTopicIds.add(id);
         }
         JSONArray subTopicIds = (JSONArray) jsonTopic.getOrDefault("subTopicIds", new JSONArray());
-        this.subTopicIds = new ArrayList<>();
         for(String id: (Iterable<String>) subTopicIds){
             this.subTopicIds.add(id);
         }
         JSONArray distributions = (JSONArray) jsonTopic.getOrDefault("distributions", new JSONArray());
-        this.distributions = new ArrayList<>();
         for(JSONObject distribObj: (Iterable<JSONObject>) distributions){
             this.distributions.add(new JSONTopicDistribution(distribObj));
         }
+        JSONArray totals = (JSONArray) jsonTopic.getOrDefault("totals", new JSONArray());
+        for(JSONObject totalObj: (Iterable<JSONObject>) totals){
+            this.distributionTotals.add(new JSONTopicWeight(totalObj));
+        }
+        this.groupTopicId = (String) jsonTopic.getOrDefault("subTopicId", "");
+        this.groupTopicIndex = Math.toIntExact((long)jsonTopic.getOrDefault("groupTopicIndex", (long) -1));
     }
 
     /**
-     * Copy constructor, used by topic clsutering for sub topics
+     * Copy constructor, used by topic clustering for sub topics
      * @param topic topic to copy
      */
-    public JSONTopic(JSONTopic topic){
+    public TopicIOWrapper(TopicIOWrapper topic){
         this.topicId = topic.topicId;
         this.topicIndex = topic.topicIndex;
-        this.groupTopicId = topic.groupTopicId;
-        this.groupTopicIndex = topic.groupTopicIndex;
         this.docs = topic.docs;
         this.words = topic.words;
         this.mainTopicIds = topic.mainTopicIds;
         this.subTopicIds = topic.subTopicIds;
         this.distributions = topic.distributions;
+        this.distributionTotals = topic.distributionTotals;
+        this.groupTopicId = topic.groupTopicId;
+        this.groupTopicIndex = topic.groupTopicIndex;
     }
 
     /**
@@ -334,11 +332,20 @@ public class JSONTopic {
     }
 
     /**
+     * Add an entry to the topic distribution totals
+     * @param total total to add
+     */
+    public void addTotal(JSONTopicWeight total){
+        distributionTotals.add(total);
+    }
+
+    /**
      * Create a JSON object of the topic to save in a JSON file
      * @return JSON object of the topic
      */
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
+        // Save necessary data
         root.put("topicId", topicId);
         root.put("topicIndex", topicIndex);
         JSONArray wordArray = new JSONArray();
@@ -351,12 +358,8 @@ public class JSONTopic {
             docArray.add(docs.get(d).toJSON("docId"));
         }
         root.put("topDocs", docArray);
-        if(groupTopicId.length() > 0){
-            root.put("groupTopicId", groupTopicId);
-        }
-        if(groupTopicIndex > -1){
-            root.put("groupTopicIndex", groupTopicIndex);
-        }
+        // Save non-necessary data
+        // Save if non-empty
         if(!mainTopicIds.isEmpty()){
             JSONArray mainTopics = new JSONArray();
             mainTopicIds.forEach(id->mainTopics.add(id));
@@ -367,10 +370,22 @@ public class JSONTopic {
             subTopicIds.forEach(id->subTopics.add(id));
             root.put("subTopicIds", subTopics);
         }
-        if(!distributions.isEmpty()){
+        if(!distributions.isEmpty()) {
             JSONArray distribs = new JSONArray();
-            distributions.forEach(d->distribs.add(d.toJSON()));
+            distributions.forEach(d -> distribs.add(d.toJSON()));
             root.put("distributions", distribs);
+        }
+        if(!distributionTotals.isEmpty()){
+            JSONArray totals = new JSONArray();
+            distributionTotals.forEach(t -> totals.add(t.toJSON()));
+            root.put("totals", totals);
+        }
+        // Save if non-default
+        if(groupTopicId.length() > 0){
+            root.put("groupTopicId", groupTopicId);
+        }
+        if(groupTopicIndex > -1){
+            root.put("groupTopicIndex", groupTopicIndex);
         }
         return root;
     }

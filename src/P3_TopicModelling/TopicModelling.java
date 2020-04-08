@@ -1,7 +1,7 @@
 package P3_TopicModelling;
 
 import P0_Project.ModelSpecs;
-import P0_Project.ProjectModel;
+import P0_Project.TopicModelModuleSpecs;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import P3_TopicModelling.TopicModelCore.*;
 import PX_Data.*;
@@ -26,8 +26,8 @@ public class TopicModelling {
     private int skipCount = 0;
 
     private JSONObject metadata;
-    private ConcurrentHashMap<String, JSONDocument> Documents;
-    private ConcurrentHashMap<String, JSONTopic> Topics;
+    private ConcurrentHashMap<String, DocIOWrapper> Documents;
+    private ConcurrentHashMap<String, TopicIOWrapper> Topics;
     private List<Document> DocumentList = new ArrayList<>();
     private double[][] SimilarityMatrix;
     private List<List<WordData>> wordsAndWeights;
@@ -42,7 +42,7 @@ public class TopicModelling {
     private String simOutput = null;
     private int numWordId;
 
-    public static TopicModelling Model(ProjectModel specs, ModelSpecs modelSpecs, LemmaReader reader){
+    public static TopicModelling Model(TopicModelModuleSpecs specs, ModelSpecs modelSpecs, LemmaReader reader){
         TopicModelling startClass = new TopicModelling();
         startClass.ProcessArguments(specs, modelSpecs, reader);
         startClass.AddLemmasToModel();
@@ -53,7 +53,7 @@ public class TopicModelling {
         return startClass;
     }
 
-    public static void SingleModel(ProjectModel specs){
+    public static void SingleModel(TopicModelModuleSpecs specs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Topic Modelling !                             *\n" +
                             "**********************************************************\n");
@@ -74,7 +74,7 @@ public class TopicModelling {
                             "**********************************************************\n");
     }
 
-    private void ProcessArguments(ProjectModel specs, ModelSpecs modelSpecs, LemmaReader reader){
+    private void ProcessArguments(TopicModelModuleSpecs specs, ModelSpecs modelSpecs, LemmaReader reader){
         outputDir = specs.outputDir;
         docOutput = specs.documentOutput;
 
@@ -104,9 +104,9 @@ public class TopicModelling {
         System.out.println("Lemmas Added to Model!");
     }
 
-    private void addLemmaToModel(Map.Entry<String, JSONDocument> entry){
+    private void addLemmaToModel(Map.Entry<String, DocIOWrapper> entry){
         String key = entry.getKey();
-        JSONDocument doc = entry.getValue();
+        DocIOWrapper doc = entry.getValue();
         if(doc.getLemmaString() == null){
             System.out.println("\n************\nERROR! Cannot find Lemmas.\n************\n");
             System.exit(1);
@@ -154,7 +154,7 @@ public class TopicModelling {
         //If you change the first value to false, you get the actual number of words distributed to each topic from each document!
         double[][] distributions = tModel.model.getDocumentTopics(true, false);
 
-        for(Map.Entry<String, JSONDocument> entry: Documents.entrySet()){
+        for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){
             if(tModel.stringIDtoNumID.containsKey(entry.getKey())){
                 int modelPosition = tModel.stringIDtoNumID.get(entry.getKey());
                 entry.getValue().setTopicDistribution(distributions[modelPosition]);
@@ -174,27 +174,27 @@ public class TopicModelling {
         ArrayList<TreeSet<IDSorter>> topicDocuments = tModel.model.getTopicDocuments(0);
 
         for(int topic = 0; topic < sortedWords.size(); topic++){
-            List<JSONTopic.JSONTopicWeight> topicWords = new ArrayList<>();
+            List<TopicIOWrapper.JSONTopicWeight> topicWords = new ArrayList<>();
             int count = 0;
             for(IDSorter word: sortedWords.get(topic)){
                 if(count >= nWords) break;
                 if(word.getWeight() > 0){
-                    topicWords.add(new JSONTopic.JSONTopicWeight((String) alphabet.lookupObject(word.getID()), word.getWeight()));
+                    topicWords.add(new TopicIOWrapper.JSONTopicWeight((String) alphabet.lookupObject(word.getID()), word.getWeight()));
                 }
                 count++;
             }
 
-            List<JSONTopic.JSONTopicWeight> topicDocs = new ArrayList<>();
+            List<TopicIOWrapper.JSONTopicWeight> topicDocs = new ArrayList<>();
             count = 0;
             for(IDSorter document: topicDocuments.get(topic)){
                 if(count >= nDocs) break;
                 if(document.getWeight() > 0){
-                    topicDocs.add(new JSONTopic.JSONTopicWeight(tModel.numIDtoStringID.get(document.getID()), document.getWeight()));
+                    topicDocs.add(new TopicIOWrapper.JSONTopicWeight(tModel.numIDtoStringID.get(document.getID()), document.getWeight()));
                 }
                 count++;
             }
 
-            Topics.put(Integer.toString(topic), new JSONTopic(Integer.toString(topic), topic, topicWords, topicDocs));
+            Topics.put(Integer.toString(topic), new TopicIOWrapper(Integer.toString(topic), topic, topicWords, topicDocs));
         }
 
         System.out.println("Topic Data Created!");
@@ -211,11 +211,11 @@ public class TopicModelling {
         return tModel.topicDistributions;
     }
 
-    public ConcurrentHashMap<String, JSONTopic> getTopics(){
+    public ConcurrentHashMap<String, TopicIOWrapper> getTopics(){
         return Topics;
     }
 
-    public ConcurrentHashMap<String, JSONDocument> getDocuments(){
+    public ConcurrentHashMap<String, DocIOWrapper> getDocuments(){
         return Documents;
     }
 
@@ -261,7 +261,7 @@ public class TopicModelling {
         meta.put("nWords", nWords);
         meta.put("nDocs", nDocs);
         root.put("metadata", meta);
-        for(Map.Entry<String, JSONTopic> entry: Topics.entrySet()){
+        for(Map.Entry<String, TopicIOWrapper> entry: Topics.entrySet()){
             topics.add(entry.getValue().toJSON());
         }
         root.put("topics", topics);
@@ -291,8 +291,8 @@ public class TopicModelling {
             meta.put("nTopicsSub", nTopicsSub);
         }
         root.put("metadata", meta);
-        JSONDocument.PrintModel();
-        for(Map.Entry<String, JSONDocument> entry: Documents.entrySet()){
+        DocIOWrapper.PrintModel();
+        for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){
             documents.add(entry.getValue().toJSON());
         }
         root.put("documents", documents);

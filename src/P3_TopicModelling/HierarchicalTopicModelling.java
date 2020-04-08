@@ -1,9 +1,9 @@
 package P3_TopicModelling;
 
-import P0_Project.ProjectModel;
+import P0_Project.TopicModelModuleSpecs;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
-import PX_Data.JSONDocument;
-import PX_Data.JSONTopic;
+import PX_Data.DocIOWrapper;
+import PX_Data.TopicIOWrapper;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
@@ -22,9 +22,9 @@ public class HierarchicalTopicModelling {
     private TopicModelling SubTopicModel;
     private double[][] SimilarityMatrix;
 
-    private ProjectModel specs;
+    private TopicModelModuleSpecs specs;
 
-    public static void HierarchicalModel(ProjectModel specs){
+    public static void HierarchicalModel(TopicModelModuleSpecs specs){
         System.out.println( "**********************************************************\n" +
                             "* STARTING Hierarchical Topic Modelling !                *\n" +
                             "**********************************************************\n");
@@ -58,8 +58,8 @@ public class HierarchicalTopicModelling {
 
     private void AssignTopicHierarchy() {
         int maxAssign = specs.maxAssign;
-        ConcurrentHashMap<String, JSONTopic> mainTopics = MainTopicModel.getTopics();
-        ConcurrentHashMap<String, JSONTopic> subTopics = SubTopicModel.getTopics();
+        ConcurrentHashMap<String, TopicIOWrapper> mainTopics = MainTopicModel.getTopics();
+        ConcurrentHashMap<String, TopicIOWrapper> subTopics = SubTopicModel.getTopics();
 
 //        List<Pair<Integer, List<Pair<Integer, Double>>>> assignment = new ArrayList<>(); // [(subTopic, [(mainTopic, sim)])]
         HashMap<Integer, HashMap<Integer, Double>> assignment = new HashMap<>();
@@ -70,7 +70,7 @@ public class HierarchicalTopicModelling {
             double[] currentRow = SimilarityMatrix[sT];
 
             // for direct assignment
-            JSONTopic subTopic = subTopics.get(String.valueOf((sT)));
+            TopicIOWrapper subTopic = subTopics.get(String.valueOf((sT)));
 
             HashMap<Integer, Double> assigns = new HashMap<>();
 
@@ -89,7 +89,7 @@ public class HierarchicalTopicModelling {
                 assigns.put(currentMaxIdx, currentMax);
 
                 // if no difference check: assign directly
-                JSONTopic mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
+                TopicIOWrapper mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
                 mainTopic.addSubTopicId(subTopic.getId());
                 subTopic.addMainTopicId(mainTopic.getId());
             }
@@ -103,9 +103,9 @@ public class HierarchicalTopicModelling {
     }
 
     private void MergeDocuments(){
-        ConcurrentHashMap<String, JSONDocument> mainDocs = MainTopicModel.getDocuments();
-        ConcurrentHashMap<String, JSONDocument> subDocs = SubTopicModel.getDocuments();
-        for(Map.Entry<String, JSONDocument> docEntry: mainDocs.entrySet()){
+        ConcurrentHashMap<String, DocIOWrapper> mainDocs = MainTopicModel.getDocuments();
+        ConcurrentHashMap<String, DocIOWrapper> subDocs = SubTopicModel.getDocuments();
+        for(Map.Entry<String, DocIOWrapper> docEntry: mainDocs.entrySet()){
             String docKey = docEntry.getKey();
             docEntry.getValue().setSubTopicDistribution(subDocs.get(docKey).getTopicDistribution());
         }

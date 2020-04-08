@@ -10,13 +10,13 @@
   "input": {
     "module": "CSV",
     "source": "files/test.csv",
-    "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract", "authors": "Authors", "url":  "Title-href"},
+    "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract", "authors": "Authors", "money":  "Money"},
     "output": "files/corpus.json"
   },
   "lemmatise": {
     "corpus": "files/corpus.json",
     "textFields": ["title", "abstract"],
-    "docFields": ["title", "university", "url", "authors"],
+    "docFields": ["title", "university", "money", "authors"],
     "stopWords": [],
     "minLemmas": 10,
     "removeLowCounts": 0,
@@ -66,10 +66,13 @@
       "output": "files/output/uniDistributions.json",
       "valueField": ""
     },{
+      "fieldName": "university",
+      "topPerTopic": 0
+    },{
       "fieldName": "authors",
       "fieldSeparator": "&",
       "topPerTopic": 5,
-      "valueField": ""
+      "valueField": "money"
     }]
   },
   "clusterTopics": {

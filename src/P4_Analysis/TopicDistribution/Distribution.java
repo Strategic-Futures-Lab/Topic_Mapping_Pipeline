@@ -1,9 +1,9 @@
 package P4_Analysis.TopicDistribution;
 
 import P0_Project.DistribSpecs;
-import PX_Data.JSONDocument;
+import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
-import PX_Data.JSONTopic;
+import PX_Data.TopicIOWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -93,14 +93,14 @@ public class Distribution {
         }
     }
 
-    public void updateDistributions(JSONDocument doc){
+    public void updateDistributions(DocIOWrapper doc){
         updateDistribution(doc, mainDistribution);
         if(distributeSubTopics){
             updateDistribution(doc, subDistribution);
         }
     }
 
-    private void updateDistribution(JSONDocument doc, HashMap<String, MutableValue>[] distribution){
+    private void updateDistribution(DocIOWrapper doc, HashMap<String, MutableValue>[] distribution){
         double[] topicWeights = doc.getTopicDistribution();
         for(int i = 0; i < topicWeights.length; i++){
             double topicWeight = topicWeights[i];
@@ -118,7 +118,7 @@ public class Distribution {
         }
     }
 
-    public void saveDistributions(ConcurrentHashMap<Integer, JSONTopic> mainTopics){
+    public void saveDistributions(ConcurrentHashMap<Integer, TopicIOWrapper> mainTopics){
         if(this.saveInTopics()){
             saveDistributionInTopics(mainTopics, mainDistribution);
         } else {
@@ -128,7 +128,7 @@ public class Distribution {
         }
     }
 
-    public void saveDistributions(ConcurrentHashMap<Integer, JSONTopic> mainTopics, ConcurrentHashMap<Integer, JSONTopic> subTopics){
+    public void saveDistributions(ConcurrentHashMap<Integer, TopicIOWrapper> mainTopics, ConcurrentHashMap<Integer, TopicIOWrapper> subTopics){
         if(this.saveInTopics()){
             saveDistributionInTopics(mainTopics, mainDistribution);
             saveDistributionInTopics(subTopics, subDistribution);
@@ -140,16 +140,16 @@ public class Distribution {
         }
     }
 
-    private void saveDistributionInTopics(ConcurrentHashMap<Integer, JSONTopic> topics, HashMap<String, MutableValue>[] distribution){
+    private void saveDistributionInTopics(ConcurrentHashMap<Integer, TopicIOWrapper> topics, HashMap<String, MutableValue>[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
         for(int i = 0; i < distribution.length; i++){
-            JSONTopic topic = topics.get(i);
-            JSONTopic.JSONTopicDistribution jsonDistribution = new JSONTopic.JSONTopicDistribution(fieldName);
+            TopicIOWrapper topic = topics.get(i);
+            TopicIOWrapper.JSONTopicDistribution jsonDistribution = new TopicIOWrapper.JSONTopicDistribution(fieldName);
             if(valueName.length() > 0){
                 jsonDistribution.distributionValue = valueName;
             }
-            double topicTotalWeigth = 0.0;
+            double topicTotalWeight = 0.0;
             Map<String, MutableValue> sortedTopicDistribution = distribution[i].entrySet().stream()
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e2, LinkedHashMap::new));
@@ -157,14 +157,14 @@ public class Distribution {
             for(Map.Entry<String, MutableValue> distribEntry: sortedTopicDistribution.entrySet()){
                 double weight = Double.parseDouble(df.format(distribEntry.getValue().getValue()));
                 if(countAdded < topPerTopic || topPerTopic ==-1){
-                    JSONTopic.JSONTopicWeight jsonWeight = new JSONTopic.JSONTopicWeight(distribEntry.getKey(), weight);
-                    jsonDistribution.addWeight(jsonWeight);
+                    TopicIOWrapper.JSONTopicWeight jsonWeight = new TopicIOWrapper.JSONTopicWeight(distribEntry.getKey(), weight);
+                    jsonDistribution.values.add(jsonWeight);
                     countAdded++;
                 }
-                topicTotalWeigth += weight;
+                topicTotalWeight += weight;
             }
-            jsonDistribution.total = Double.parseDouble(df.format(topicTotalWeigth));
-            topic.addDistribution(jsonDistribution);
+            topic.addTotal(new TopicIOWrapper.JSONTopicWeight(valueName, Double.parseDouble(df.format(topicTotalWeight))));
+            if(topPerTopic != 0) topic.addDistribution(jsonDistribution);
         }
     }
 
@@ -177,7 +177,7 @@ public class Distribution {
         return root;
     }
 
-    private void saveDistributionInFile(JSONObject root, String key, ConcurrentHashMap<Integer, JSONTopic> topics, HashMap<String, MutableValue>[] distribution){
+    private void saveDistributionInFile(JSONObject root, String key, ConcurrentHashMap<Integer, TopicIOWrapper> topics, HashMap<String, MutableValue>[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
         JSONArray jsonDistributionArray = new JSONArray();
