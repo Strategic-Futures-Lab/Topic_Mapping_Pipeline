@@ -34,7 +34,7 @@ sub topics and hierarchical clusters of topics.
 The ***project file*** is a JSON data file containing the specifications for the pipeline. It is organised as follow:
 ```json5
 {
-  "run": {                      // detail of modules to run
+  "run": {                      // modules to run
     "input": true,
     "lemmatise": true,
     "model": true,
@@ -50,6 +50,12 @@ The ***project file*** is a JSON data file containing the specifications for the
   "clusterTopics": { ... }      // spces for topic cluster module
 }
 ```
+
+The `run` object is mandatory and should be complete, i.e. each module should be set to either `true` (run) or `false`
+(don't run).
+
+The other object are only necessary if the respective module should be run (the project manager won't read them if not
+necessary). 
 
 ---
 

@@ -3,7 +3,7 @@
 - [Getting Started](GettingStarted.md)
 - [System Overview](SystemOverview.md)
 - Modules
-    - Input
+    - [Input](InputModule.md)
     - Lemmatise
     - Topic Model
     - Analysis
