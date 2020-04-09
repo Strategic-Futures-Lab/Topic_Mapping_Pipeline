@@ -17,10 +17,14 @@ public class TopicDistribModuleSpecs {
     public String documents;
     /** Filename to main topic data (from Topic Model module) */
     public String mainTopics;
+    /** Filename for the JSON main topic file generated */
+    public String mainOutput;
     /** Filename to sub topic data (from Topic Model module), optional, defaults to "" */
     public String subTopics;
     /** Flag for distributing over sub topics, defaults to false if subTopics = "" */
     public boolean distributeSubTopics = false;
+    /** Filename for the JSON sub topic file generated, only required if subTopics not empty */
+    public String subOutput;
     /** List of specifications for each distribution to calculate */
     public List<DistribSpecs> fields;
 
@@ -31,10 +35,14 @@ public class TopicDistribModuleSpecs {
     public TopicDistribModuleSpecs(JSONObject specs){
         documents = (String) specs.get("documents");
         mainTopics = (String) specs.get("mainTopics");
+        mainOutput = (String) specs.get("mainOutput");
         subTopics = (String) specs.getOrDefault("subTopics", "");
         distributeSubTopics = subTopics.length() > 0;
+        if(distributeSubTopics){
+            subOutput = (String) specs.get("subOutput");
+        }
         fields = new ArrayList<>();
-        for(JSONObject field: JSONIOWrapper.getJSONObjectArray((JSONArray) specs.get("fields"))){
+        for(JSONObject field: JSONIOWrapper.getJSONObjectArray((JSONArray) specs.get("distributions"))){
             fields.add(new DistribSpecs(field));
         };
     }

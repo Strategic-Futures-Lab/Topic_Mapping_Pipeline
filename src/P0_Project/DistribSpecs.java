@@ -7,8 +7,9 @@ import org.json.simple.JSONObject;
  */
 public class DistribSpecs {
 
-    /** Name of field in docData to get distribution for */
-    public String fieldName;
+    /** Name of field in docData to get distribution for,
+     * optional, defaults to "": no field -> only calculate total weight of topic against valueField */
+    public String fieldName = ""; // "" = no field, only do totals
     /** Separator to use on field to get unique field values
      * (if more than one value stored in a document),
      * optional, defaults to "": no separation */
@@ -27,7 +28,7 @@ public class DistribSpecs {
      * @param specs JSON object where specifications are written
      */
     public DistribSpecs(JSONObject specs){
-        fieldName = (String) specs.get("fieldName");
+        fieldName = (String) specs.getOrDefault("fieldName", "");
         fieldSeparator = (String) specs.getOrDefault("fieldSeparator", "");
         output = (String) specs.getOrDefault("output", "");
         topPerTopic = Math.toIntExact((long) specs.getOrDefault("topPerTopic", (long) -1));

@@ -94,18 +94,17 @@ public class Distribution {
     }
 
     public void updateDistributions(DocIOWrapper doc){
-        updateDistribution(doc, mainDistribution);
+        updateDistribution(doc, doc.getTopicDistribution(), mainDistribution);
         if(distributeSubTopics){
-            updateDistribution(doc, subDistribution);
+            updateDistribution(doc, doc.getSubTopicDistribution(), subDistribution);
         }
     }
 
-    private void updateDistribution(DocIOWrapper doc, HashMap<String, MutableValue>[] distribution){
-        double[] topicWeights = doc.getTopicDistribution();
+    private void updateDistribution(DocIOWrapper doc, double[] topicWeights, HashMap<String, MutableValue>[] distribution){
         for(int i = 0; i < topicWeights.length; i++){
             double topicWeight = topicWeights[i];
-            double value = valueName.equals("") ? 1.0 : Double.parseDouble(doc.getData(valueName));
-            String docFieldValue = doc.getData(fieldName);
+            double value = valueName.length() > 0 ? Double.parseDouble(doc.getData(valueName)) : 1.0;
+            String docFieldValue = fieldName.length() > 0 ? doc.getData(fieldName) : "";
             if(separator.length() > 0){
                 int finalI = i;
                 Arrays.stream(docFieldValue.split(separator))
@@ -156,7 +155,7 @@ public class Distribution {
             int countAdded = 0;
             for(Map.Entry<String, MutableValue> distribEntry: sortedTopicDistribution.entrySet()){
                 double weight = Double.parseDouble(df.format(distribEntry.getValue().getValue()));
-                if(countAdded < topPerTopic || topPerTopic ==-1){
+                if(fieldName.length() > 0 && (countAdded < topPerTopic || topPerTopic ==-1)){
                     TopicIOWrapper.JSONTopicWeight jsonWeight = new TopicIOWrapper.JSONTopicWeight(distribEntry.getKey(), weight);
                     jsonDistribution.values.add(jsonWeight);
                     countAdded++;
@@ -164,13 +163,15 @@ public class Distribution {
                 topicTotalWeight += weight;
             }
             topic.addTotal(new TopicIOWrapper.JSONTopicWeight(valueName, Double.parseDouble(df.format(topicTotalWeight))));
-            if(topPerTopic != 0) topic.addDistribution(jsonDistribution);
+            if(topPerTopic != 0 && fieldName.length() > 0) topic.addDistribution(jsonDistribution);
         }
     }
 
     private JSONObject initialiseJSON(){
         JSONObject root = new JSONObject();
-        root.put("distributionField", fieldName);
+        if(valueName.length() > 0) {
+            root.put("distributionField", fieldName);
+        }
         if(valueName.length() > 0){
             root.put("distributionValue", valueName);
         }
@@ -191,7 +192,7 @@ public class Distribution {
             int countAdded = 0;
             for(Map.Entry<String, MutableValue> distribEntry: sortedTopicDistribution.entrySet()){
                 double weight = Double.parseDouble(df.format(distribEntry.getValue().getValue()));
-                if(countAdded < topPerTopic || topPerTopic ==-1){
+                if(fieldName.length() > 0 && (countAdded < topPerTopic || topPerTopic ==-1)){
                     JSONObject jsonDistributionEntry = new JSONObject();
                     jsonDistributionEntry.put("id", distribEntry.getKey());
                     jsonDistributionEntry.put("weight", weight);
@@ -204,7 +205,7 @@ public class Distribution {
             JSONObject jsonEntry = new JSONObject();
             jsonEntry.put("topicId", topicId);
             jsonEntry.put("total", topicTotalWeigth);
-            jsonEntry.put("distribution", jsonTopicDistribution);
+            if(topPerTopic != 0 && fieldName.length() > 0) jsonEntry.put("distribution", jsonTopicDistribution);
             jsonDistributionArray.add(jsonEntry);
         }
         root.put(key, jsonDistributionArray);

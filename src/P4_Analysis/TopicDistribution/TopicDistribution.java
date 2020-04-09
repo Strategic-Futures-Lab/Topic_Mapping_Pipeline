@@ -15,11 +15,10 @@ public class TopicDistribution {
 
     private String documentsFile;
     private String mainTopicsFile;
+    private String mainOutput;
     private String subTopicsFile;
     private boolean distributeSubTopics;
-    // private HashMap<String, String> fields;
-    // private List<String> values;
-    // private String distribOutputFile;
+    private String subOutput;
 
     private ConcurrentHashMap<String, DocIOWrapper> documents;
     private ConcurrentHashMap<Integer, TopicIOWrapper> mainTopics;
@@ -66,9 +65,11 @@ public class TopicDistribution {
     private void ProcessArguments(TopicDistribModuleSpecs distribSpecs){
         documentsFile = distribSpecs.documents;
         mainTopicsFile = distribSpecs.mainTopics;
+        mainOutput = distribSpecs.mainOutput;
         distributeSubTopics = distribSpecs.distributeSubTopics;
         if(distributeSubTopics){
             subTopicsFile = distribSpecs.subTopics;
+            subOutput = distribSpecs.subOutput;
         }
         distributions = new ArrayList<>();
         for(DistribSpecs specs: distribSpecs.fields){
@@ -114,9 +115,11 @@ public class TopicDistribution {
             if(!document.isRemoved()){
                 HashMap<String, String> docData = document.getDocData();
                 for(Distribution distrib: distributions){
-                    if(!docData.containsKey(distrib.getFieldName())){
-                        System.out.println("Document Field "+distrib.getFieldName()+" not valid (not found): will be ignored from distribution process!");
-                        ignoreFields.add(distrib.getFieldName());
+                    if(distrib.getFieldName().length() > 0) {
+                        if (!docData.containsKey(distrib.getFieldName())) {
+                            System.out.println("Document Field " + distrib.getFieldName() + " not valid (not found): will be ignored from distribution process!");
+                            ignoreFields.add(distrib.getFieldName());
+                        }
                     }
                     if(distrib.getValueName().length() > 0) {
                         if (!docData.containsKey(distrib.getValueName())) {
@@ -154,7 +157,7 @@ public class TopicDistribution {
         for(Map.Entry<String, DocIOWrapper> documentEntry: documents.entrySet()){
             DocIOWrapper doc = documentEntry.getValue();
             for(Distribution distrib: distributions){
-                String fieldValue = doc.getData(distrib.getFieldName());
+                String fieldValue = distrib.getFieldName().length() > 0 ? doc.getData(distrib.getFieldName()) : "";
                 distrib.addUniqueFieldValues(fieldValue);
             }
         }
@@ -167,7 +170,7 @@ public class TopicDistribution {
             if(distributeSubTopics){
                 distrib.initialiseDistributions(mainTopics.size(), subTopics.size());
             } else {
-                distrib.initialiseDistribution((mainTopics.size()));
+                distrib.initialiseDistribution(mainTopics.size());
             }
         }
         System.out.println("Distributions Initialisation Complete!");
@@ -187,15 +190,15 @@ public class TopicDistribution {
 
     private void SaveDistributions(){
         System.out.println("Saving Distributions ...");
-        boolean saveTopicFiles = false;
+        // boolean saveTopicFiles = false;
         for(Distribution distrib: distributions){
-            saveTopicFiles = distrib.saveInTopics();
+            // saveTopicFiles = distrib.saveInTopics();
             if(distributeSubTopics) distrib.saveDistributions(mainTopics, subTopics);
             else distrib.saveDistributions(mainTopics);
         }
-        if(saveTopicFiles){
+        // if(saveTopicFiles){
             saveTopics();
-        }
+        // }
         System.out.println("Distributions Saved!");
     }
 
@@ -209,7 +212,7 @@ public class TopicDistribution {
             topics.add(entry.getValue().toJSON());
         }
         root.put("topics", topics);
-        JSONIOWrapper.SaveJSON(root, mainTopicsFile);
+        JSONIOWrapper.SaveJSON(root, mainOutput);
         if(distributeSubTopics){
             root = new JSONObject();
             root.put("metadata", subTopicsMetadata);
@@ -219,7 +222,7 @@ public class TopicDistribution {
                 topics.add(entry.getValue().toJSON());
             }
             root.put("topics", topics);
-            JSONIOWrapper.SaveJSON(root, subTopicsFile);
+            JSONIOWrapper.SaveJSON(root, subOutput);
         }
         System.out.println("Topics Saved!");
     }

@@ -2,9 +2,9 @@
   "run": {
     "input": false,
     "lemmatise": false,
-    "model": true,
-    "indexLabels": true,
-    "distributeTopics": true,
+    "model": false,
+    "indexLabels": false,
+    "distributeTopics": false,
     "clusterTopics": true
   },
   "input": {
@@ -60,24 +60,22 @@
     "documents": "files/topicModel/documents.json",
     "mainTopics": "files/topicModel/mainTopics.json",
     "subTopics": "files/topicModel/subTopics.json",
-    "fields": [{
+    "mainOutput": "files/output/mainTopics.json",
+    "subOutput": "files/output/subTopics.json",
+    "distributions": [{
       "fieldName": "university",
-      "fieldSeparator": "",
-      "output": "files/output/uniDistributions.json",
-      "valueField": ""
+      "valueField": "money"
     },{
-      "fieldName": "university",
-      "topPerTopic": 0
+      "output": "files/output/distributionTotal.json"
     },{
       "fieldName": "authors",
       "fieldSeparator": "&",
-      "topPerTopic": 5,
-      "valueField": "money"
+      "topPerTopic": 5
     }]
   },
   "clusterTopics": {
-    "mainTopics": "files/topicModel/mainTopics.json",
-    "subTopics": "files/topicModel/subTopics.json",
+    "mainTopics": "files/output/mainTopics.json",
+    "subTopics": "files/output/subTopics.json",
     "linkageMethod": "max",
     "mainOutput": "files/output/mainTopics.json",
     "subOutput": "files/output/subTopics.json"

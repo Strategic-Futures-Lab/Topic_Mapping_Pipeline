@@ -272,7 +272,7 @@ public class DocIOWrapper {
      * @return sub topic distribution
      */
     public double[] getSubTopicDistribution(){
-        return topicDistribution;
+        return subTopicDistribution;
     }
 
     /**
