@@ -1,8 +1,13 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
-
-The Topic Mapping Pipeline reads textual data, models it into topics, analyses the output data, and produces visual topic maps. 
-
-Click [here](doc/index.md) to access the documentation.
+# Documentation Index
+- [Getting Started](GettingStarted.md)
+- System Overview
+- Modules
+    - Input
+    - Lemmatise
+    - Topic Model
+    - Analysis
+    - Mapping
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International
