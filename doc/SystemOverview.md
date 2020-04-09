@@ -32,7 +32,7 @@ sub topics and hierarchical clusters of topics.
 ## Project File
 
 The ***project file*** is a JSON data file containing the specifications for the pipeline. It is organised as follow:
-```json
+```json5
 {
   "run": {                      // detail of modules to run
     "input": true,
