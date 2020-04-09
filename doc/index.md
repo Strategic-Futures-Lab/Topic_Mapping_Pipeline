@@ -1,7 +1,7 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 # Documentation Index
 - [Getting Started](GettingStarted.md)
-- System Overview
+- [System Overview](SystemOverview.md)
 - Modules
     - Input
     - Lemmatise
