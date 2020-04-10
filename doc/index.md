@@ -4,9 +4,12 @@
 - [System Overview](SystemOverview.md)
 - Modules
     - [Input](InputModule.md)
-    - Lemmatise
+    - [Lemmatise](LemmatiseModule.md)
     - Topic Model
     - Analysis
+        - Label Indexing
+        - Topic Distribution
+        - Topic Clustering
     - Mapping
 
 ---

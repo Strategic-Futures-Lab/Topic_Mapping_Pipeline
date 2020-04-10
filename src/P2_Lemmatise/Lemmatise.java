@@ -18,7 +18,7 @@ public class Lemmatise {
     private int totalDocs = 0;
     private long startTime;
     private StanfordLemmatizer slem;
-    private HashMap<String, Integer> lemmaCounts = new HashMap<>();
+    private List<String> lowCounts;
 
     private final static int UPDATE_FREQUENCY = 100;
     private final static boolean RUN_IN_PARALLEL = true;
@@ -158,6 +158,7 @@ public class Lemmatise {
         if(removeLowCounts > 0){
             System.out.println("Cleaning Low Count Lemmas ...");
             startTime = System.currentTimeMillis();
+            HashMap<String, Integer> lemmaCounts = new HashMap<>();
             for(Map.Entry<String, DocIOWrapper> doc: Documents.entrySet()){
                 for(String l: doc.getValue().getLemmas()){
                     if(lemmaCounts.containsKey(l)){
@@ -168,7 +169,7 @@ public class Lemmatise {
                     }
                 }
             }
-            List<String> lowCounts = lemmaCounts.entrySet().stream()
+            lowCounts = lemmaCounts.entrySet().stream()
                     .filter(e -> e.getValue() <= removeLowCounts)
                     .map(e->e.getKey())
                     .collect(Collectors.toList());
@@ -193,6 +194,7 @@ public class Lemmatise {
         JSONArray lemmas = new JSONArray();
         metadata.put("nDocsRemoved", totalDocRemoved);
         metadata.put("stopWords", String.join(",", stopWords));
+        if(removeLowCounts > 0) metadata.put("nLemmasRemoved", lowCounts.size());
         root.put("metadata", metadata);
         DocIOWrapper.PrintLemmas();
         for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){

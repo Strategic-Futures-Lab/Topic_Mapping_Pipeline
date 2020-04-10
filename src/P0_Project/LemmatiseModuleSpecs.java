@@ -13,7 +13,7 @@ public class LemmatiseModuleSpecs {
     public String corpus;
     /** List of fields in docData to use for text */
     public String[] textFields;
-    /** List of fields in docData to keep after process is done */
+    /** List of fields in docData to keep after process is done, optional, defaults to empty  */
     public String[] docFields;
     /** List of stopwords to remove from lemmas, optional, defaults to empty */
     public String[] stopWords;
@@ -31,7 +31,7 @@ public class LemmatiseModuleSpecs {
     public LemmatiseModuleSpecs(JSONObject specs){
         corpus = (String) specs.get("corpus");
         textFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("textFields"));
-        docFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("docFields"));
+        docFields = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         stopWords = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopWords", new JSONArray()));
         minLemmas = Math.toIntExact((long) specs.getOrDefault("minLemmas", (long) 1));
         removeLowCounts = Math.toIntExact((long) specs.getOrDefault("removeLowCounts", (long) 0));

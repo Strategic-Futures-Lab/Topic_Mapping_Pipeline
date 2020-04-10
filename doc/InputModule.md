@@ -55,9 +55,9 @@ Each sub module generate a corpus JSON file with a standard structure:
 
 The `metadata` only contains the number of documents read by the module (additional metadata will be added by other
 modules). Then the file has a `corpus` list, with one object per document with the following information:
-- `docId` the document id
-- `docIndex` the document index
-- `docData` the document data, as key-values pairs, note that every value will be saved in a String format
+- `docId` the document id;
+- `docIndex` the document index;
+- `docData` the document data, as key-values pairs, note that every value will be saved in a String format.
 
 ---
 
