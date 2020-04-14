@@ -157,7 +157,7 @@ public class TopicModelling {
         for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){
             if(tModel.stringIDtoNumID.containsKey(entry.getKey())){
                 int modelPosition = tModel.stringIDtoNumID.get(entry.getKey());
-                entry.getValue().setTopicDistribution(distributions[modelPosition]);
+                entry.getValue().setMainTopicDistribution(distributions[modelPosition]);
             }
         }
 
@@ -265,15 +265,15 @@ public class TopicModelling {
             topics.add(entry.getValue().toJSON());
         }
         root.put("topics", topics);
-        JSONArray topicSimilarity = new JSONArray();
+        JSONArray topicsSimilarities = new JSONArray();
         for(int y = 0; y < SimilarityMatrix.length; y++){
             JSONArray SimRow = new JSONArray();
             for(int x = 0; x < SimilarityMatrix.length; x++){
                 SimRow.add(SimilarityMatrix[x][y]);
             }
-            topicSimilarity.add(SimRow);
+            topicsSimilarities.add(SimRow);
         }
-        root.put("topicSimilarity", topicSimilarity);
+        root.put("similarities", topicsSimilarities);
         JSONIOWrapper.SaveJSON(root, topicOutput);
         System.out.println("Topics Saved!");
     }
@@ -284,7 +284,7 @@ public class TopicModelling {
         JSONArray documents = new JSONArray();
         JSONObject meta = (JSONObject) metadata.clone();
         if(nTopicsSub < 0){
-            meta.put("nTopics", nTopics);
+            meta.put("nTopicsMain", nTopics);
         }
         else {
             meta.put("nTopicsMain", nTopicsMain);

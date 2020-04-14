@@ -94,7 +94,7 @@ public class Distribution {
     }
 
     public void updateDistributions(DocIOWrapper doc){
-        updateDistribution(doc, doc.getTopicDistribution(), mainDistribution);
+        updateDistribution(doc, doc.getMainTopicDistribution(), mainDistribution);
         if(distributeSubTopics){
             updateDistribution(doc, doc.getSubTopicDistribution(), subDistribution);
         }

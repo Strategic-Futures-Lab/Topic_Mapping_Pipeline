@@ -107,7 +107,7 @@ public class HierarchicalTopicModelling {
         ConcurrentHashMap<String, DocIOWrapper> subDocs = SubTopicModel.getDocuments();
         for(Map.Entry<String, DocIOWrapper> docEntry: mainDocs.entrySet()){
             String docKey = docEntry.getKey();
-            docEntry.getValue().setSubTopicDistribution(subDocs.get(docKey).getTopicDistribution());
+            docEntry.getValue().setSubTopicDistribution(subDocs.get(docKey).getMainTopicDistribution());
         }
         MainTopicModel.SaveDocuments(specs.mainModel.topics, specs.subModel.topics);
     }

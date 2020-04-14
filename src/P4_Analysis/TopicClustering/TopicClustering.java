@@ -113,7 +113,7 @@ public class TopicClustering {
             TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
             mainTopics.put(topic.getId(), topic);
         }
-        mainSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("topicSimilarity"));
+        mainSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("similarities"));
         if(clusterSubTopics){
             input = JSONIOWrapper.LoadJSON(subTopicsFile);
             subTopicsMetadata = (JSONObject) input.get("metadata");
@@ -123,7 +123,7 @@ public class TopicClustering {
                 TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
                 subTopics.put(topic.getId(), topic);
             }
-            subSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("topicSimilarity"));
+            subSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("similarities"));
         }
         System.out.println("Topics Loaded!");
     }

@@ -56,7 +56,7 @@ public class TopicIOWrapper {
         public JSONObject toJSON(){
             JSONObject obj = new JSONObject();
             obj.put("id", ID);
-            obj.put("w", weight);
+            obj.put("weight", weight);
             return obj;
         }
 
@@ -68,7 +68,7 @@ public class TopicIOWrapper {
         public JSONObject toJSON(String customName){
             JSONObject obj = new JSONObject();
             obj.put(customName, ID);
-            obj.put("w", weight);
+            obj.put("weight", weight);
             return obj;
         }
     }

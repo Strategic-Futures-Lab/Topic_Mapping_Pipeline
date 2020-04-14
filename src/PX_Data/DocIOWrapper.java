@@ -29,7 +29,7 @@ public class DocIOWrapper {
     private boolean removed = false;
     private String removeReason = "";
     // used or set by topic modelling module
-    private double[] topicDistribution;
+    private double[] mainTopicDistribution;
     private double[] subTopicDistribution;
 
     /**
@@ -58,17 +58,12 @@ public class DocIOWrapper {
         this.numLemmas = Math.toIntExact((long) jsonDoc.getOrDefault("numLemmas", (long) 0));
         // set by model module
         if(!this.removed){
-            JSONArray distrib = (JSONArray) jsonDoc.getOrDefault("topicDistribution", null);
+            JSONArray distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicDistribution", null);
             if(distrib != null){
-                this.topicDistribution = JSONIOWrapper.getDoubleArray(distrib);
-            } else {
-                distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicDistribution", null);
+                this.mainTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
+                distrib = (JSONArray) jsonDoc.getOrDefault("subTopicDistribution", null);
                 if(distrib != null){
-                    this.topicDistribution = JSONIOWrapper.getDoubleArray(distrib);
-                    distrib = (JSONArray) jsonDoc.getOrDefault("subTopicDistribution", null);
-                    if(distrib != null){
-                        this.subTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
-                    }
+                    this.subTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
                 }
             }
         }
@@ -87,8 +82,8 @@ public class DocIOWrapper {
         this.numLemmas = doc.numLemmas;
         this.removed = doc.removed;
         this.removeReason = doc.removeReason;
-        if(doc.topicDistribution != null){
-            this.topicDistribution = doc.topicDistribution;
+        if(doc.mainTopicDistribution != null){
+            this.mainTopicDistribution = doc.mainTopicDistribution;
             if(doc.subTopicDistribution != null){
                 this.subTopicDistribution = doc.subTopicDistribution;
             }
@@ -241,12 +236,12 @@ public class DocIOWrapper {
      * Setter for the distribution over main topics
      * @param distribution topic distribution
      */
-    public void setTopicDistribution(double[] distribution){
+    public void setMainTopicDistribution(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
-        topicDistribution = new double[distribution.length];
+        mainTopicDistribution = new double[distribution.length];
         for(int i = 0; i < distribution.length; i++){
-            topicDistribution[i] = Double.parseDouble(df.format(distribution[i]));
+            mainTopicDistribution[i] = Double.parseDouble(df.format(distribution[i]));
         }
     }
 
@@ -254,8 +249,8 @@ public class DocIOWrapper {
      * Getter for the distribution over main topics
      * @return main topic distribution
      */
-    public double[] getTopicDistribution(){
-        return topicDistribution;
+    public double[] getMainTopicDistribution(){
+        return mainTopicDistribution;
     }
 
     /**
@@ -303,11 +298,9 @@ public class DocIOWrapper {
         // Saving Model
         else if(ToPrint.equals("Model") && !removed){
             root.put("numLemmas", numLemmas);
-            JSONArray topicDistrib = getDistribJSON(topicDistribution);
-            if(subTopicDistribution == null){
-                root.put("topicDistribution", topicDistrib);
-            } else {
-                root.put("mainTopicDistribution", topicDistrib);
+            JSONArray topicDistrib = getDistribJSON(mainTopicDistribution);
+            root.put("mainTopicDistribution", topicDistrib);
+            if(subTopicDistribution != null){
                 topicDistrib = getDistribJSON(subTopicDistribution);
                 root.put("subTopicDistribution", topicDistrib);
             }

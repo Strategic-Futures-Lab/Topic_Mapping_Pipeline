@@ -23,10 +23,10 @@ public class TopicDistribution {
     private ConcurrentHashMap<String, DocIOWrapper> documents;
     private ConcurrentHashMap<Integer, TopicIOWrapper> mainTopics;
     private JSONObject mainTopicsMetadata;
-    private JSONArray mainTopicSimilarity;
+    private JSONArray mainTopicsSimilarities;
     private ConcurrentHashMap<Integer, TopicIOWrapper> subTopics;
     private JSONObject subTopicsMetadata;
-    private JSONArray subTopicSimilarity;
+    private JSONArray subTopicsSimilarities;
 
     private List<Distribution> distributions;
 
@@ -87,7 +87,7 @@ public class TopicDistribution {
         }
         input = JSONIOWrapper.LoadJSON(mainTopicsFile);
         mainTopicsMetadata = (JSONObject) input.get("metadata");
-        mainTopicSimilarity = (JSONArray) input.get("topicSimilarity");
+        mainTopicsSimilarities = (JSONArray) input.get("similarities");
         mainTopics = new ConcurrentHashMap<>();
         for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
             TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
@@ -96,7 +96,7 @@ public class TopicDistribution {
         if(distributeSubTopics){
             input = JSONIOWrapper.LoadJSON(subTopicsFile);
             subTopicsMetadata = (JSONObject) input.get("metadata");
-            subTopicSimilarity = (JSONArray) input.get("topicSimilarity");
+            subTopicsSimilarities = (JSONArray) input.get("similarities");
             subTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
                 TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
@@ -206,7 +206,7 @@ public class TopicDistribution {
         System.out.println("Saving Topics...");
         JSONObject root = new JSONObject();
         root.put("metadata", mainTopicsMetadata);
-        root.put("topicSimilarity", mainTopicSimilarity);
+        root.put("similarities", mainTopicsSimilarities);
         JSONArray topics = new JSONArray();
         for(Map.Entry<Integer, TopicIOWrapper> entry: mainTopics.entrySet()){
             topics.add(entry.getValue().toJSON());
@@ -216,7 +216,7 @@ public class TopicDistribution {
         if(distributeSubTopics){
             root = new JSONObject();
             root.put("metadata", subTopicsMetadata);
-            root.put("topicSimilarity", subTopicSimilarity);
+            root.put("similarities", subTopicsSimilarities);
             topics = new JSONArray();
             for(Map.Entry<Integer, TopicIOWrapper> entry: subTopics.entrySet()){
                 topics.add(entry.getValue().toJSON());
