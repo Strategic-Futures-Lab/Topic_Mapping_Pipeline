@@ -5,7 +5,7 @@
 - Modules
     - [Input](InputModule.md)
     - [Lemmatise](LemmatiseModule.md)
-    - Topic Model
+    - [Topic Model](ModelModule.md)
     - Analysis
         - Label Indexing
         - Topic Distribution

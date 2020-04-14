@@ -4,7 +4,7 @@
 The Lemmatise module is the second module of the Topic Mapping pipeline. It *cleans* the corpus and produce lemmatised
 text data for the topic modelling process. This data is saved in a ***Lemma JSON file***.
 
-The Lemmatise module is contained in the `P2_Lemmatise` package.
+The Lemmatise module is contained in the `P2_Lemmatise` package, in the `Lemmatise.java` class.
 
 ## Specifications
 

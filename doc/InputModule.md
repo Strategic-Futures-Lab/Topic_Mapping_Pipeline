@@ -6,10 +6,10 @@ by the next module in the pipeline.
 
 The Input modules are contained within the `P1_Input` package.
 
-## Sub-modules
+## List of Input Modules
 
 There is currently only one input module available:
-- CSV Input (`CSVInput.java` class) which reads document data organised in a CSV file.
+- ***CSV Input*** (`CSVInput.java` class) which reads document data organised in a CSV file.
 
 ## Specifications
 
@@ -17,7 +17,7 @@ The Input module entry in the project file should have the following structure:
 ```json5
 {...
   "input": {
-      "module": "submodule",
+      "module": "module name",
       "source": "path",
       "fields": {"key": "value", ...},
       "output": "path"
@@ -26,7 +26,7 @@ The Input module entry in the project file should have the following structure:
 ``` 
 
 Where:
-- `module` points to the sub module to use:
+- `module` points to the module to use:
     - `"CSV"` for the CSV Input;
 - `source` is the path to the input file or directory (depending on sub module used);
 - `output` is the path to the output corpus JSON file;
