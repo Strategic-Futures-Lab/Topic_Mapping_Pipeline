@@ -7,7 +7,7 @@
     - [Lemmatise](LemmatiseModule.md)
     - [Topic Model](ModelModule.md)
     - Analysis
-        - Label Indexing
+        - [Label Indexing](LabelIndexModule.md)
         - Topic Distribution
         - Topic Clustering
     - Mapping

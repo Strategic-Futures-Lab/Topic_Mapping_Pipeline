@@ -3,9 +3,9 @@
     "input": false,
     "lemmatise": false,
     "model": false,
-    "indexLabels": false,
+    "indexLabels": true,
     "distributeTopics": false,
-    "clusterTopics": true
+    "clusterTopics": false
   },
   "input": {
     "module": "CSV",

@@ -112,17 +112,19 @@ public class LabelIndexing {
         for(Map.Entry<String, LabelIndexEntry> indexRow: Index.entrySet()){
             String label = indexRow.getKey();
             LabelIndexEntry indexEntry = indexRow.getValue();
-            JSONArray topicIds = new JSONArray();
+            JSONObject topicIds = new JSONObject();
             JSONArray mainTopicIds = new JSONArray();
             for(String id : indexEntry.mainTopics){
                 mainTopicIds.add(id);
             }
-            topicIds.add(mainTopicIds);
-            JSONArray subTopicIds = new JSONArray();
-            for(String id : indexEntry.subTopics){
-                subTopicIds.add(id);
+            topicIds.put("mainTopics", mainTopicIds);
+            if(indexSubTopics){
+                JSONArray subTopicIds = new JSONArray();
+                for(String id : indexEntry.subTopics){
+                    subTopicIds.add(id);
+                }
+                topicIds.put("subTopics", subTopicIds);
             }
-            topicIds.add(subTopicIds);
             root.put(label, topicIds);
         }
         JSONIOWrapper.SaveJSON(root, outputFile);
