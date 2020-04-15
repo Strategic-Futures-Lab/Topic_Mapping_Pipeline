@@ -3,9 +3,9 @@
     "input": false,
     "lemmatise": false,
     "model": false,
-    "indexLabels": true,
-    "distributeTopics": false,
-    "clusterTopics": false
+    "indexLabels": false,
+    "distributeTopics": true,
+    "clusterTopics": true
   },
   "input": {
     "module": "CSV",
@@ -62,15 +62,20 @@
     "subTopics": "files/topicModel/subTopics.json",
     "mainOutput": "files/output/mainTopics.json",
     "subOutput": "files/output/subTopics.json",
-    "distributions": [{
+    "distributions": [{},{
       "fieldName": "university",
       "valueField": "money"
     },{
-      "output": "files/output/distributionTotal.json"
+      "fieldName": "university",
+      "valueField": "money",
+      "output": "files/output/distributionUni.json"
     },{
       "fieldName": "authors",
       "fieldSeparator": "&",
       "topPerTopic": 5
+    },{
+      "fieldName": "university",
+      "topPerTopic": 2
     }]
   },
   "clusterTopics": {

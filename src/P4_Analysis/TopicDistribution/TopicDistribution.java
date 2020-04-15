@@ -42,7 +42,7 @@ public class TopicDistribution {
 
         TopicDistribution startClass = new TopicDistribution();
         startClass.ProcessArguments(distribSpecs);
-        startClass.LoadDcouments();
+        startClass.LoadDocuments();
         startClass.ValidateDocumentData();
         startClass.GetUniqueFields();
         startClass.InitialiseDistributions();
@@ -77,7 +77,7 @@ public class TopicDistribution {
         }
     }
 
-    private void LoadDcouments(){
+    private void LoadDocuments(){
         JSONObject input = JSONIOWrapper.LoadJSON(documentsFile);
         JSONArray docs = (JSONArray) input.get("documents");
         documents = new ConcurrentHashMap<>();

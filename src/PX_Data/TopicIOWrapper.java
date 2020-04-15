@@ -36,7 +36,7 @@ public class TopicIOWrapper {
          */
         public JSONTopicWeight(JSONObject jsonWeight){
             this.ID = (String) jsonWeight.get("id");
-            this.weight = (double) jsonWeight.get("w");
+            this.weight = (double) jsonWeight.get("weight");
         }
 
         /**
@@ -46,7 +46,7 @@ public class TopicIOWrapper {
          */
         public JSONTopicWeight(JSONObject jsonWeight, String customName){
             this.ID = (String) jsonWeight.get(customName);
-            this.weight = (double) jsonWeight.get("w");
+            this.weight = (double) jsonWeight.get("weight");
         }
 
         /**
@@ -121,7 +121,7 @@ public class TopicIOWrapper {
         public JSONObject toJSON(){
             JSONObject obj = new JSONObject();
             obj.put("field", distributionField);
-            obj.put("value", distributionValue);
+            if(distributionValue.length() > 0) obj.put("value", distributionValue);
             JSONArray array = new JSONArray();
             for(int v = 0; v < values.size(); v++){
                 array.add(values.get(v).toJSON());

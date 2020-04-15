@@ -8,7 +8,7 @@
     - [Topic Model](ModelModule.md)
     - Analysis
         - [Label Indexing](LabelIndexModule.md)
-        - Topic Distribution
+        - [Topic Distribution](TopicDistribution.md)
         - Topic Clustering
     - Mapping
 
