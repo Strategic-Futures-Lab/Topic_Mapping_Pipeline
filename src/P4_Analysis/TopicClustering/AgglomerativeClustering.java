@@ -1,5 +1,7 @@
 package P4_Analysis.TopicClustering;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,10 @@ public class AgglomerativeClustering {
         public ClusterRow(int Node1, int Node2, double Distance) {
             this.Node1 = Node1;
             this.Node2 = Node2;
-            this.Distance = Distance;
+            DecimalFormat df = new DecimalFormat("#.####");
+            df.setRoundingMode(RoundingMode.UP);
+            this.Distance = Double.parseDouble(df.format(Distance));
+            // this.Distance = Distance;
         }
     }
 

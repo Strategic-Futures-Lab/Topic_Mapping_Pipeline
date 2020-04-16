@@ -9,8 +9,8 @@
     - Analysis
         - [Label Indexing](LabelIndexModule.md)
         - [Topic Distribution](TopicDistribution.md)
-        - Topic Clustering
-    - Mapping
+        - [Topic Clustering](TopicClustering.md)
+    - Mapping (TBD)
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International
