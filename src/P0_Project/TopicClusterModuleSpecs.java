@@ -14,6 +14,8 @@ public class TopicClusterModuleSpecs {
     /** Linkage method to create cluster hierarchy: "min", "max", or "avg",
      * optional, defaults to "avg" */
     public String linkageMethod;
+    /** Number of clusters in main topics, optional, defaults to 1 */
+    public int clusters;
     /** Filename to sub topic data (from Topic Model module), optional, defaults to "" */
     public String subTopics;
     /** Flag for grouping and clustering sub topics, defaults to false if subTopics = "" */
@@ -29,6 +31,7 @@ public class TopicClusterModuleSpecs {
         mainTopics = (String) specs.get("mainTopics");
         mainOutput = (String) specs.get("mainOutput");
         linkageMethod = (String) specs.getOrDefault("linkageMethod", "avg"); // max | min | avg
+        clusters = Math.toIntExact((long) specs.getOrDefault("clusters", (long) 1));
         subTopics = (String) specs.getOrDefault("subTopics", "");
         clusterSubTopics = subTopics.length() > 0;
         if(clusterSubTopics){

@@ -150,6 +150,8 @@ public class TopicIOWrapper {
     private List<JSONTopicDistribution> distributions = new ArrayList<>(); // list of distribution to save in topic data
     private List<JSONTopicWeight> distributionTotals = new ArrayList<>(); // list of distribution totals to save in topic data
 
+    // set by clustering module
+    private String clusterId = "";
     // set by clustering module if sub-topic:
     // default: empty string and non-possible group, only saved to JSON if changed
     private String groupTopicId = ""; // id of topic inside a sub-group
@@ -205,6 +207,7 @@ public class TopicIOWrapper {
         for(JSONObject totalObj: (Iterable<JSONObject>) totals){
             this.distributionTotals.add(new JSONTopicWeight(totalObj));
         }
+        this.clusterId = (String) jsonTopic.getOrDefault("clusterId", "");
         this.groupTopicId = (String) jsonTopic.getOrDefault("subTopicId", "");
         this.groupTopicIndex = Math.toIntExact((long)jsonTopic.getOrDefault("groupTopicIndex", (long) -1));
     }
@@ -222,6 +225,7 @@ public class TopicIOWrapper {
         this.subTopicIds = topic.subTopicIds;
         this.distributions = topic.distributions;
         this.distributionTotals = topic.distributionTotals;
+        this.clusterId = topic.clusterId;
         this.groupTopicId = topic.groupTopicId;
         this.groupTopicIndex = topic.groupTopicIndex;
     }
@@ -272,6 +276,22 @@ public class TopicIOWrapper {
      */
     public String getGroupTopicId(){
         return groupTopicId;
+    }
+
+    /**
+     * Setter method for the cluster identifier
+     * @param id cluster identifier value
+     */
+    public void setClusterId(String id){
+        clusterId = id;
+    }
+
+    /**
+     * Getter method for the cluster identifier
+     * @return cluster identifier value
+     */
+    public String getClusterId(){
+        return clusterId;
     }
 
     /**
@@ -381,6 +401,9 @@ public class TopicIOWrapper {
             root.put("totals", totals);
         }
         // Save if non-default
+        if(clusterId.length() > 0){
+            root.put("clusterId", clusterId);
+        }
         if(groupTopicId.length() > 0){
             root.put("groupTopicId", groupTopicId);
         }

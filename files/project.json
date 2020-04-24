@@ -4,7 +4,7 @@
     "lemmatise": false,
     "model": false,
     "indexLabels": false,
-    "distributeTopics": true,
+    "distributeTopics": false,
     "clusterTopics": true
   },
   "input": {
@@ -47,7 +47,7 @@
     "documentOutput": "documents.json",
     "hierarchy": {
       "modelSimOutput": "modelSim.csv",
-      "maxAssign": 3,
+      "maxAssign": 2,
       "assignmentOutput": "assignment.csv"
     }
   },
@@ -60,12 +60,9 @@
     "documents": "files/topicModel/documents.json",
     "mainTopics": "files/topicModel/mainTopics.json",
     "subTopics": "files/topicModel/subTopics.json",
-    "mainOutput": "files/output/mainTopics.json",
-    "subOutput": "files/output/subTopics.json",
+    "mainOutput": "files/output/mainTopics_distrib.json",
+    "subOutput": "files/output/subTopics_distrib.json",
     "distributions": [{},{
-      "fieldName": "university",
-      "valueField": "money"
-    },{
       "fieldName": "university",
       "valueField": "money",
       "output": "files/output/distributionUni.json"
@@ -73,16 +70,19 @@
       "fieldName": "authors",
       "fieldSeparator": "&",
       "topPerTopic": 5
-    },{
-      "fieldName": "university",
-      "topPerTopic": 2
     }]
   },
   "clusterTopics": {
-    "mainTopics": "files/output/mainTopics.json",
-    "subTopics": "files/output/subTopics.json",
+    "mainTopics": "files/output/mainTopics_distrib.json",
+    "subTopics": "files/output/subTopics_distrib.json",
     "linkageMethod": "max",
-    "mainOutput": "files/output/mainTopics.json",
-    "subOutput": "files/output/subTopics.json"
+    "clusters": 5,
+    "mainOutput": "files/output/mainTopics_cluster.json",
+    "subOutput": "files/output/subTopics_cluster.json"
+  },
+  "mapTopics": {
+    "mainTopics": "files/output/mainTopics.json",
+    "subTopics": "files/output/subTopics.json"
+
   }
 }

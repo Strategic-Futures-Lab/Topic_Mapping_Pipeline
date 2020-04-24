@@ -6,8 +6,11 @@ import P3_TopicModelling.TopicModelling;
 import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
 import P4_Analysis.TopicDistribution.TopicDistribution;
+import P5_TopicMapping.JSTest;
 
 public class TopicMapping {
+
+    private boolean TESTING = false;
 
     private String projectFile;
     private ProjectManager projectManager;
@@ -30,6 +33,9 @@ public class TopicMapping {
     }
 
     private void Run(){
+        if(TESTING){
+            this.RunTESTING();
+        }
         if(projectManager.runInput){
             this.RunInput();
         }
@@ -80,5 +86,9 @@ public class TopicMapping {
 
     private void RunTopicDistrib(){
         TopicDistribution.Distribute(projectManager.topicDistrib);
+    }
+
+    private void RunTESTING(){
+        JSTest.run();
     }
 }
