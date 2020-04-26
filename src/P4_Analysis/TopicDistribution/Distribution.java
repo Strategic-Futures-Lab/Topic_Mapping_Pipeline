@@ -162,10 +162,10 @@ public class Distribution {
                 }
                 topicTotalWeight += weight;
             }
-            String totalId = "";
-            if(fieldName.length() > 0 && valueName.length() > 0) totalId=fieldName+"-"+valueName;
-            else if(fieldName.length() > 0) totalId=fieldName;
-            else if(valueName.length() > 0) totalId=valueName;
+            String totalId=fieldName+"-"+valueName;
+            // if(fieldName.length() > 0 && valueName.length() > 0) totalId=fieldName+"-"+valueName;
+            // else if(fieldName.length() > 0) totalId=fieldName;
+            // else if(valueName.length() > 0) totalId=valueName;
             topic.addTotal(new TopicIOWrapper.JSONTopicWeight(totalId, Double.parseDouble(df.format(topicTotalWeight))));
             if(topPerTopic != 0 && fieldName.length() > 0) topic.addDistribution(jsonDistribution);
         }

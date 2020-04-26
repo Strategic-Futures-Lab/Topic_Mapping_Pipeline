@@ -5,7 +5,8 @@
     "model": false,
     "indexLabels": false,
     "distributeTopics": false,
-    "clusterTopics": true
+    "clusterTopics": false,
+    "mapTopics": true
   },
   "input": {
     "module": "CSV",
@@ -81,8 +82,11 @@
     "subOutput": "files/output/subTopics_cluster.json"
   },
   "mapTopics": {
-    "mainTopics": "files/output/mainTopics.json",
-    "subTopics": "files/output/subTopics.json"
-
+    "mainTopics": "files/output/mainTopics_cluster.json",
+    "subTopics": "files/output/subTopics_cluster.json",
+    "mapType": "bubble",
+    "bubbleSize": "-",
+    "mainOutput": "files/output/mainMap.json",
+    "subOutput": "files/output/subMaps.json"
   }
 }

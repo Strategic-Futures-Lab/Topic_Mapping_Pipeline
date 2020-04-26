@@ -108,7 +108,6 @@ public class TopicClustering {
         startClass.GroupTopics();
         // Run Agglomerative clustering on topics groups
         startClass.ClusterTopics();
-//        startClass.IndexLabels();
         startClass.SaveClusters();
 
         System.out.println( "**********************************************************\n" +

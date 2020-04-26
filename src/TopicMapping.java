@@ -6,7 +6,7 @@ import P3_TopicModelling.TopicModelling;
 import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
 import P4_Analysis.TopicDistribution.TopicDistribution;
-import P5_TopicMapping.JSTest;
+import P5_TopicMapping.BubbleMap;
 
 public class TopicMapping {
 
@@ -54,6 +54,9 @@ public class TopicMapping {
         if(projectManager.runTopicCluster){
             this.RunTopicCluster();
         }
+        if(projectManager.runTopicMap){
+            this.RunTopicMap();
+        }
     }
 
     private void RunInput(){
@@ -80,15 +83,21 @@ public class TopicMapping {
         LabelIndexing.Index(projectManager.labelIndex);
     }
 
-    private void RunTopicCluster(){
-        TopicClustering.Cluster(projectManager.topicCluster);
-    }
-
     private void RunTopicDistrib(){
         TopicDistribution.Distribute(projectManager.topicDistrib);
     }
 
+    private void RunTopicCluster(){
+        TopicClustering.Cluster(projectManager.topicCluster);
+    }
+
+    private void RunTopicMap() {
+        if(projectManager.topicMap.mapType.equals("bubble")){
+            BubbleMap.MapTopics(projectManager.topicMap);
+        }
+    }
+
     private void RunTESTING(){
-        JSTest.run();
+
     }
 }

@@ -34,6 +34,10 @@ public class ProjectManager {
     public boolean runTopicCluster;
     /** Topic Cluster module specifications */
     public TopicClusterModuleSpecs topicCluster;
+    /** If Topic Mapping module should run */
+    public boolean runTopicMap;
+    /** Topic Mapping module spedifications */
+    public TopicMappingModuleSpecs topicMap;
 
     /**
      * Constructor, also triggers reading the project file and setting up the specs
@@ -56,6 +60,7 @@ public class ProjectManager {
         runLabelIndex = (boolean) specs.get("indexLabels");
         runTopicDistrib = (boolean) specs.get("distributeTopics");
         runTopicCluster = (boolean) specs.get("clusterTopics");
+        runTopicMap = (boolean) specs.get("mapTopics");
     }
 
     /**
@@ -80,6 +85,9 @@ public class ProjectManager {
         }
         if(runTopicCluster){
             topicCluster = new TopicClusterModuleSpecs((JSONObject) projectSpec.get("clusterTopics"));
+        }
+        if(runTopicMap){
+            topicMap = new TopicMappingModuleSpecs((JSONObject) projectSpec.get("mapTopics"));
         }
     }
 
