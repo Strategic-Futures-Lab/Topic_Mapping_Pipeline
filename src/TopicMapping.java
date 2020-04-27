@@ -1,4 +1,5 @@
 import P1_Input.CSVInput;
+import P1_Input.PDFInput;
 import P2_Lemmatise.Lemmatise;
 import P0_Project.ProjectManager;
 import P3_TopicModelling.HierarchicalTopicModelling;
@@ -63,6 +64,8 @@ public class TopicMapping {
         switch (projectManager.input.module){
             case "CSV":
                 CSVInput.CSVInput(projectManager.input);
+            case "PDF":
+                PDFInput.PDFInput(projectManager.input);
         }
     }
 
