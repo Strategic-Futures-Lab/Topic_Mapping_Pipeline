@@ -71,6 +71,14 @@ public class JSONIOWrapper {
         return res;
     }
 
+    public static HashMap<String, Object> getJSONObjectMap(JSONObject map){
+        HashMap<String, Object> res = new HashMap<String, Object>();
+        for(String key: (Iterable<String>) map.keySet()){
+            res.put(key, map.get(key));
+        }
+        return res;
+    }
+
     public static JSONObject LoadJSON(String filename){
         System.out.println("Loading "+filename+" ...");
 

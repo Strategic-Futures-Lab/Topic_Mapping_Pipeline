@@ -1,0 +1,92 @@
+{
+  "run": {
+    "input": false,
+    "lemmatise": false,
+    "model": false,
+    "indexLabels": false,
+    "distributeTopics": false,
+    "clusterTopics": false,
+    "mapTopics": true
+  },
+  "input": {
+    "module": "CSV",
+    "source": "files/test.csv",
+    "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract", "authors": "Authors", "money":  "Money"},
+    "output": "files/corpus.json"
+  },
+  "lemmatise": {
+    "corpus": "files/corpus.json",
+    "textFields": ["title", "abstract"],
+    "docFields": ["title", "university", "money", "authors"],
+    "stopWords": [],
+    "minLemmas": 10,
+    "removeLowCounts": 0,
+    "output": "files/lemmas.json"
+  },
+  "model": {
+    "lemmas": "files/lemmas.json",
+    "module": "hierarchical",
+    "outputDir": "files/topicModel/",
+    "mainModel": {
+      "topics": 20,
+      "words": 10,
+      "docs": 20,
+      "iterations": 50,
+      "topicOutput": "mainTopics.json",
+      "topicSimOutput": "mainTopicsSim.csv",
+      "numWordId": 5
+    },
+    "subModel": {
+      "topics": 30,
+      "words": 10,
+      "docs": 20,
+      "iterations": 50,
+      "topicOutput": "subTopics.json",
+      "topicSimOutput": "subTopicsSim.csv",
+      "numWordId": 5
+    },
+    "documentOutput": "documents.json",
+    "hierarchy": {
+      "modelSimOutput": "modelSim.csv",
+      "maxAssign": 2,
+      "assignmentOutput": "assignment.csv"
+    }
+  },
+  "indexLabels": {
+    "mainTopics": "files/topicModel/mainTopics.json",
+    "subTopics": "files/topicModel/subTopics.json",
+    "output": "files/output/labelIndex.json"
+  },
+  "distributeTopics": {
+    "documents": "files/topicModel/documents.json",
+    "mainTopics": "files/topicModel/mainTopics.json",
+    "subTopics": "files/topicModel/subTopics.json",
+    "mainOutput": "files/output/mainTopics_distrib.json",
+    "subOutput": "files/output/subTopics_distrib.json",
+    "distributions": [{},{
+      "fieldName": "university",
+      "valueField": "money",
+      "output": "files/output/distributionUni.json"
+    },{
+      "fieldName": "authors",
+      "fieldSeparator": "&",
+      "topPerTopic": 5
+    }]
+  },
+  "clusterTopics": {
+    "mainTopics": "files/output/mainTopics_distrib.json",
+    "subTopics": "files/output/subTopics_distrib.json",
+    "linkageMethod": "max",
+    "clusters": 5,
+    "mainOutput": "files/output/mainTopics_cluster.json",
+    "subOutput": "files/output/subTopics_cluster.json"
+  },
+  "mapTopics": {
+    "mainTopics": "files/output/mainTopics_cluster.json",
+    "subTopics": "files/output/subTopics_cluster.json",
+    "mapType": "bubble",
+    "bubbleSize": "-",
+    "mainOutput": "files/output/mainMap.json",
+    "subOutput": "files/output/subMaps.json"
+  }
+}

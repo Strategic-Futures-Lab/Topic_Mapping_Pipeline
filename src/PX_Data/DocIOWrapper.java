@@ -216,6 +216,14 @@ public class DocIOWrapper {
     }
 
     /**
+     * Getter for number of lemmas
+     * @return number of lemmas
+     */
+    public int getNumLemmas(){
+        return numLemmas;
+    }
+
+    /**
      * Removes the document from modelling, giving a reason
      * @param reason reason for removal
      */

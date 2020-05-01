@@ -6,7 +6,9 @@ import org.json.simple.JSONObject;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TopicIOWrapper {
@@ -17,6 +19,7 @@ public class TopicIOWrapper {
     public static class JSONTopicWeight {
         public String ID;
         public double weight;
+        public HashMap<String, String> data;
 
         /**
          * Constructor
@@ -28,6 +31,7 @@ public class TopicIOWrapper {
             DecimalFormat df = new DecimalFormat("#.####");
             df.setRoundingMode(RoundingMode.UP);
             this.weight = Double.parseDouble(df.format(weight));
+            this.data = new HashMap<>();
         }
 
         /**
@@ -37,6 +41,7 @@ public class TopicIOWrapper {
         public JSONTopicWeight(JSONObject jsonWeight){
             this.ID = (String) jsonWeight.get("id");
             this.weight = (double) jsonWeight.get("weight");
+            this.data = JSONIOWrapper.getStringMap((JSONObject) jsonWeight.getOrDefault("data", new JSONObject()));
         }
 
         /**
@@ -47,7 +52,30 @@ public class TopicIOWrapper {
         public JSONTopicWeight(JSONObject jsonWeight, String customName){
             this.ID = (String) jsonWeight.get(customName);
             this.weight = (double) jsonWeight.get("weight");
+            this.data = JSONIOWrapper.getStringMap((JSONObject) jsonWeight.getOrDefault("data", new JSONObject()));
         }
+
+        /**
+         * Constructor from JSON object
+         * @param jsonWeight JSON object of the instance
+         * @param customName custom name of the instance
+         * @param customDataName custom for the instance data field
+         */
+        public JSONTopicWeight(JSONObject jsonWeight, String customName, String customDataName){
+            this.ID = (String) jsonWeight.get(customName);
+            this.weight = (double) jsonWeight.get("weight");
+            this.data = JSONIOWrapper.getStringMap((JSONObject) jsonWeight.getOrDefault(customDataName, new JSONObject()));
+        }
+
+        /**
+         * Adds an entry to the instance data
+         * @param key entry key
+         * @param value entry value
+         */
+        public void addDataEntry(String key, String value){
+            this.data.put(key, value);
+        }
+
 
         /**
          * Creates a JSON object of the instance weight to save in JSON file
@@ -57,6 +85,13 @@ public class TopicIOWrapper {
             JSONObject obj = new JSONObject();
             obj.put("id", ID);
             obj.put("weight", weight);
+            if(!data.isEmpty()){
+                JSONObject d = new JSONObject();
+                for(Map.Entry<String, String> e: data.entrySet()){
+                    d.put(e.getKey(), e.getValue());
+                }
+                obj.put("data", d);
+            }
             return obj;
         }
 
@@ -69,6 +104,33 @@ public class TopicIOWrapper {
             JSONObject obj = new JSONObject();
             obj.put(customName, ID);
             obj.put("weight", weight);
+            if(!data.isEmpty()){
+                JSONObject d = new JSONObject();
+                for(Map.Entry<String, String> e: data.entrySet()){
+                    d.put(e.getKey(), e.getValue());
+                }
+                obj.put("data", d);
+            }
+            return obj;
+        }
+
+        /**
+         * Creates a JSON object of the instance weight to save in JSON file
+         * @param customName custom instance name to save in JSON
+         * @param customDataName custom instance data name to save in JSON
+         * @return JSON object of instance weight
+         */
+        public JSONObject toJSON(String customName, String customDataName){
+            JSONObject obj = new JSONObject();
+            obj.put(customName, ID);
+            obj.put("weight", weight);
+            if(!data.isEmpty()){
+                JSONObject d = new JSONObject();
+                for(Map.Entry<String, String> e: data.entrySet()){
+                    d.put(e.getKey(), e.getValue());
+                }
+                obj.put(customDataName, d);
+            }
             return obj;
         }
     }
@@ -188,7 +250,7 @@ public class TopicIOWrapper {
         JSONArray docs = (JSONArray) jsonTopic.get("topDocs");
         this.docs = new ArrayList<>();
         for(JSONObject d: (Iterable<JSONObject>) docs){
-            this.docs.add(new JSONTopicWeight(d, "docId"));
+            this.docs.add(new JSONTopicWeight(d, "docId", "docData"));
         }
         // non-necessary data only fill if exists in JSON
         JSONArray mainTopicIds = (JSONArray) jsonTopic.getOrDefault("mainTopicIds", new JSONArray());
@@ -312,6 +374,14 @@ public class TopicIOWrapper {
     }
 
     /**
+     * Getter method for the topic docs
+     * @return topic docs
+     */
+    public List<JSONTopicWeight> getDocs(){
+        return docs;
+    }
+
+    /**
      * Add a topic id as main topic
      * @param id main topic id
      */
@@ -375,7 +445,7 @@ public class TopicIOWrapper {
         root.put("topWords", wordArray);
         JSONArray docArray = new JSONArray();
         for(int d = 0; d < docs.size(); d++){
-            docArray.add(docs.get(d).toJSON("docId"));
+            docArray.add(docs.get(d).toJSON("docId", "docData"));
         }
         root.put("topDocs", docArray);
         // Save non-necessary data

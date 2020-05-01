@@ -22,6 +22,10 @@ public class ProjectManager {
     public boolean runModel;
     /** Topic Model module specifications */
     public TopicModelModuleSpecs model;
+    /** If Topic Model Export should run */
+    public boolean runTopicModelExport;
+    /** Topic Model Export module specifications */
+    public TopicModelExportModuleSpecs topicModelExport;
     /** If Index Label module should run */
     public boolean runLabelIndex;
     /** Label Index module specifications */
@@ -36,7 +40,7 @@ public class ProjectManager {
     public TopicClusterModuleSpecs topicCluster;
     /** If Topic Mapping module should run */
     public boolean runTopicMap;
-    /** Topic Mapping module spedifications */
+    /** Topic Mapping module specifications */
     public TopicMappingModuleSpecs topicMap;
 
     /**
@@ -57,6 +61,7 @@ public class ProjectManager {
         runInput = (boolean) specs.get("input");
         runLemmatise = (boolean) specs.get("lemmatise");
         runModel = (boolean) specs.get("model");
+        runTopicModelExport = (boolean) specs.get("exportTopicModel");
         runLabelIndex = (boolean) specs.get("indexLabels");
         runTopicDistrib = (boolean) specs.get("distributeTopics");
         runTopicCluster = (boolean) specs.get("clusterTopics");
@@ -76,6 +81,9 @@ public class ProjectManager {
         }
         if(runModel){
             model = new TopicModelModuleSpecs((JSONObject) projectSpec.get("model"));
+        }
+        if(runTopicModelExport){
+            topicModelExport = new TopicModelExportModuleSpecs((JSONObject) projectSpec.get("exportTopicModel"));
         }
         if(runLabelIndex){
             labelIndex = new LabelIndexModuleSpecs((JSONObject) projectSpec.get("indexLabels"));

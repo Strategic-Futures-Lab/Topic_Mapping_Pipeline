@@ -8,6 +8,7 @@ import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
 import P4_Analysis.TopicDistribution.TopicDistribution;
 import P5_TopicMapping.BubbleMap;
+import P3_TopicModelling.ExportTopicModel;
 
 public class TopicMapping {
 
@@ -46,6 +47,9 @@ public class TopicMapping {
         if(projectManager.runModel){
             this.RunModel();
         }
+        if(projectManager.runTopicModelExport){
+            this.RunExport();
+        }
         if(projectManager.runLabelIndex){
             this.RunLabelIndex();
         }
@@ -64,8 +68,10 @@ public class TopicMapping {
         switch (projectManager.input.module){
             case "CSV":
                 CSVInput.CSVInput(projectManager.input);
+                break;
             case "PDF":
                 PDFInput.PDFInput(projectManager.input);
+                break;
         }
     }
 
@@ -80,6 +86,10 @@ public class TopicMapping {
             HierarchicalTopicModelling.HierarchicalModel(projectManager.model);
         }
 
+    }
+
+    private void RunExport(){
+        ExportTopicModel.ExportTopicModel(projectManager.topicModelExport);
     }
 
     private void RunLabelIndex(){

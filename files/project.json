@@ -3,81 +3,85 @@
     "input": false,
     "lemmatise": false,
     "model": false,
+    "exportTopicModel": false,
     "indexLabels": false,
     "distributeTopics": false,
-    "clusterTopics": false,
+    "clusterTopics": true,
     "mapTopics": true
   },
   "input": {
     "module": "CSV",
-    "source": "files/test.csv",
-    "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract", "authors": "Authors", "money":  "Money"},
-    "output": "files/corpus.json"
+    "source": "files/projects/COVID-19_Dimensions/dimensions_pubs_trials_290420_clean.csv",
+    "fields": {"title": "title", "abstract": "abstract", "doi": "doi", "url":  "url",
+      "type": "type", "source": "source"
+    },
+    "output": "files/output/corpus.json"
   },
   "lemmatise": {
-    "corpus": "files/corpus.json",
+    "corpus": "files/output/corpus.json",
     "textFields": ["title", "abstract"],
-    "docFields": ["title", "university", "money", "authors"],
-    "stopWords": [],
+    "docFields": ["title", "doi", "url", "type", "source"],
+    "stopWords": ["http", "www", "sec", "xmln", "gov", "nih", "ncbi", "nlm", "mml", "mrow", "abstracttext", "xlink",
+      "xmlns", "italic", "der", "und", "org", "iii", "jat", "jats", "xmlschema", "xsi", "w3", "covid"],
     "minLemmas": 10,
     "removeLowCounts": 0,
-    "output": "files/lemmas.json"
+    "output": "files/output/lemmas.json"
   },
   "model": {
-    "lemmas": "files/lemmas.json",
+    "lemmas": "files/output/lemmas.json",
     "module": "hierarchical",
-    "outputDir": "files/topicModel/",
+    "outputDir": "files/output/topicModel/",
     "mainModel": {
-      "topics": 20,
-      "words": 10,
-      "docs": 20,
-      "iterations": 50,
+      "topics": 30,
+      "words": 40,
+      "docs": 50,
+      "iterations": 2000,
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
       "numWordId": 5
     },
     "subModel": {
-      "topics": 30,
-      "words": 10,
-      "docs": 20,
-      "iterations": 50,
+      "topics": 200,
+      "words": 40,
+      "docs": 50,
+      "iterations": 2000,
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
       "numWordId": 5
     },
     "documentOutput": "documents.json",
     "hierarchy": {
-      "modelSimOutput": "modelSim.csv",
-      "maxAssign": 2,
+      "modelSimOutput": "modelsSim.csv",
+      "maxAssign": 1,
       "assignmentOutput": "assignment.csv"
     }
   },
+  "exportTopicModel": {
+    "mainTopics": "files/output/topicModel/mainTopics.json",
+    "subTopics": "files/output/topicModel/subTopics.json",
+    "documents": "files/output/topicModel/documents.json",
+    "docFields": ["title", "doi", "url", "type", "source"],
+    "mainOutput": "files/output/mainModel.json",
+    "subOutput": "files/output/subModel.json"
+  },
   "indexLabels": {
-    "mainTopics": "files/topicModel/mainTopics.json",
-    "subTopics": "files/topicModel/subTopics.json",
+    "mainTopics": "files/output/topicModel/mainTopics.json",
+    "subTopics": "files/output/topicModel/subTopics.json",
     "output": "files/output/labelIndex.json"
   },
   "distributeTopics": {
-    "documents": "files/topicModel/documents.json",
-    "mainTopics": "files/topicModel/mainTopics.json",
-    "subTopics": "files/topicModel/subTopics.json",
+    "documents": "files/output/topicModel/documents.json",
+    "mainTopics": "files/output/topicModel/mainTopics.json",
+    "subTopics": "files/output/topicModel/subTopics.json",
     "mainOutput": "files/output/mainTopics_distrib.json",
     "subOutput": "files/output/subTopics_distrib.json",
-    "distributions": [{},{
-      "fieldName": "university",
-      "valueField": "money",
-      "output": "files/output/distributionUni.json"
-    },{
-      "fieldName": "authors",
-      "fieldSeparator": "&",
-      "topPerTopic": 5
-    }]
+    "distributions": [{}]
   },
   "clusterTopics": {
     "mainTopics": "files/output/mainTopics_distrib.json",
     "subTopics": "files/output/subTopics_distrib.json",
     "linkageMethod": "max",
-    "clusters": 5,
+    "clusters": 8,
     "mainOutput": "files/output/mainTopics_cluster.json",
     "subOutput": "files/output/subTopics_cluster.json"
   },
