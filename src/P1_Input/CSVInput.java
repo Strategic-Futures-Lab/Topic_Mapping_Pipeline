@@ -3,6 +3,7 @@ package P1_Input;
 import P0_Project.InputModuleSpecs;
 import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
@@ -29,22 +30,24 @@ public class CSVInput {
     private String outputFile;
 
     public static void CSVInput(InputModuleSpecs inputSpecs){
-        System.out.println( "**********************************************************\n" +
-                            "* STARTING CSV Input !                                   *\n" +
-                            "**********************************************************\n");
+
+        LogPrint.printModuleStart("CSV Input");
+
         CSVInput startClass = new CSVInput();
         startClass.processSpecs(inputSpecs);
         startClass.LoadCSVFile();
         startClass.OutputJSON();
-        System.out.println( "**********************************************************\n" +
-                            "* CSV Input: COMPLETE !                                  *\n" +
-                            "**********************************************************\n");
+
+        LogPrint.printModuleEnd("CSV Input");
+
     }
 
     private void processSpecs(InputModuleSpecs inputSpecs){
+        LogPrint.printNewStep("Processing arguments", 0);
         sourceFile = inputSpecs.source;
         fields = inputSpecs.fields;
         outputFile = inputSpecs.output;
+        LogPrint.printCompleteStep();
     }
 
 
@@ -54,7 +57,7 @@ public class CSVInput {
         csvReader.setContainsHeader(true);
 
         int rowNum = 0;
-        System.out.println("Reading CSV: "+sourceFile+" ...");
+        LogPrint.printNewStep("Reading CSV: "+sourceFile, 0);
 
         try(CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)){
             CsvRow row;
@@ -72,8 +75,8 @@ public class CSVInput {
         }
         finally {
             numDocs = Docs.size();
-            System.out.println("Finished!");
-            System.out.println("Number of documents recovered from file: " + numDocs);
+            LogPrint.printCompleteStep();
+            LogPrint.printNote("Number of documents recovered from file: " + numDocs);
         }
     }
 
@@ -87,6 +90,6 @@ public class CSVInput {
             corpus.add(entry.getValue().toJSON());
         }
         root.put("corpus", corpus);
-        JSONIOWrapper.SaveJSON(root, outputFile);
+        JSONIOWrapper.SaveJSON(root, outputFile, 0);
     }
 }

@@ -49,7 +49,6 @@ public class TopicDistribution {
         startClass.CalculateDistributions();
         startClass.SaveDistributions();
 
-        // TODO: Save distribution
 //         // create sub groups of topics (and there similarity) based on main topic assignment
 //         startClass.GroupTopics();
 //         // Run Agglomerative clustering on topics groups

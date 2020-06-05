@@ -1,5 +1,6 @@
 package PX_Data;
 
+import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -109,6 +110,39 @@ public class JSONIOWrapper {
         }
         finally {
             System.out.println(filename+" Saved!");
+        }
+    }
+
+    public static JSONObject LoadJSON(String filename, int depth){
+        LogPrint.printNewStep("Loading "+filename, depth);
+
+        JSONObject root = new JSONObject();
+
+        JSONParser parser = new JSONParser();
+        try (FileReader file = new FileReader(filename)){
+            root = (JSONObject) parser.parse(file);
+        }
+        catch (IOException | ParseException e){
+            e.printStackTrace();
+        }
+        finally {
+            LogPrint.printCompleteStep();
+        }
+        return root;
+    }
+
+    public static void SaveJSON(JSONObject obj, String filename, int depth){
+        LogPrint.printNewStep("Saving "+filename, depth);
+        try (FileWriter file = new FileWriter(filename)){
+            String str = obj.toJSONString();
+            file.write(str);
+            file.flush();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+        finally {
+            LogPrint.printCompleteStep();
         }
     }
 }

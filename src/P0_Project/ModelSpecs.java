@@ -42,6 +42,6 @@ public class ModelSpecs {
             outputSimilarity = true;
             similarityOutput = outputDir+similarityOutput;
         }
-        numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", 3));
+        numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
     }
 }

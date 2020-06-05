@@ -3,6 +3,7 @@ package P2_Lemmatise;
 import P0_Project.LemmatiseModuleSpecs;
 import P2_Lemmatise.Lemmatizer.StanfordLemmatizer;
 import PX_Data.*;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -33,9 +34,8 @@ public class Lemmatise {
     private int totalDocRemoved = 0;
 
     public static void Lemmatise(LemmatiseModuleSpecs lemmaSpecs){
-        System.out.println( "**********************************************************\n" +
-                            "* STARTING Lemmatise !                                   *\n" +
-                            "**********************************************************\n");
+
+        LogPrint.printModuleStart("Lemmatisation");
 
         Lemmatise startClass = new Lemmatise();
         startClass.ProcessArguments(lemmaSpecs);
@@ -45,12 +45,11 @@ public class Lemmatise {
         startClass.CleanLemmas();
         startClass.OutputJSON();
 
-        System.out.println( "**********************************************************\n" +
-                            "* Lemmatise COMPLETE !                                   *\n" +
-                            "**********************************************************\n");
+        LogPrint.printModuleEnd("Lemmatisation");
     }
 
     private void ProcessArguments(LemmatiseModuleSpecs lemmaSpecs){
+        LogPrint.printNewStep("Processing arguments", 0);
         corpusFile = lemmaSpecs.corpus;
         outputFile = lemmaSpecs.output;
         textFields = Arrays.asList(lemmaSpecs.textFields);
@@ -58,10 +57,12 @@ public class Lemmatise {
         stopWords = Arrays.asList(lemmaSpecs.stopWords);
         minLemmas = lemmaSpecs.minLemmas;
         removeLowCounts = lemmaSpecs.removeLowCounts;
+        LogPrint.printCompleteStep();
+        if(removeLowCounts > 0) LogPrint.printNote("Removing lemmas with count less than "+(removeLowCounts+1));
     }
 
     private void LoadCorpusFile(){
-        JSONObject input = JSONIOWrapper.LoadJSON(corpusFile);
+        JSONObject input = JSONIOWrapper.LoadJSON(corpusFile, 0);
         metadata = (JSONObject) input.get("metadata");
         JSONArray corpus = (JSONArray) input.get("corpus");
         Documents = new ConcurrentHashMap<>();
@@ -69,23 +70,25 @@ public class Lemmatise {
             DocIOWrapper doc = new DocIOWrapper(docEntry);
             Documents.put(doc.getId(), doc);
         }
-        System.out.println("Loaded corpus!");
+        // System.out.println("Loaded corpus!");
     }
 
     private void ProcessDocuments(){
+        LogPrint.printNewStep("Processing documents", 0);
         for(Map.Entry<String, DocIOWrapper> doc: Documents.entrySet()){
             doc.getValue().addTexts(textFields);
             doc.getValue().filterData(docFields);
         }
+        LogPrint.printCompleteStep();
     }
 
     private void LemmatiseDocuments(){
 
-        System.out.println("Loading Stanford Lemmatiser");
+        LogPrint.printNewStep("Loading Stanford CoreNLP Lemmatiser:\n", 0);
         slem = new StanfordLemmatizer();
-        System.out.println("Stanford Lemmatiser Loaded");
+        // System.out.println("Stanford Lemmatiser Loaded");
 
-        System.out.println("Starting Lemmatising!");
+        LogPrint.printNewStep("Starting lemmatisation", 0);
 
         totalDocs = Documents.size();
         startTime = System.currentTimeMillis();
@@ -100,27 +103,31 @@ public class Lemmatise {
             Documents.entrySet().forEach(this::LemmatiseDocument);
 
         long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
-        System.out.println("Lemmatising Complete!"  +
-                Math.floorDiv(timeTaken, 60) + " minutes, " + timeTaken % 60 + " seconds.");
+        LogPrint.printNewStep("Lemmatisation complete ", 1);
+        LogPrint.printNote("Time taken: "+
+                Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
     }
 
     private void LemmatiseDocument(Map.Entry<String, DocIOWrapper> docEntry){
 
         if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0)
         {
-            System.out.println();
+            // System.out.println();
             long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
-            String timeTakenStr = "Time Taken: " + Math.floorDiv(timeTaken, 60) + " minutes, " + timeTaken % 60 + " seconds.";
+            String timeTakenStr = "time: " + Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
 
             float timeLeft = ((float) timeTaken / (float) docsProcessed) * (totalDocs - docsProcessed);
-            String timeToGoStr = "Estimated Remaining Time: " + Math.floor(timeLeft / 60) + " minutes, " + Math.floor(timeLeft % 60) + " seconds.";
+            String timeToGoStr = "remaining (est.)): " + Math.floor(timeLeft / 60) + " m, " + Math.floor(timeLeft % 60) + " s.";
 
             float percentage = (((float) docsProcessed / (float) totalDocs) * 100);
 
-            System.out.println("Lemmatising Row ID: " + docEntry.getKey() + " | Number: " + docsProcessed +
-                    " | Percent Complete: " + (Math.round(percentage * 100f) / 100f) + "%");
+            // System.out.println("Lemmatising Row ID: " + docEntry.getKey() + " | Number: " + docsProcessed +
+            //         " | Percent Complete: " + (Math.round(percentage * 100f) / 100f) + "%");
 
-            System.out.println(timeTakenStr + " | " + timeToGoStr);
+            LogPrint.printNewStep("Lemmatised: " + docsProcessed +
+                    "documents | % complete: " + (Math.round(percentage * 100f) / 100f) + "%", 1);
+
+            LogPrint.printStep(timeTakenStr + " | " + timeToGoStr, 1);
         }
 
         DocIOWrapper doc = docEntry.getValue();
@@ -156,7 +163,7 @@ public class Lemmatise {
 
     private void CleanLemmas(){
         if(removeLowCounts > 0){
-            System.out.println("Cleaning Low Count Lemmas ...");
+            LogPrint.printNewStep("Cleaning low count lemmas", 0);
             startTime = System.currentTimeMillis();
             HashMap<String, Integer> lemmaCounts = new HashMap<>();
             for(Map.Entry<String, DocIOWrapper> doc: Documents.entrySet()){
@@ -173,11 +180,15 @@ public class Lemmatise {
                     .filter(e -> e.getValue() <= removeLowCounts)
                     .map(e->e.getKey())
                     .collect(Collectors.toList());
-            System.out.println("Found "+lowCounts.size()+" lemmas with count less or equal to "+removeLowCounts);
+
             Documents.entrySet().parallelStream().forEach(e->e.getValue().filterOutLemmas(lowCounts));
             long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
-            System.out.println("Low Count Lemmas Cleaned!"  +
-                    Math.floorDiv(timeTaken, 60) + " minutes, " + timeTaken % 60 + " seconds.");
+            LogPrint.printCompleteStep();
+
+            LogPrint.printNote("Found "+lowCounts.size()+" lemmas with count less than "+(removeLowCounts+1));
+            LogPrint.printNote("Time taken: "+
+                    Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
+
         }
         Documents.entrySet().parallelStream().forEach(e->{
             DocIOWrapper doc = e.getValue();
@@ -201,6 +212,6 @@ public class Lemmatise {
             lemmas.add(entry.getValue().toJSON());
         }
         root.put("lemmas", lemmas);
-        JSONIOWrapper.SaveJSON(root, outputFile);
+        JSONIOWrapper.SaveJSON(root, outputFile, 0);
     }
 }

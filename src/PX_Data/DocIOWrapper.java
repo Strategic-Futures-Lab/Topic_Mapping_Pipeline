@@ -124,12 +124,31 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter method for a particular data value
+     * Getter method for a particular data value, returns an empty string value if not found
      * @param key data key
      * @return data value
      */
     public String getData(String key){
-        return docData.get(key);
+        return docData.getOrDefault(key, "");
+    }
+
+    /**
+     * Getter method for a particular data value, returns a default value if not found
+     * @param key data key
+     * @param def default value to return
+     * @return data value
+     */
+    public String getDataOr(String key, String def){
+        return docData.getOrDefault(key, def);
+    }
+
+    /**
+     * Check method for a particular data key
+     * @param key data key
+     * @return boolean for key existing
+     */
+    public boolean hasData(String key){
+        return docData.containsKey(key);
     }
 
     /**
@@ -238,6 +257,14 @@ public class DocIOWrapper {
      */
     public boolean isRemoved(){
         return removed;
+    }
+
+    /**
+     * Getter for removed reason
+     * @return remove reason
+     */
+    public String getRemoveReason(){
+        return removeReason;
     }
 
     /**
