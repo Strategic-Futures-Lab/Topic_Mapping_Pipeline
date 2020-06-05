@@ -27,3 +27,5 @@ hs_err_pid*
 out/**
 lib/**
 *.iml
+files/output/**
+files/projects/**

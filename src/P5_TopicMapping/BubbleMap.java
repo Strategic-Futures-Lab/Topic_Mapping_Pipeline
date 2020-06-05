@@ -82,15 +82,16 @@ public class BubbleMap {
         try {
             System.out.println("Calling Node JS ...");
             Process process = processBuilder.start();
-            StringBuilder output = new StringBuilder();
+            // StringBuilder output = new StringBuilder();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
+                // output.append(line + "\n");
+                System.out.println(line);
             }
             int exitVal = process.waitFor();
             if (exitVal == 0) {
-                System.out.println(output);
+                // System.out.println(output);
                 System.out.println("Node JS Finished!");
                 // System.exit(0);
             } else {
