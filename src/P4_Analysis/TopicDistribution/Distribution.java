@@ -57,8 +57,24 @@ public class Distribution {
         return valueName;
     }
 
+    public String getSeparator(){ return separator;}
+
+    public int getTopPerTopic(){return topPerTopic;}
+
+    public String getOutput(){return output;}
+
     public boolean saveInTopics(){
         return output.length() == 0;
+    }
+
+    public String getDescription(){
+        String f = fieldName.length() > 0 ? "Distributing topics across "+fieldName : "Getting topics total";
+        String s = separator.length() > 0 ? " separating field by \""+separator+"\"" : "";
+        String v = valueName.length() > 0 ? ", using "+valueName+" value" : ", counting documents";
+        String t = topPerTopic > 0 ? ", saving "+topPerTopic+" entries"
+                : topPerTopic < 0 ? ", saving all entries" : ", only saving totals";
+        String o = output.length() > 0 ? ", saving separately" : ", saving with topics";
+        return f+s+v+t+o;
     }
 
     public void addUniqueFieldValues(String fieldValue){
@@ -122,8 +138,8 @@ public class Distribution {
             saveDistributionInTopics(mainTopics, mainDistribution);
         } else {
             JSONObject root = initialiseJSON();
-            saveDistributionInFile(root, "topics", mainTopics, mainDistribution);
-            JSONIOWrapper.SaveJSON(root, output);
+            saveDistributionInFile(root, "mainTopics", mainTopics, mainDistribution);
+            JSONIOWrapper.SaveJSON(root, output, 1);
         }
     }
 
@@ -135,7 +151,7 @@ public class Distribution {
             JSONObject root = initialiseJSON();
             saveDistributionInFile(root, "mainTopics", mainTopics, mainDistribution);
             saveDistributionInFile(root, "subTopics", subTopics, subDistribution);
-            JSONIOWrapper.SaveJSON(root, output);
+            JSONIOWrapper.SaveJSON(root, output,1);
         }
     }
 

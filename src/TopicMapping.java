@@ -9,19 +9,27 @@ import P4_Analysis.TopicClustering.TopicClustering;
 import P4_Analysis.TopicDistribution.TopicDistribution;
 import P5_TopicMapping.BubbleMap;
 import P3_TopicModelling.ExportTopicModel;
+import PY_Helper.LogPrint;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TopicMapping {
 
-    private boolean TESTING = false;
-
     private String projectFile;
     private ProjectManager projectManager;
+    private static List<String> times = new ArrayList<>();
 
     public static void main(String[] args) {
+        LogPrint.printModuleStart("Pipeline");
         TopicMapping startClass = new TopicMapping();
         startClass.CheckArgs(args);
         startClass.LoadProject();
         startClass.Run();
+        for(String t: times){
+            LogPrint.printNote(t);
+        }
+        LogPrint.printModuleEnd("Pipeline");
     }
 
     private void CheckArgs(String[] args){
@@ -35,9 +43,6 @@ public class TopicMapping {
     }
 
     private void Run(){
-        if(TESTING){
-            this.RunTESTING();
-        }
         if(projectManager.runInput){
             this.RunInput();
         }
@@ -67,7 +72,7 @@ public class TopicMapping {
     private void RunInput(){
         switch (projectManager.input.module){
             case "CSV":
-                CSVInput.CSVInput(projectManager.input);
+                times.add(CSVInput.CSVInput(projectManager.input));
                 break;
             case "PDF":
                 PDFInput.PDFInput(projectManager.input);
@@ -76,41 +81,37 @@ public class TopicMapping {
     }
 
     private void RunLemmatise(){
-        Lemmatise.Lemmatise(projectManager.lemmatise);
+        times.add(Lemmatise.Lemmatise(projectManager.lemmatise));
     }
 
     private void RunModel(){
         if(projectManager.model.module.equals("simple")){
-            TopicModelling.SingleModel(projectManager.model);
+            times.add(TopicModelling.SingleModel(projectManager.model));
         } else if(projectManager.model.module.equals("hierarchical")){
-            HierarchicalTopicModelling.HierarchicalModel(projectManager.model);
+            times.add(HierarchicalTopicModelling.HierarchicalModel(projectManager.model));
         }
 
     }
 
     private void RunExport(){
-        ExportTopicModel.ExportTopicModel(projectManager.topicModelExport);
+        times.add(ExportTopicModel.ExportTopicModel(projectManager.topicModelExport));
     }
 
     private void RunLabelIndex(){
-        LabelIndexing.Index(projectManager.labelIndex);
+        times.add(LabelIndexing.Index(projectManager.labelIndex));
     }
 
     private void RunTopicDistrib(){
-        TopicDistribution.Distribute(projectManager.topicDistrib);
+        times.add(TopicDistribution.Distribute(projectManager.topicDistrib));
     }
 
     private void RunTopicCluster(){
-        TopicClustering.Cluster(projectManager.topicCluster);
+        times.add(TopicClustering.Cluster(projectManager.topicCluster));
     }
 
     private void RunTopicMap() {
         if(projectManager.topicMap.mapType.equals("bubble")){
-            BubbleMap.MapTopics(projectManager.topicMap);
+            times.add(BubbleMap.MapTopics(projectManager.topicMap));
         }
-    }
-
-    private void RunTESTING(){
-
     }
 }

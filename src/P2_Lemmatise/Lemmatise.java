@@ -33,9 +33,11 @@ public class Lemmatise {
     private int removeLowCounts;
     private int totalDocRemoved = 0;
 
-    public static void Lemmatise(LemmatiseModuleSpecs lemmaSpecs){
+    public static String Lemmatise(LemmatiseModuleSpecs lemmaSpecs){
 
         LogPrint.printModuleStart("Lemmatisation");
+
+        long startTime = System.currentTimeMillis();
 
         Lemmatise startClass = new Lemmatise();
         startClass.ProcessArguments(lemmaSpecs);
@@ -45,7 +47,11 @@ public class Lemmatise {
         startClass.CleanLemmas();
         startClass.OutputJSON();
 
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
         LogPrint.printModuleEnd("Lemmatisation");
+
+        return "Lemmatising: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
     private void ProcessArguments(LemmatiseModuleSpecs lemmaSpecs){
@@ -84,14 +90,17 @@ public class Lemmatise {
 
     private void LemmatiseDocuments(){
 
-        LogPrint.printNewStep("Loading Stanford CoreNLP Lemmatiser:\n", 0);
+        LogPrint.printNewStep("Loading lemmatiser", 0);
+        LogPrint.printNote("Following output from Stanford CoreNLP\n");
         slem = new StanfordLemmatizer();
+        LogPrint.printNewStep("Loading lemmatiser", 0);
+        LogPrint.printCompleteStep();
         // System.out.println("Stanford Lemmatiser Loaded");
 
-        LogPrint.printNewStep("Starting lemmatisation", 0);
+        LogPrint.printNewStep("Lemmatisation", 0);
 
         totalDocs = Documents.size();
-        startTime = System.currentTimeMillis();
+        // startTime = System.currentTimeMillis();
 
         //Parallel version of the lambada-style code. Please note:
         //1. You need to parallelise the entry set, and pass that to the method
@@ -103,9 +112,11 @@ public class Lemmatise {
             Documents.entrySet().forEach(this::LemmatiseDocument);
 
         long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
-        LogPrint.printNewStep("Lemmatisation complete ", 1);
-        LogPrint.printNote("Time taken: "+
-                Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
+        LogPrint.printNewStep("Lemmatisation", 0);
+        LogPrint.printCompleteStep();
+        // LogPrint.printNewStep("Lemmatisation complete ", 1);
+        // LogPrint.printNote("Time taken: "+
+        //         Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
     }
 
     private void LemmatiseDocument(Map.Entry<String, DocIOWrapper> docEntry){
@@ -164,7 +175,7 @@ public class Lemmatise {
     private void CleanLemmas(){
         if(removeLowCounts > 0){
             LogPrint.printNewStep("Cleaning low count lemmas", 0);
-            startTime = System.currentTimeMillis();
+            // startTime = System.currentTimeMillis();
             HashMap<String, Integer> lemmaCounts = new HashMap<>();
             for(Map.Entry<String, DocIOWrapper> doc: Documents.entrySet()){
                 for(String l: doc.getValue().getLemmas()){
@@ -186,8 +197,8 @@ public class Lemmatise {
             LogPrint.printCompleteStep();
 
             LogPrint.printNote("Found "+lowCounts.size()+" lemmas with count less than "+(removeLowCounts+1));
-            LogPrint.printNote("Time taken: "+
-                    Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
+            // LogPrint.printNote("Time taken: "+
+            //         Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
 
         }
         Documents.entrySet().parallelStream().forEach(e->{

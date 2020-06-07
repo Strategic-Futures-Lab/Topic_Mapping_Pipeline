@@ -83,13 +83,33 @@ public class LogPrint {
         System.out.print(stars+" STARTING "+moduleName+" \n");
     }
 
+    public static void printSubModuleStart(String moduleName){
+        System.out.print(ConsoleColors.BLUE+"\n| "+moduleName+ConsoleColors.RESET);
+    }
+
+    public static void printSubModuleEnd(){
+        System.out.print(ConsoleColors.BLUE+"\n====================="+ConsoleColors.RESET);
+    }
+
     public static void printModuleEnd(String moduleName){
         System.out.println("\n\n "+moduleName+" COMPLETED "+stars);
     }
 
     public static void printNote(String msg){
+        // String arrow = "➡ ";
+        // System.out.print("\n"+ConsoleColors.YELLOW+arrow+msg+ConsoleColors.RESET);
+        printNote(msg, 0);
+    }
+
+    public static void printNote(String msg, int depth){
+        String tab = "  ".repeat(depth);
+        String arrow = " ➡ ";
+        System.out.print("\n"+tab+ConsoleColors.YELLOW+arrow+msg+ConsoleColors.RESET);
+    }
+
+    public static void printNoteError(String msg){
         String arrow = "➡ ";
-        System.out.print("\n"+ConsoleColors.YELLOW+arrow+msg+ConsoleColors.RESET);
+        System.out.print("\n"+ConsoleColors.RED+arrow+msg+ConsoleColors.RESET);
     }
 
     public static void printNewStep(String msg, int depth){
@@ -100,6 +120,11 @@ public class LogPrint {
     public static void printStep(String msg, int depth){
         String tab = "  ".repeat(depth);
         System.out.print("\n"+tab+"   "+msg);
+    }
+
+    public static void printExternalStep(String msg, int depth){
+        String tab = "  ".repeat(depth);
+        System.out.print("\n"+ConsoleColors.PURPLE+tab+"   "+msg+ConsoleColors.RESET);
     }
 
     public static void printCompleteStep(String msg){

@@ -13,9 +13,9 @@ public class LemmaReader {
     private ConcurrentHashMap<String, DocIOWrapper> Documents;
 
     public LemmaReader(String lemmaFile){
-        System.out.println("Loading corpus ...");
+        // System.out.println("Loading corpus ...");
 
-        JSONObject input = JSONIOWrapper.LoadJSON(lemmaFile);
+        JSONObject input = JSONIOWrapper.LoadJSON(lemmaFile, 0);
         metadata = (JSONObject) input.get("metadata");
         JSONArray lemmas = (JSONArray) input.get("lemmas");
         Documents = new ConcurrentHashMap<>();
@@ -24,7 +24,7 @@ public class LemmaReader {
             Documents.put(doc.getId(), doc);
         }
 
-        System.out.println("Loaded corpus!");
+        // System.out.println("Loaded corpus!");
     }
 
     public ConcurrentHashMap<String, DocIOWrapper> getDocuments(){

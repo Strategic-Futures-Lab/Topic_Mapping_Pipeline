@@ -1,6 +1,7 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 /**
@@ -48,7 +49,7 @@ public class ProjectManager {
      * @param projectFile filename for the project file
      */
     public ProjectManager(String projectFile){
-        JSONObject projectSpec = JSONIOWrapper.LoadJSON(projectFile);
+        JSONObject projectSpec = JSONIOWrapper.LoadJSON(projectFile, 0);
         getRuns((JSONObject) projectSpec.get("run"));
         getSpecs(projectSpec);
     }
@@ -58,6 +59,7 @@ public class ProjectManager {
      * @param specs JSON object attached to "run" in project file
      */
     private void getRuns(JSONObject specs){
+        LogPrint.printNewStep("Getting modules to run", 0);
         runInput = (boolean) specs.get("input");
         runLemmatise = (boolean) specs.get("lemmatise");
         runModel = (boolean) specs.get("model");
@@ -66,6 +68,7 @@ public class ProjectManager {
         runTopicDistrib = (boolean) specs.get("distributeTopics");
         runTopicCluster = (boolean) specs.get("clusterTopics");
         runTopicMap = (boolean) specs.get("mapTopics");
+        LogPrint.printCompleteStep();
     }
 
     /**
@@ -73,6 +76,7 @@ public class ProjectManager {
      * @param projectSpec JSON object from the project file, specific module entries are then distributed
      */
     private void getSpecs(JSONObject projectSpec){
+        LogPrint.printNewStep("Getting modules parameters", 0);
         if(runInput){
             input = new InputModuleSpecs((JSONObject) projectSpec.get("input"));
         }
@@ -97,6 +101,7 @@ public class ProjectManager {
         if(runTopicMap){
             topicMap = new TopicMappingModuleSpecs((JSONObject) projectSpec.get("mapTopics"));
         }
+        LogPrint.printCompleteStep();
     }
 
 }

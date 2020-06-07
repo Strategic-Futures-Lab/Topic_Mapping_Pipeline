@@ -38,9 +38,11 @@ public class ExportTopicModel {
     private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
     private JSONObject subTopicsMetadata;
 
-    public static void ExportTopicModel(TopicModelExportModuleSpecs exportSpecs){
+    public static String ExportTopicModel(TopicModelExportModuleSpecs exportSpecs){
 
         LogPrint.printModuleStart("Topic Model Export");
+
+        long startTime = System.currentTimeMillis();
 
         ExportTopicModel startClass = new ExportTopicModel();
         startClass.ProcessArguments(exportSpecs);
@@ -49,7 +51,11 @@ public class ExportTopicModel {
         startClass.BuildModelData();
         startClass.SaveModel();
 
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
         LogPrint.printModuleEnd("Topic Model Export");
+
+        return "Model export: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
 
     }
 

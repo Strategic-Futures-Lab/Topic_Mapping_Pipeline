@@ -1,5 +1,7 @@
 package P4_Analysis.TopicClustering;
 
+import PY_Helper.LogPrint;
+
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -77,9 +79,11 @@ public class AgglomerativeClustering {
     }
 
     public static List<ClusterRow> PerformClustering(double[][] dissimilarityMatrix, LINKAGE_TYPE clusterType) {
-        System.out.println("Performing Clustering and Creating Linkage Table ...");
+        // System.out.println("Performing Clustering and Creating Linkage Table ...");
 
         CheckSimilarityMatrixValidity(dissimilarityMatrix);
+
+        LogPrint.printNewStep("Clustering and creating linkage table", 2);
 
         //Output in the Matlab-style linkage table
         List<ClusterRow> linkageTable = new ArrayList<>();
@@ -165,7 +169,8 @@ public class AgglomerativeClustering {
             escape++;
         }
 
-        System.out.println("Clustering and Linkage Table Creation Complete!");
+        // System.out.println("Clustering and Linkage Table Creation Complete!");
+        LogPrint.printCompleteStep();
         return linkageTable;
     }
 
@@ -217,16 +222,18 @@ public class AgglomerativeClustering {
     }
 
     private static void CheckSimilarityMatrixValidity(double[][] similarityMatrix) {
-        System.out.println("Checking similarity matrix for validity...");
+        // System.out.println("Checking similarity matrix for validity...");
+        LogPrint.printNewStep("Checking similarity matrix validity", 2);
         for(int y = 0; y < similarityMatrix.length; y++) {
             for(int x = 0; x < similarityMatrix.length; x++) {
                 if(similarityMatrix[x][y] != similarityMatrix[y][x]) {
-                    System.out.println("\n**********\nERROR IN SIMILARITY MATRIX!\n**********\nSimilarity matrix is not symmetrical as [x][y] != [y][x] at location x: " + x + " | y: " + y);
+                    LogPrint.printNoteError("Error in similarity matrix, not symmetrical at location x: "+x+"; y: "+y);
+                    // System.out.println("\n**********\nERROR IN SIMILARITY MATRIX!\n**********\nSimilarity matrix is not symmetrical as [x][y] != [y][x] at location x: " + x + " | y: " + y);
                     System.exit(1);
                 }
             }
         }
-
-        System.out.println("Similarity matrix is valid!");
+        LogPrint.printCompleteStep();
+        // System.out.println("Similarity matrix is valid!");
     }
 }

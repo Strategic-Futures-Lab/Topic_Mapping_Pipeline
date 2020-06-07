@@ -121,12 +121,11 @@ public class JSONIOWrapper {
         JSONParser parser = new JSONParser();
         try (FileReader file = new FileReader(filename)){
             root = (JSONObject) parser.parse(file);
+            LogPrint.printCompleteStep();
         }
         catch (IOException | ParseException e){
+            LogPrint.printNoteError("Error while loading "+filename);
             e.printStackTrace();
-        }
-        finally {
-            LogPrint.printCompleteStep();
         }
         return root;
     }
@@ -137,12 +136,12 @@ public class JSONIOWrapper {
             String str = obj.toJSONString();
             file.write(str);
             file.flush();
+
+            LogPrint.printCompleteStep();
         }
         catch(IOException e){
+            LogPrint.printNoteError("Error while saving "+filename);
             e.printStackTrace();
-        }
-        finally {
-            LogPrint.printCompleteStep();
         }
     }
 }

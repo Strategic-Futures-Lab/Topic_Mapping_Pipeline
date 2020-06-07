@@ -6,26 +6,40 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
 
 (function Main(){
 
+    function LOG(msg, depth){
+        let tab = "  ".repeat(depth);
+        console.log(tab+" - "+msg)
+    }
+
     let topicFile, mapFile, sizeId, isMain;
     let topicsData;
 
     function processArgs(){
+        LOG("processing arguments", 1)
         let args = process.argv.slice(2);
         topicFile = args[0];
         mapFile = args[1];
         isMain = (args[2] === "true")
         sizeId = args[3] || "";
+        LOG("mapping topics from "+topicFile+" to "+mapFile, 2);
     }
 
     function readTopics(){
-        console.log("reading topics");
+        LOG("reading topics", 1);
         topicsData = JSON.parse(fs.readFileSync(topicFile));
     }
 
-    function buildMap(topics){
-        console.log("generating hierarchy");
+    function buildMap(topics, depth=2){
+        if(topics.topics.length == 0){
+            LOG("Empty topic group, returning empty map", depth)
+            return {
+               "topics": [],
+               "bubbleMapBorder": []
+           }
+        }
+        LOG("generating hierarchy", depth);
         let hData = hierarchyData.make(topics, sizeId);
-        console.log("generating bubble map");
+        LOG("generating bubble map", depth);
         let sizeScale = d3.scaleLinear()
             .domain([1, d3.max(hierarchyData.getSizes(hData))])
             .range([5, 40]);
@@ -50,7 +64,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         let bordersData = bubbleTreeMap.getContour().filter(a =>{
             return a.strokeWidth > 0;
         });
-        console.log("building map data");
+        LOG("building map data", depth);
         let tmpTopics = bubblesData.map(d=>{
             return {
                 "topicId": d.data.topicData.topicId,
@@ -75,7 +89,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
 
     function saveMap(data){
         try{
-            console.log("saving map");
+            LOG("saving map data", 2);
             fs.writeFileSync(mapFile, JSON.stringify(data));
         } catch(err){
             console.error(err);
@@ -83,16 +97,17 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
     }
 
     function buildMainMap(){
-        console.log("Building main map");
+        LOG("building main map", 1);
         let mapData = buildMap(topicsData);
         saveMap(mapData);
     }
 
     function buildSubMap(){
-        console.log("Building sub maps");
+        LOG("building sub maps", 1);
         let mapsArray = [];
         for(let group of topicsData.subTopicGroups){
-            let mapData = buildMap(group);
+            LOG("building sub map "+group.mainTopicId, 2)
+            let mapData = buildMap(group, 3);
             mapsArray.push({
                 "subMap": mapData,
                 "mainTopicId": group.mainTopicId
@@ -102,16 +117,15 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
     }
 
     function start(){
-        console.log("Node JS - starting");
+        LOG("Node JS - starting", 0);
         processArgs();
-        console.log("mapping topics from "+topicFile+" to "+mapFile);
         readTopics();
         if(isMain){
             buildMainMap();
         } else {
             buildSubMap();
         }
-        console.log("Node JS - finished!");
+        LOG("Node JS - finished", 0);
     }
 
     start();

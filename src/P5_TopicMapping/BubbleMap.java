@@ -1,7 +1,9 @@
 package P5_TopicMapping;
 
 import P0_Project.TopicMappingModuleSpecs;
+import PY_Helper.LogPrint;
 import PY_Helper.OSValidator;
+import org.apache.commons.logging.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,21 +19,26 @@ public class BubbleMap {
     private String subTopicsFile;
     private String subOutput;
 
-    public static void MapTopics(TopicMappingModuleSpecs mapSpecs){
-        System.out.println( "**********************************************************\n" +
-                            "* STARTING Bubble Map !                                  *\n" +
-                            "**********************************************************\n");
+    public static String MapTopics(TopicMappingModuleSpecs mapSpecs){
+
+        LogPrint.printModuleStart("Bubble map");
+
+        long startTime = System.currentTimeMillis();
 
         BubbleMap startClass = new BubbleMap();
         startClass.ProcessArguments(mapSpecs);
         startClass.StartMapping();
 
-        System.out.println( "**********************************************************\n" +
-                            "* Bubble Map Complete !                                  *\n" +
-                            "**********************************************************\n");
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
+        LogPrint.printModuleEnd("Bubble map");
+
+        return "Topic mapping (bubbles): "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
+
     }
 
     private void ProcessArguments(TopicMappingModuleSpecs mapSpecs){
+        LogPrint.printNewStep("Processing arguments", 0);
         mainTopicsFile = mapSpecs.mainTopics;
         mainOutput = mapSpecs.mainOutput;
         mapType = mapSpecs.mapType;
@@ -41,6 +48,9 @@ public class BubbleMap {
             subTopicsFile = mapSpecs.subTopics;
             subOutput = mapSpecs.subOutput;
         }
+        LogPrint.printCompleteStep();
+        if(mapSubTopics) LogPrint.printNote("Mapping sub topics");
+        LogPrint.printNote("Using "+bubbleSize+" distribution for bubble sizes");
     }
 
     private void StartMapping(){
@@ -80,22 +90,22 @@ public class BubbleMap {
             processBuilder.command("cmd.exe", "/c", "node js_scripts\\bubbleMap\\index.js "+args);
         }
         try {
-            System.out.println("Calling Node JS ...");
+            LogPrint.printNewStep("Calling Node JS", 0);
             Process process = processBuilder.start();
             // StringBuilder output = new StringBuilder();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
                 // output.append(line + "\n");
-                System.out.println(line);
+                LogPrint.printExternalStep(line, 1);
             }
             int exitVal = process.waitFor();
             if (exitVal == 0) {
                 // System.out.println(output);
-                System.out.println("Node JS Finished!");
+                // System.out.println("Node JS Finished!");
                 // System.exit(0);
             } else {
-                System.out.println("Node JS Failed!");
+                LogPrint.printNoteError("Node JS failed");
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

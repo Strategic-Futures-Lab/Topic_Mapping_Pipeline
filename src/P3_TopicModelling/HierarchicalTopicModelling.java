@@ -4,6 +4,7 @@ import P0_Project.TopicModelModuleSpecs;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import PX_Data.DocIOWrapper;
 import PX_Data.TopicIOWrapper;
+import PY_Helper.LogPrint;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
@@ -24,10 +25,11 @@ public class HierarchicalTopicModelling {
 
     private TopicModelModuleSpecs specs;
 
-    public static void HierarchicalModel(TopicModelModuleSpecs specs){
-        System.out.println( "**********************************************************\n" +
-                            "* STARTING Hierarchical Topic Modelling !                *\n" +
-                            "**********************************************************\n");
+    public static String HierarchicalModel(TopicModelModuleSpecs specs){
+
+        LogPrint.printModuleStart("Hierarchical topic modelling");
+
+        long startTime = System.currentTimeMillis();
 
         HierarchicalTopicModelling startClass = new HierarchicalTopicModelling();
         startClass.specs = specs;
@@ -37,15 +39,21 @@ public class HierarchicalTopicModelling {
         startClass.MergeDocuments();
         startClass.SaveTopics();
 
-        System.out.println( "**********************************************************\n" +
-                            "* Hierarchical Topic Modelling COMPLETE !                *\n" +
-                            "**********************************************************\n");
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
+        LogPrint.printModuleEnd("Hierarchical topic modelling");
+
+        return "Hierarchical topic modelling: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
     private void RunModels(){
+        LogPrint.printSubModuleStart("Lemma reader");
         Lemmas = new LemmaReader(specs.lemmas);
+        LogPrint.printSubModuleStart("Main model");
         MainTopicModel = TopicModelling.Model(specs, specs.mainModel, Lemmas);
+        LogPrint.printSubModuleStart("Sub model");
         SubTopicModel = TopicModelling.Model(specs, specs.subModel, Lemmas);
+        LogPrint.printSubModuleEnd();
     }
 
     private void GetAndSetModelSimilarity(){
@@ -65,7 +73,7 @@ public class HierarchicalTopicModelling {
         HashMap<Integer, HashMap<Integer, Double>> assignment = new HashMap<>();
 //        HashMap<String, ArrayList<String>> superSubGroups = new HashMap<>();
 
-        System.out.println("Calculating Hierarchy Assignments ...");
+        LogPrint.printNewStep("Calculating hierarchy assignments", 0);
         for (int sT = 0; sT < SimilarityMatrix.length; sT++) {
             double[] currentRow = SimilarityMatrix[sT];
 
@@ -95,7 +103,7 @@ public class HierarchicalTopicModelling {
             }
             assignment.put(sT,assigns);
         }
-        System.out.println("Hierarchy Assignments Completed!");
+        LogPrint.printCompleteStep();
 
         if(specs.outputAssignment){
             SaveAssignment(assignment);
@@ -113,7 +121,7 @@ public class HierarchicalTopicModelling {
     }
 
     private void SaveSimilarityMatrix(){
-        System.out.println("Saving Model Similarity ...");
+        LogPrint.printNewStep("Saving model similarities", 0);
 
         File file = new File(specs.similarityOutput);
         CsvWriter writer = new CsvWriter();
@@ -134,15 +142,17 @@ public class HierarchicalTopicModelling {
                     appender.appendField(String.valueOf(SimilarityMatrix[sT][mT]));
                 appender.endLine();
             }
+            LogPrint.printCompleteStep();
         } catch (Exception e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
             e.printStackTrace();
         }
 
-        System.out.println("Model Similarity Saved!");
+        // System.out.println("Model Similarity Saved!");
     }
 
     private void SaveAssignment(HashMap<Integer, HashMap<Integer, Double>> assignment){
-        System.out.println("Saving Hierarchy Assignments ...");
+        LogPrint.printNewStep("Saving hierarchy assignments", 0);
 
         File file = new File(specs.assignmentOutput);
         CsvWriter writer = new CsvWriter();
@@ -166,19 +176,21 @@ public class HierarchicalTopicModelling {
                     skipFirstCol = true;
                 }
             }
+            LogPrint.printCompleteStep();
         } catch (Exception e) {
+            LogPrint.printNoteError("Error while saving hierarchy assignments\n");
             e.printStackTrace();
         }
 
-        System.out.println("Hierarchy Assignemnts Saved!");
+        // System.out.println("Hierarchy Assignemnts Saved!");
     }
 
     private void SaveTopics(){
-        System.out.println("Saving Main Topics ...");
+        // System.out.println("Saving Main Topics ...");
         MainTopicModel.SaveTopics();
-        System.out.println("Main Topics Saved!");
-        System.out.println("Saving Sub Topics ...");
+        // System.out.println("Main Topics Saved!");
+        // System.out.println("Saving Sub Topics ...");
         SubTopicModel.SaveTopics();
-        System.out.println("Sub Topics Saved!");
+        // System.out.println("Sub Topics Saved!");
     }
 }

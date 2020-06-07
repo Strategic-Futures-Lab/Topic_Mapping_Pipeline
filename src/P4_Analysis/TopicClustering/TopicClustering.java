@@ -3,6 +3,8 @@ package P4_Analysis.TopicClustering;
 import P0_Project.TopicClusterModuleSpecs;
 import PX_Data.JSONIOWrapper;
 import PX_Data.TopicIOWrapper;
+import PY_Helper.LogPrint;
+import org.apache.commons.logging.Log;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -28,12 +30,14 @@ public class TopicClustering {
         }
 
         public void addClusterIds(int nClusters){
+            LogPrint.printNewStep("Addeing cluster ids", 2);
             int linkageSplitHeight = linkageTable.size() - nClusters;
             if(linkageTable.size() > 0){
                 exploreLinkageNode(linkageTable.size()-1, 0, linkageSplitHeight);
             } else {
-                topics.get(0).setClusterId("0");
+                if(topics.size() > 0) topics.get(0).setClusterId("0");
             }
+            LogPrint.printCompleteStep();
         }
 
         private void exploreLinkageNode(int nodeIndex, int clusterNumber, int linkageSplitHeight){
@@ -96,10 +100,11 @@ public class TopicClustering {
     private TopicGroup mainTopicGroup;
     private HashMap<String, TopicGroup> subTopicGroups;
 
-    public static void Cluster(TopicClusterModuleSpecs clusterSpecs){
-        System.out.println( "**********************************************************\n" +
-                            "* STARTING Topic Cluster !                               *\n" +
-                            "**********************************************************\n");
+    public static String Cluster(TopicClusterModuleSpecs clusterSpecs){
+
+        LogPrint.printModuleStart("Topic cluster");
+
+        long startTime = System.currentTimeMillis();
 
         TopicClustering startClass = new TopicClustering();
         startClass.ProcessArguments(clusterSpecs);
@@ -110,12 +115,16 @@ public class TopicClustering {
         startClass.ClusterTopics();
         startClass.SaveClusters();
 
-        System.out.println( "**********************************************************\n" +
-                            "* Topic Cluster COMPLETE !                               *\n" +
-                            "**********************************************************\n");
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
+        LogPrint.printModuleEnd("Topic cluster");
+
+        return "Topic clustering: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
+
     }
 
     private void ProcessArguments(TopicClusterModuleSpecs clusterSpecs){
+        LogPrint.printNewStep("Processing arguments", 0);
         switch (clusterSpecs.linkageMethod){
             case "max":
                 linkageMethod = AgglomerativeClustering.LINKAGE_TYPE.MAX;
@@ -127,7 +136,7 @@ public class TopicClustering {
                 linkageMethod = AgglomerativeClustering.LINKAGE_TYPE.AVERAGE;
                 break;
             default:
-                System.out.println("Error: Linkage method provided not recognised!\nUse one of the following: min, max, or avg");
+                LogPrint.printNoteError("Error: Linkage method provided not recognised!\nUse one of the following: min, max, or avg\n");
                 System.exit(1);
         }
         mainTopicsFile = clusterSpecs.mainTopics;
@@ -138,10 +147,14 @@ public class TopicClustering {
             subTopicsFile = clusterSpecs.subTopics;
             subOutput = clusterSpecs.subOutput;
         }
+        LogPrint.printCompleteStep();
+        LogPrint.printNote("Producing "+mainNClusters+" clusters using "+linkageMethod+" linkage");
+        if(clusterSubTopics) LogPrint.printNote("Grouping sub topics");
     }
 
     private void LoadTopics(){
-        JSONObject input = JSONIOWrapper.LoadJSON(mainTopicsFile);
+        LogPrint.printNewStep("Loading data", 0);
+        JSONObject input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
         mainTopicsMetadata = (JSONObject) input.get("metadata");
         JSONArray topics = (JSONArray) input.get("topics");
         mainTopics = new ConcurrentHashMap<>();
@@ -151,7 +164,7 @@ public class TopicClustering {
         }
         mainSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("similarities"));
         if(clusterSubTopics){
-            input = JSONIOWrapper.LoadJSON(subTopicsFile);
+            input = JSONIOWrapper.LoadJSON(subTopicsFile, 1);
             subTopicsMetadata = (JSONObject) input.get("metadata");
             topics = (JSONArray) input.get("topics");
             subTopics = new ConcurrentHashMap<>();
@@ -161,11 +174,11 @@ public class TopicClustering {
             }
             subSimilarityMatrix = new SimilarityMatrix((JSONArray) input.get("similarities"));
         }
-        System.out.println("Topics Loaded!");
+        // System.out.println("Topics Loaded!");
     }
 
     private void GroupTopics(){
-        System.out.println("Grouping Topics ...");
+        LogPrint.printNewStep("Creating topic groups", 0);
         mainTopicGroup = new TopicGroup(mainTopics, mainSimilarityMatrix);
         if(clusterSubTopics){
             subTopicGroups = new HashMap<>();
@@ -190,20 +203,20 @@ public class TopicClustering {
                 subTopicGroups.put(mainTopic.getKey(), new TopicGroup(subs, subsSimilarities));
             }
         }
-        System.out.println("Topics Grouped!");
+        LogPrint.printCompleteStep();
     }
 
     private void ClusterTopics(){
-        System.out.println("Clustering Topics ...");
-        System.out.println("Clustering main topics");
+        LogPrint.printNewStep("Clustering topics", 0);
+        LogPrint.printNewStep("Clustering main topics", 1);
         clusterTopicGroup(mainTopicGroup, mainNClusters);
         if(clusterSubTopics){
             for(Map.Entry<String, TopicGroup> group: subTopicGroups.entrySet()){
-                System.out.println("Clustering sub-topics for main topic "+group.getKey());
+                LogPrint.printNewStep("Clustering sub topics for main topic "+group.getKey(), 1);
                 clusterTopicGroup(group.getValue(), 1);
             }
         }
-        System.out.println("Topics Clustered!");
+        // System.out.println("Topics Clustered!");
     }
 
     private void clusterTopicGroup(TopicGroup group, int nClusters){
@@ -212,10 +225,10 @@ public class TopicClustering {
     }
 
     private void SaveClusters(){
-        System.out.println("Saving Topic Clusters ...");
+        LogPrint.printNewStep("Saving topic clusters", 0);
         JSONObject main = mainTopicGroup.toJSON();
         main.put("metadata", mainTopicsMetadata);
-        JSONIOWrapper.SaveJSON(main, mainOutput);
+        JSONIOWrapper.SaveJSON(main, mainOutput, 1);
         if(clusterSubTopics){
             JSONObject root = new JSONObject();
             root.put("metadata", subTopicsMetadata);
@@ -226,8 +239,7 @@ public class TopicClustering {
                 groups.add(jsonGroup);
             }
             root.put("subTopicGroups", groups);
-            JSONIOWrapper.SaveJSON(root, subOutput);
+            JSONIOWrapper.SaveJSON(root, subOutput, 1);
         }
-        System.out.println("Topic Cluster Saved!");
     }
 }

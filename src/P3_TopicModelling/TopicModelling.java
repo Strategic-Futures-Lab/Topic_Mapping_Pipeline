@@ -5,6 +5,7 @@ import P0_Project.TopicModelModuleSpecs;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import P3_TopicModelling.TopicModelCore.*;
 import PX_Data.*;
+import PY_Helper.LogPrint;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
 import de.siegmar.fastcsv.writer.CsvAppender;
@@ -53,10 +54,11 @@ public class TopicModelling {
         return startClass;
     }
 
-    public static void SingleModel(TopicModelModuleSpecs specs){
-        System.out.println( "**********************************************************\n" +
-                            "* STARTING Topic Modelling !                             *\n" +
-                            "**********************************************************\n");
+    public static String SingleModel(TopicModelModuleSpecs specs){
+
+        LogPrint.printModuleStart("Simple topic modelling");
+
+        long startTime = System.currentTimeMillis();
 
         TopicModelling startClass = new TopicModelling();
         LemmaReader reader = new LemmaReader(specs.lemmas);
@@ -69,12 +71,15 @@ public class TopicModelling {
         startClass.SaveTopics();
         startClass.SaveDocuments(startClass.nTopics, -1);
 
-        System.out.println( "**********************************************************\n" +
-                            "* Topic Modelling COMPLETE !                             *\n" +
-                            "**********************************************************\n");
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
+        LogPrint.printModuleEnd("Simple topic modelling");
+
+        return "Simple topic modelling: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
     private void ProcessArguments(TopicModelModuleSpecs specs, ModelSpecs modelSpecs, LemmaReader reader){
+        LogPrint.printNewStep("Processing arguments", 0);
         outputDir = specs.outputDir;
         docOutput = specs.documentOutput;
 
@@ -90,25 +95,32 @@ public class TopicModelling {
             simOutput = modelSpecs.similarityOutput;
         }
         numWordId = modelSpecs.numWordId;
+        LogPrint.printCompleteStep();
+        LogPrint.printNote("Modelling "+nTopics+" topics in "+nIterations+" iterations");
+        LogPrint.printNote("Saving "+nWords+" words and "+nDocs+" docs");
+        if(modelSpecs.outputSimilarity){
+            LogPrint.printNote("Saving topic to topic similarity, identifying topics with "+numWordId+" labels");
+        }
     }
 
     private void AddLemmasToModel(){
-        System.out.println("Adding Lemmas to Model ...");
+        LogPrint.printNewStep("Adding lemmas to model", 0);
         for(int i = 0; i < Documents.size(); i++){
             DocumentList.add(null);
         }
         Documents.entrySet().forEach(this::addLemmaToModel);
+        LogPrint.printCompleteStep();
         if(skipCount > 0){
-            System.out.println("Skipped "+skipCount+" documents!!");
+            LogPrint.printNote("Skipped "+skipCount+" documents");
         }
-        System.out.println("Lemmas Added to Model!");
     }
 
     private void addLemmaToModel(Map.Entry<String, DocIOWrapper> entry){
         String key = entry.getKey();
         DocIOWrapper doc = entry.getValue();
         if(doc.getLemmaString() == null){
-            System.out.println("\n************\nERROR! Cannot find Lemmas.\n************\n");
+            LogPrint.printNoteError("Cannot find lemmas\n");
+            // System.out.println("\n************\nERROR! Cannot find Lemmas.\n************\n");
             System.exit(1);
         } else {
             if(doc.getLemmaString().length() > 0){
@@ -124,7 +136,8 @@ public class TopicModelling {
     }
 
     private void RunTopicModel(int number){
-        System.out.println("Starting Topic Modelling ...\nFollowing output from Mallet.");
+        LogPrint.printNewStep("Topic modelling", 0);
+        LogPrint.printNote("Following output from Mallet\n");
 
         tModel = new TopicModel(DocumentList);
         tModel.numTopics = nTopics;
@@ -139,17 +152,18 @@ public class TopicModelling {
         }
 
         if(tModel.topicDistributions == null || tModel.topicDistributions.isEmpty()){
-            System.out.println("Model "+number+" failed!\nTrying again...");
+            LogPrint.printNote("Model "+number+" failed! Trying again\n");
             RunTopicModel(number);
         } else {
-            System.out.println("Model "+number+" completed!");
+            LogPrint.printNote("Model "+number+" completed");
         }
 
-        System.out.println("Topic Modelling Complete!");
+        LogPrint.printNewStep("Topic modelling", 0);
+        LogPrint.printCompleteStep();
     }
 
     private void GetAndSetDocumentDistributions(){
-        System.out.println("Adding Topic Distributions to Documents ...");
+        LogPrint.printNewStep("Adding topic distributions to documents", 0);
 
         //If you change the first value to false, you get the actual number of words distributed to each topic from each document!
         double[][] distributions = tModel.model.getDocumentTopics(true, false);
@@ -161,11 +175,11 @@ public class TopicModelling {
             }
         }
 
-        System.out.println("Topic Distributions Added to Documents!");
+        LogPrint.printCompleteStep();
     }
 
     private void GetAndSetTopicDetails(){
-        System.out.println("Creating Topic Data ...");
+        LogPrint.printNewStep("Creating topic data", 0);
         Topics = new ConcurrentHashMap<>();
 
         ArrayList<TreeSet<IDSorter>> sortedWords = tModel.model.getSortedWords();
@@ -197,7 +211,7 @@ public class TopicModelling {
             Topics.put(Integer.toString(topic), new TopicIOWrapper(Integer.toString(topic), topic, topicWords, topicDocs));
         }
 
-        System.out.println("Topic Data Created!");
+        LogPrint.printCompleteStep();
     }
 
     private void GetAndSetTopicSimilarity(){
@@ -228,7 +242,7 @@ public class TopicModelling {
     }
 
     public void SaveSimilarityMatrix(){
-        System.out.println("Saving Topic Similarities ...");
+        LogPrint.printNewStep("Saving topic similarities", 0);
         File file = new File(simOutput);
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
@@ -246,14 +260,16 @@ public class TopicModelling {
                 }
                 appender.endLine();
             }
+            LogPrint.printCompleteStep();
         } catch (Exception e){
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
             e.printStackTrace();
         }
-        System.out.println("Topic Similarities Saved!");
+        // System.out.println("Topic Similarities Saved!");
     }
 
     public void SaveTopics(){
-        System.out.println("Saving Topics...");
+        // System.out.println("Saving Topics...");
         JSONObject root = new JSONObject();
         JSONArray topics = new JSONArray();
         JSONObject meta = (JSONObject) metadata.clone();
@@ -274,12 +290,12 @@ public class TopicModelling {
             topicsSimilarities.add(SimRow);
         }
         root.put("similarities", topicsSimilarities);
-        JSONIOWrapper.SaveJSON(root, topicOutput);
-        System.out.println("Topics Saved!");
+        JSONIOWrapper.SaveJSON(root, topicOutput, 0);
+        // System.out.println("Topics Saved!");
     }
 
     public void SaveDocuments(int nTopicsMain, int nTopicsSub){
-        System.out.println("Saving Documents...");
+        // System.out.println("Saving Documents...");
         JSONObject root = new JSONObject();
         JSONArray documents = new JSONArray();
         JSONObject meta = (JSONObject) metadata.clone();
@@ -296,7 +312,7 @@ public class TopicModelling {
             documents.add(entry.getValue().toJSON());
         }
         root.put("documents", documents);
-        JSONIOWrapper.SaveJSON(root, docOutput);
-        System.out.println("Documents Saved!");
+        JSONIOWrapper.SaveJSON(root, docOutput, 0);
+        // System.out.println("Documents Saved!");
     }
 }

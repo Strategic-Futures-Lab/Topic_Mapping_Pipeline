@@ -29,16 +29,22 @@ public class CSVInput {
     private HashMap<String, String> fields;
     private String outputFile;
 
-    public static void CSVInput(InputModuleSpecs inputSpecs){
+    public static String CSVInput(InputModuleSpecs inputSpecs){
 
         LogPrint.printModuleStart("CSV Input");
+
+        long startTime = System.currentTimeMillis();
 
         CSVInput startClass = new CSVInput();
         startClass.processSpecs(inputSpecs);
         startClass.LoadCSVFile();
         startClass.OutputJSON();
 
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
         LogPrint.printModuleEnd("CSV Input");
+
+        return "CSV Input: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
 
     }
 

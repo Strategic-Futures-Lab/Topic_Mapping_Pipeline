@@ -1,6 +1,7 @@
 package P3_TopicModelling.Similarity;
 
 import P3_TopicModelling.TopicModelCore.TopicData;
+import PY_Helper.LogPrint;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
@@ -17,7 +18,8 @@ public class TopicsSimilarity {
     }
 
     public static double[][] GetSimilarityMatrix(int sizeX, List<TopicData> topicModelX, int sizeY, List<TopicData> topicModelY){
-        System.out.println("Calculating Similarity Matrix "+sizeX+"x"+sizeY+" ...");
+        // System.out.println("Calculating Similarity Matrix "+sizeX+"x"+sizeY+" ...");
+        LogPrint.printNewStep("Calculating similarity matrix "+sizeX+"x"+sizeY, 0);
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
 
@@ -31,12 +33,13 @@ public class TopicsSimilarity {
                 try{
                     matrix[xTopic][yTopic] = Double.parseDouble(df.format(cosineSimilarity(topicVectorX[xTopic], topicVectorY[yTopic])));
                 } catch (Exception e){
-                    System.out.println("Error while calculating the topic to topic distance.");
+                    LogPrint.printNoteError("Error while calculating the topic to topic distance\n");
+                    System.out.println(e.getStackTrace());
                     System.exit(1);
                 }
             }
         }
-        System.out.println("Similarity Matrix Calculated!");
+        LogPrint.printCompleteStep();
         return matrix;
     }
 
