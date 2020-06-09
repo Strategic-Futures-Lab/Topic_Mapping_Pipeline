@@ -13,7 +13,8 @@
     "module": "CSV",
     "source": "files/projects/test/test.csv",
     "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract", "authors": "Authors", "money":  "Money"},
-    "output": "files/output/corpus.json"
+    "output": "files/output/corpus.json",
+    "wordsPerDoc" : 500
   },
   "lemmatise": {
     "corpus": "files/output/corpus.json",
