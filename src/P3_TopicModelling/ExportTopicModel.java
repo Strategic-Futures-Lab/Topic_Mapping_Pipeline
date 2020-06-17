@@ -158,6 +158,7 @@ public class ExportTopicModel {
                     for(String key: docFields){
                         d.addDataEntry(key, doc.getData(key));
                     }
+                    d.addDataEntry("wordCount", Integer.toString(doc.getNumLemmas()));
                 }
             }
         }

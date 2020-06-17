@@ -99,15 +99,13 @@ public class LabelIndexing {
                 if(Index.containsKey(label)){
                     if(isMain) Index.get(label).mainTopics.add(topicId);
                     else {
-                        Index.get(label).subTopics.add(topicId);
-                        Index.get(label).mainTopics.addAll(topic.getValue().getMainTopicIds());
+                        Index.get(label).subTopics.put(topicId, new HashSet<>(topic.getValue().getMainTopicIds()));
                     }
                 } else {
                     LabelIndexEntry entry = new LabelIndexEntry();
                     if(isMain) entry.mainTopics.add(topicId);
                     else {
-                        entry.subTopics.add(topicId);
-                        entry.mainTopics.addAll(topic.getValue().getMainTopicIds());
+                        entry.subTopics.put(topicId, new HashSet<>(topic.getValue().getMainTopicIds()));
                     }
                     Index.put(label, entry);
                 }
@@ -129,8 +127,13 @@ public class LabelIndexing {
             topicIds.put("mainTopics", mainTopicIds);
             if(indexSubTopics){
                 JSONArray subTopicIds = new JSONArray();
-                for(String id : indexEntry.subTopics){
-                    subTopicIds.add(id);
+                for(Map.Entry<String, Set<String>> subIds : indexEntry.subTopics.entrySet()){
+                    JSONArray subTopicId = new JSONArray();
+                    JSONArray subTopicMainIds = new JSONArray();
+                    subTopicMainIds.addAll(subIds.getValue());
+                    subTopicId.add(subIds.getKey());
+                    subTopicId.add(subTopicMainIds);
+                    subTopicIds.add(subTopicId);
                 }
                 topicIds.put("subTopics", subTopicIds);
             }

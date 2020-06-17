@@ -22,6 +22,9 @@ public class TopicMapping {
 
     public static void main(String[] args) {
         LogPrint.printModuleStart("Pipeline");
+
+        long startTime = System.currentTimeMillis();
+
         TopicMapping startClass = new TopicMapping();
         startClass.CheckArgs(args);
         startClass.LoadProject();
@@ -29,6 +32,11 @@ public class TopicMapping {
         for(String t: times){
             LogPrint.printNote(t);
         }
+
+        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+
+        LogPrint.printNote("Total: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
+
         LogPrint.printModuleEnd("Pipeline");
     }
 
