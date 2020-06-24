@@ -25,15 +25,16 @@ public class TopicMappingModuleSpecs {
      * Constructor: reads the specification from the "mapTopics" entry in the project file
      * @param specs JSON object attached to "mapTopics"
      */
-    public TopicMappingModuleSpecs(JSONObject specs){
-        mainTopics = (String) specs.get("mainTopics");
-        mainOutput = (String) specs.get("mainOutput");
+    public TopicMappingModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
+        mainTopics = metaSpecs.getDataDir() + (String) specs.get("mainTopics");
+        mainOutput = metaSpecs.getOutputDir() + (String) specs.get("mainOutput");
         mapType = (String) specs.getOrDefault("linkageMethod", "bubble"); // bubble | hex
         bubbleSize = (String) specs.getOrDefault("bubbleSize", "-");
         subTopics = (String) specs.getOrDefault("subTopics", "");
-        mapSubTopics = subTopics.length() > 0;
+        mapSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(mapSubTopics){
-            subOutput = (String) specs.get("subOutput");
+            subTopics = metaSpecs.getDataDir() + subTopics;
+            subOutput = metaSpecs.getOutputDir() + (String) specs.get("subOutput");
         }
     }
 }

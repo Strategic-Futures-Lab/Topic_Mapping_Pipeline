@@ -20,10 +20,13 @@ public class LabelIndexModuleSpecs {
      * Constructor: reads the specification from the "indexLabels" entry in the project file
      * @param specs JSON object attached to "indexLabels"
      */
-    public LabelIndexModuleSpecs(JSONObject specs) {
-        mainTopics = (String) specs.get("mainTopics");
-        indexOutput = (String) specs.get("output");
+    public LabelIndexModuleSpecs(JSONObject specs, MetaSpecs metaSpecs) {
+        mainTopics = metaSpecs.getDataDir() + (String) specs.get("mainTopics");
+        indexOutput = metaSpecs.getOutputDir() + (String) specs.get("output");
         subTopics = (String) specs.getOrDefault("subTopics", "");
-        indexSubTopics = subTopics.length() > 0;
+        indexSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
+        if(indexSubTopics){
+            subTopics = metaSpecs.getDataDir() + subTopics;
+        }
     }
 }

@@ -27,10 +27,13 @@ public class DistribSpecs {
      * Constructor: reads the specification from a JSON object passed from TopicDistribModuleSpecs
      * @param specs JSON object where specifications are written
      */
-    public DistribSpecs(JSONObject specs){
+    public DistribSpecs(JSONObject specs, MetaSpecs metaSpecs){
         fieldName = (String) specs.getOrDefault("fieldName", "");
         fieldSeparator = (String) specs.getOrDefault("fieldSeparator", "");
         output = (String) specs.getOrDefault("output", "");
+        if(output.length() > 0){
+            output = metaSpecs.getOutputDir() + output;
+        }
         topPerTopic = Math.toIntExact((long) specs.getOrDefault("topPerTopic", (long) -1));
         valueField = (String) specs.getOrDefault("valueField", "");
     }

@@ -124,6 +124,7 @@ public class HierarchicalTopicModelling {
         LogPrint.printNewStep("Saving model similarities", 0);
 
         File file = new File(specs.similarityOutput);
+        file.getParentFile().mkdirs();
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
 
@@ -155,6 +156,7 @@ public class HierarchicalTopicModelling {
         LogPrint.printNewStep("Saving hierarchy assignments", 0);
 
         File file = new File(specs.assignmentOutput);
+        file.getParentFile().mkdirs();
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
 

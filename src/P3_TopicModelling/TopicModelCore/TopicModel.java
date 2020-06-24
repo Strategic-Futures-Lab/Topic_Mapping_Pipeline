@@ -54,7 +54,9 @@ public class TopicModel implements Serializable {
             //Save all data in mallet style
             try
             {
-                FileWriter writer = new FileWriter(rotLoc + File.separator + "modelCorpus.txt");
+                File file = new File(rotLoc+File.separator+"modelCorpus.txt");
+                file.getParentFile().mkdirs();
+                FileWriter writer = new FileWriter(file);
 
                 int count = 0;
                 for (Document entry : documents)

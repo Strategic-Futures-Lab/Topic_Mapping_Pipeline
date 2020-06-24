@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -100,10 +101,13 @@ public class JSONIOWrapper {
 
     public static void SaveJSON(JSONObject obj, String filename){
         System.out.println("Saving "+filename+" ...");
-        try (FileWriter file = new FileWriter(filename)){
+        try {
+            File file = new File(filename);
+            file.getParentFile().mkdirs();
+            FileWriter writer = new FileWriter(file);
             String str = obj.toJSONString();
-            file.write(str);
-            file.flush();
+            writer.write(str);
+            writer.flush();
         }
         catch(IOException e){
             e.printStackTrace();
@@ -132,10 +136,13 @@ public class JSONIOWrapper {
 
     public static void SaveJSON(JSONObject obj, String filename, int depth){
         LogPrint.printNewStep("Saving "+filename, depth);
-        try (FileWriter file = new FileWriter(filename)){
+        try {
+            File file = new File(filename);
+            file.getParentFile().mkdirs();
+            FileWriter writer = new FileWriter(file);
             String str = obj.toJSONString();
-            file.write(str);
-            file.flush();
+            writer.write(str);
+            writer.flush();
 
             LogPrint.printCompleteStep();
         }

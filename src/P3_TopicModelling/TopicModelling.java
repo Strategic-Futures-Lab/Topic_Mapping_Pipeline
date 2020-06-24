@@ -80,7 +80,7 @@ public class TopicModelling {
 
     private void ProcessArguments(TopicModelModuleSpecs specs, ModelSpecs modelSpecs, LemmaReader reader){
         LogPrint.printNewStep("Processing arguments", 0);
-        outputDir = specs.outputDir;
+        outputDir = specs.dataDir;
         docOutput = specs.documentOutput;
 
         Documents = reader.getDocuments();
@@ -244,6 +244,7 @@ public class TopicModelling {
     public void SaveSimilarityMatrix(){
         LogPrint.printNewStep("Saving topic similarities", 0);
         File file = new File(simOutput);
+        file.getParentFile().mkdirs();
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
         try(CsvAppender appender = writer.append(file, StandardCharsets.UTF_8)){

@@ -26,10 +26,10 @@ public class InputModuleSpecs{
      * Constructor: reads the specification from the "input" entry in the project file
      * @param specs JSON object attached to "input"
      */
-    public InputModuleSpecs(JSONObject specs){
+    public InputModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         module = (String) specs.get("module");
-        source = (String) specs.get("source");
+        source = metaSpecs.getSourceDir() + (String) specs.get("source");
         fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));
-        output = (String) specs.get("output");
+        output = metaSpecs.getDataDir() + (String) specs.get("output");
     }
 }

@@ -93,9 +93,9 @@ public class TopicMapping {
     }
 
     private void RunModel(){
-        if(projectManager.model.module.equals("simple")){
+        if(projectManager.model.modelType.equals("simple")){
             times.add(TopicModelling.SingleModel(projectManager.model));
-        } else if(projectManager.model.module.equals("hierarchical")){
+        } else if(projectManager.model.modelType.equals("hierarchical")){
             times.add(HierarchicalTopicModelling.HierarchicalModel(projectManager.model));
         }
 

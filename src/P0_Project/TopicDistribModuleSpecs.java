@@ -32,18 +32,19 @@ public class TopicDistribModuleSpecs {
      * Constructor: reads the specification from the "distributeTopics" entry in the project file
      * @param specs JSON object attached to "distributeTopics"
      */
-    public TopicDistribModuleSpecs(JSONObject specs){
-        documents = (String) specs.get("documents");
-        mainTopics = (String) specs.get("mainTopics");
-        mainOutput = (String) specs.get("mainOutput");
+    public TopicDistribModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
+        documents = metaSpecs.getDataDir() + (String) specs.get("documents");
+        mainTopics = metaSpecs.getDataDir() + (String) specs.get("mainTopics");
+        mainOutput = metaSpecs.getDataDir() + (String) specs.get("mainOutput");
         subTopics = (String) specs.getOrDefault("subTopics", "");
-        distributeSubTopics = subTopics.length() > 0;
+        distributeSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(distributeSubTopics){
-            subOutput = (String) specs.get("subOutput");
+            subTopics = metaSpecs.getDataDir() + subTopics;
+            subOutput = metaSpecs.getDataDir() + (String) specs.get("subOutput");
         }
         fields = new ArrayList<>();
         for(JSONObject field: JSONIOWrapper.getJSONObjectArray((JSONArray) specs.get("distributions"))){
-            fields.add(new DistribSpecs(field));
+            fields.add(new DistribSpecs(field, metaSpecs));
         };
     }
 
