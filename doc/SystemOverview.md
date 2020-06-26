@@ -51,9 +51,11 @@ The ***project file*** is a JSON data file containing the specifications for the
   "input": { ... },             // specs for input module
   "lemmatise": { ... },         // specs for lemmatise module
   "model": { ... },             // specs for model module
+  "exportTopicModel": { ... },  // specs for the topic model export module
   "indexLabels": { ... },       // specs for label index module
   "distributeTopics": { ... },  // specs for topic distribution module
-  "clusterTopics": { ... }      // spces for topic cluster module
+  "clusterTopics": { ... }      // specs for topic cluster module
+  "mapTopics": { ... }          // specs for the topic mapping module
 }
 ```
 
