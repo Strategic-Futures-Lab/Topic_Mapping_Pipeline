@@ -2,15 +2,17 @@
 # Documentation Index
 - [Getting Started](GettingStarted.md)
 - [System Overview](SystemOverview.md)
+- [Meta-Parameters](MetaParameters.md)
 - Modules
     - [Input](InputModule.md)
     - [Lemmatise](LemmatiseModule.md)
     - [Topic Model](ModelModule.md)
+        - [Export Topic Model](ExportModule.md)
     - Analysis
         - [Label Indexing](LabelIndexModule.md)
-        - [Topic Distribution](TopicDistribution.md)
-        - [Topic Clustering](TopicClustering.md)
-    - Mapping (TBD)
+        - [Topic Distribution](TopicDistributionModule.md)
+        - [Topic Clustering](TopicClusteringModule.md)
+    - [Topic Mapping](TopicMapping.md)
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International

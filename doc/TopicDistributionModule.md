@@ -1,7 +1,7 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 # Topic Distribution Module
 
-The Topic Distribution module is the fifth module of the Topic Mapping pipeline, and second in the `P4_Analysis` 
+The Topic Distribution module is the sixth module of the Topic Mapping pipeline, and second in the `P4_Analysis` 
 package. It reads the topic weights in documents to get customized topic distribution across document fields, e.g.
 authors, organisations, years, etc. It then saves this information either in the ***Topic JSON files***, or in separate
 ***Distribution JSON file***.
@@ -39,6 +39,8 @@ Where:
 - `subOutput` is the path to the topics JSON file generated from distributing the sub topics, it is only required if
 `subTopics` has been specified;
 - `distributions` list the specifications for each distribution to perform.
+
+Note that sub-topics won't be distributed if the meta-parameter `modelType` is set to `simple`.
 
 The Topic Distribution module allows for multiple distributions to be calculated simultaneously. Each distribution
 is specified using an object in the `distributions` field shown above. A distribution specification has the following
@@ -144,7 +146,7 @@ set to `-1`).
 
 ---
 
-[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](TopicClustering.md)
+[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](TopicClusteringModule.md)
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International

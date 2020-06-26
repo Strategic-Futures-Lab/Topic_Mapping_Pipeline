@@ -38,19 +38,19 @@
     "modelType": "hierarchical",
     "dataDir": "topicModel/",
     "mainModel": {
-      "topics": 20,
+      "topics": 5,
       "words": 10,
-      "docs": 20,
-      "iterations": 50,
+      "docs": 10,
+      "iterations": 100,
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
       "numWordId": 5
     },
     "subModel": {
-      "topics": 30,
+      "topics": 10,
       "words": 10,
-      "docs": 20,
-      "iterations": 50,
+      "docs": 10,
+      "iterations": 100,
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
       "numWordId": 5
@@ -58,7 +58,7 @@
     "documentOutput": "documents.json",
     "hierarchy": {
       "modelSimOutput": "modelSim.csv",
-      "maxAssign": 2,
+      "maxAssign": 1,
       "assignmentOutput": "assignment.csv"
     }
   },
@@ -74,8 +74,11 @@
     "numWordId": 5
   },
   "indexLabels": {
+    "documents": "topicModel/documents.json",
     "mainTopics": "topicModel/mainTopics.json",
     "subTopics": "topicModel/subTopics.json",
+    "useAllDocuments": false,
+    "useAllLabels": false,
     "output": "labelIndex.json"
   },
   "distributeTopics": {
@@ -106,7 +109,9 @@
     "subTopics": "subTopics_cluster.json",
     "mapType": "bubble",
     "bubbleSize": "-",
+    "bubbleScale": [10, 40],
     "mainOutput": "mainMap.json",
-    "subOutput": "subMaps.json"
+    "subOutput": "subMaps.json",
+    "nodeCommand": "nodejs"
   }
 }

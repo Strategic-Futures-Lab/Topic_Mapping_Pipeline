@@ -23,11 +23,14 @@ There are 6 modules developed at the moment, running in the following order:
 2) ***Lemmatise*** (`P2_Lemmatise` package) reading the corpus, lemmatising it, and generating a lemma JSON file;
 3) ***Model*** (`P3_TopicModelling` package) reading the lemmas, generating topic models (including hierarchical ones)
 and saving the topic and document data in JSON files;
-4) ***Label Index*** (`P4_Analysis.LabelIndex` package) reading the topic data and generating an index of their labels;
-5) ***Topic Distribution*** (`P4_Analysis.TopicDistribution` package) reading the topic and document data to calculate
+4) ***Export Model*** (`P3_TopicModelling` package) reading the model data outputs and generating concise model JSON 
+files, as well as complete CSV files;
+5) ***Label Index*** (`P4_Analysis.LabelIndex` package) reading the topic data and generating an index of their labels;
+6) ***Topic Distribution*** (`P4_Analysis.TopicDistribution` package) reading the topic and document data to calculate
 the distribtution of topics over specific the documents (including per field and/or using specific values);
-6) ***Topic Clustering*** (`P4_Analysis.TopicClustering` package) reading the topic data and generating groups of
-sub topics and hierarchical clusters of topics.
+7) ***Topic Clustering*** (`P4_Analysis.TopicClustering` package) reading the topic data and generating groups of
+sub topics and hierarchical clusters of topics;
+8) ***Topic Mapping*** (`P5_TopicMapping` package) reading the clustered topic data and generating the map data.
 
 ## Project File
 
@@ -38,10 +41,13 @@ The ***project file*** is a JSON data file containing the specifications for the
     "input": true,
     "lemmatise": true,
     "model": true,
+    "exportTopicModel": true,
     "indexLabels": true,
     "distributeTopics": true,
-    "clusterTopics": true
+    "clusterTopics": true,
+    "mapTopics": true
   },
+  "metaParameters": { ... },    // Parameters completing / overwriting module-level specs
   "input": { ... },             // specs for input module
   "lemmatise": { ... },         // specs for lemmatise module
   "model": { ... },             // specs for model module
@@ -54,12 +60,15 @@ The ***project file*** is a JSON data file containing the specifications for the
 The `run` object is mandatory and should be complete, i.e. each module should be set to either `true` (run) or `false`
 (don't run).
 
-The other object are only necessary if the respective module should be run (the project manager won't read them if not
+The `metaParameter` object contains project-wide specification (as opposed to module-level ones) that will complete or 
+sometimes overwrite the module-level specifications.
+
+The other objects are only necessary if the respective module should be run (the project manager won't read them if not
 necessary). 
 
 ---
 
-[< Previous](GettingStarted.md) | [Index](index.md) | [Next >](InputModule.md)
+[< Previous](GettingStarted.md) | [Index](index.md) | [Next >](MetaParameters.md)
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International

@@ -30,7 +30,7 @@ Where:
 lemmatised);
 - `docFields` lists, in the `docData` object of each document, which attributes should be kept after the lemmatising
 process (e.g. to be analysed later on, or to be printed on an interface, etc.), this list is optional and is set to
-empty (`[]`) by default;
+empty (`[]`) by default, this list gets overwritten by the `docFields` metaparameter (if set);
 - `stopWords` lists the labels that should be removed from the documents (after lemmatisation), e.g. if these labels are
 too generic, this list is optional and is set to empty (`[]`) by default;
 - `minLemma` is the minimum number of lemmas a document should have to be kept for the modelling process, i.e. documents

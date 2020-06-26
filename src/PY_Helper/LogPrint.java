@@ -88,7 +88,7 @@ public class LogPrint {
     }
 
     public static void printSubModuleEnd(){
-        System.out.print(ConsoleColors.BLUE+"\n====================="+ConsoleColors.RESET);
+        System.out.print(ConsoleColors.BLUE+"\n|====================="+ConsoleColors.RESET);
     }
 
     public static void printModuleEnd(String moduleName){

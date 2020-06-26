@@ -17,7 +17,7 @@ public class JSONIOWrapper {
     public static int[] getIntArray(JSONArray array){
         int[] res = new int[array.size()];
         for(int i = 0; i < array.size(); i++)
-            res[i] = (int) array.get(i);
+            res[i] = Math.toIntExact((long) array.get(i));
         return res;
     }
 
