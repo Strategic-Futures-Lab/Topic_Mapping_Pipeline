@@ -28,13 +28,15 @@ public class LemmatiseModuleSpecs {
      * Constructor: reads the specification from the "lemmatise" entry in the project file
      * @param specs JSON object attached to "lemmatise"
      */
-    public LemmatiseModuleSpecs(JSONObject specs){
-        corpus = (String) specs.get("corpus");
+    public LemmatiseModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
+        corpus = metaSpecs.getDataDir() + (String) specs.get("corpus");
         textFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("textFields"));
-        docFields = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
+        docFields = metaSpecs.useMetaDocFields() ?
+                metaSpecs.docFields :
+                JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         stopWords = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopWords", new JSONArray()));
         minLemmas = Math.toIntExact((long) specs.getOrDefault("minLemmas", (long) 1));
         removeLowCounts = Math.toIntExact((long) specs.getOrDefault("removeLowCounts", (long) 0));
-        output = (String) specs.get("output");
+        output = metaSpecs.getDataDir() + (String) specs.get("output");
     }
 }

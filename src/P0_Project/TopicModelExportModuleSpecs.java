@@ -37,20 +37,29 @@ public class TopicModelExportModuleSpecs {
      * Constructor: reads the specification from the "mapTopics" entry in the project file
      * @param specs JSON object attached to "mapTopics"
      */
-    public TopicModelExportModuleSpecs(JSONObject specs){
-        mainTopics = (String) specs.get("mainTopics");
-        mainOutput = (String) specs.get("mainOutput");
+    public TopicModelExportModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
+        mainTopics = metaSpecs.getDataDir() + (String) specs.get("mainTopics");
+        mainOutput = metaSpecs.getOutputDir() + (String) specs.get("mainOutput");
         mainOutputCSV = (String) specs.getOrDefault("mainOutputCSV", "");
         exportMainTopicsCSV = mainOutputCSV.length() > 0;
+        if(exportMainTopicsCSV){
+            mainOutputCSV = metaSpecs.getOutputDir() + mainOutputCSV;
+        }
         subTopics = (String) specs.getOrDefault("subTopics", "");
-        exportSubTopics = subTopics.length() > 0;
+        exportSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(exportSubTopics){
-            subOutput = (String) specs.get("subOutput");
+            subTopics = metaSpecs.getDataDir() + subTopics;
+            subOutput = metaSpecs.getOutputDir() + (String) specs.get("subOutput");
             subOutputCSV = (String) specs.getOrDefault("subOutputCSV", "");
             exportSubTopicsCSV = subOutputCSV.length() > 0;
+            if(exportSubTopicsCSV){
+                subOutputCSV = metaSpecs.getOutputDir() + subOutputCSV;
+            }
         }
-        documents = (String) specs.get("documents");
-        docFields = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
+        documents = metaSpecs.getDataDir() + (String) specs.get("documents");
+        docFields = metaSpecs.useMetaDocFields() ?
+                metaSpecs.docFields :
+                JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
     }
 }

@@ -15,9 +15,12 @@ public class BubbleMap {
     private String mainOutput;
     private String mapType;
     private String bubbleSize;
+    private String bubbleScale;
     private boolean mapSubTopics;
     private String subTopicsFile;
     private String subOutput;
+
+    private String nodeCommand;
 
     public static String MapTopics(TopicMappingModuleSpecs mapSpecs){
 
@@ -43,28 +46,32 @@ public class BubbleMap {
         mainOutput = mapSpecs.mainOutput;
         mapType = mapSpecs.mapType;
         bubbleSize = mapSpecs.bubbleSize;
+        bubbleScale = "["+mapSpecs.bubbleScale[0]+","+mapSpecs.bubbleScale[1]+"]";
         mapSubTopics = mapSpecs.mapSubTopics;
         if(mapSubTopics){
             subTopicsFile = mapSpecs.subTopics;
             subOutput = mapSpecs.subOutput;
         }
+        nodeCommand = mapSpecs.nodeCommand;
         LogPrint.printCompleteStep();
         if(mapSubTopics) LogPrint.printNote("Mapping sub topics");
         LogPrint.printNote("Using "+bubbleSize+" distribution for bubble sizes");
+        LogPrint.printNote("Using "+bubbleScale+" scale for bubble sizes");
+        LogPrint.printNote("Using node command: "+nodeCommand);
     }
 
     private void StartMapping(){
-        String[] args = new String[4];
+        String[] args = new String[5];
         args[0] = mainTopicsFile;
         args[1] = mainOutput;
         args[2] = "true";
         args[3] = bubbleSize;
+        args[4] = bubbleScale;
         callNodeJS(args);
         if(mapSubTopics){
             args[0] = subTopicsFile;
             args[1] = subOutput;
             args[2] = "false";
-            args[3] = bubbleSize;
             callNodeJS(args);
         }
     }
@@ -85,9 +92,9 @@ public class BubbleMap {
         String args = String.join(" ", arguments);
         ProcessBuilder processBuilder = new ProcessBuilder();
         if(OSValidator.isMac() || OSValidator.isUnix()){
-            processBuilder.command("bash", "-c", "node js_scripts/bubbleMap/index.js "+args);
+            processBuilder.command("bash", "-c", nodeCommand+" js_scripts/bubbleMap/index.js "+args);
         } else if(OSValidator.isWindows()){
-            processBuilder.command("cmd.exe", "/c", "node js_scripts\\bubbleMap\\index.js "+args);
+            processBuilder.command("cmd.exe", "/c", nodeCommand+" js_scripts\\bubbleMap\\index.js "+args);
         }
         try {
             LogPrint.printNewStep("Calling Node JS", 0);

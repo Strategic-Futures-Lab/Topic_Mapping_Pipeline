@@ -27,15 +27,16 @@ public class TopicClusterModuleSpecs {
      * Constructor: reads the specification from the "clusterTopics" entry in the project file
      * @param specs JSON object attached to "clusterTopics"
      */
-    public TopicClusterModuleSpecs(JSONObject specs){
-        mainTopics = (String) specs.get("mainTopics");
-        mainOutput = (String) specs.get("mainOutput");
+    public TopicClusterModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
+        mainTopics = metaSpecs.getDataDir() + (String) specs.get("mainTopics");
+        mainOutput = metaSpecs.getDataDir() + (String) specs.get("mainOutput");
         linkageMethod = (String) specs.getOrDefault("linkageMethod", "avg"); // max | min | avg
         clusters = Math.toIntExact((long) specs.getOrDefault("clusters", (long) 1));
         subTopics = (String) specs.getOrDefault("subTopics", "");
-        clusterSubTopics = subTopics.length() > 0;
+        clusterSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(clusterSubTopics){
-            subOutput = (String) specs.get("subOutput");
+            subTopics = metaSpecs.getDataDir() + subTopics;
+            subOutput = metaSpecs.getDataDir() + (String) specs.get("subOutput");
         }
     }
 }

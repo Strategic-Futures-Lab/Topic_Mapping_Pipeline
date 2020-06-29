@@ -11,6 +11,8 @@ import org.json.simple.JSONObject;
  */
 public class ProjectManager {
 
+    /** Project meta-parameters */
+    public MetaSpecs metaSpecs;
     /** If Input module should run */
     public boolean runInput;
     /** Input module specifications */
@@ -51,6 +53,7 @@ public class ProjectManager {
     public ProjectManager(String projectFile){
         JSONObject projectSpec = JSONIOWrapper.LoadJSON(projectFile, 0);
         getRuns((JSONObject) projectSpec.get("run"));
+        getMetaSpecs((JSONObject) projectSpec.getOrDefault("metaParameters", new JSONObject()));
         getSpecs(projectSpec);
     }
 
@@ -71,6 +74,12 @@ public class ProjectManager {
         LogPrint.printCompleteStep();
     }
 
+    private void getMetaSpecs(JSONObject specs){
+        LogPrint.printNewStep("Getting project's meta-parameters", 0);
+        metaSpecs = new MetaSpecs(specs);
+        LogPrint.printCompleteStep();
+    }
+
     /**
      * Sets up the different module specs instances needed (only for modules to be run)
      * @param projectSpec JSON object from the project file, specific module entries are then distributed
@@ -78,28 +87,28 @@ public class ProjectManager {
     private void getSpecs(JSONObject projectSpec){
         LogPrint.printNewStep("Getting modules parameters", 0);
         if(runInput){
-            input = new InputModuleSpecs((JSONObject) projectSpec.get("input"));
+            input = new InputModuleSpecs((JSONObject) projectSpec.get("input"), metaSpecs);
         }
         if(runLemmatise){
-            lemmatise = new LemmatiseModuleSpecs((JSONObject) projectSpec.get("lemmatise"));
+            lemmatise = new LemmatiseModuleSpecs((JSONObject) projectSpec.get("lemmatise"), metaSpecs);
         }
         if(runModel){
-            model = new TopicModelModuleSpecs((JSONObject) projectSpec.get("model"));
+            model = new TopicModelModuleSpecs((JSONObject) projectSpec.get("model"), metaSpecs);
         }
         if(runTopicModelExport){
-            topicModelExport = new TopicModelExportModuleSpecs((JSONObject) projectSpec.get("exportTopicModel"));
+            topicModelExport = new TopicModelExportModuleSpecs((JSONObject) projectSpec.get("exportTopicModel"), metaSpecs);
         }
         if(runLabelIndex){
-            labelIndex = new LabelIndexModuleSpecs((JSONObject) projectSpec.get("indexLabels"));
+            labelIndex = new LabelIndexModuleSpecs((JSONObject) projectSpec.get("indexLabels"), metaSpecs);
         }
         if(runTopicDistrib){
-            topicDistrib = new TopicDistribModuleSpecs((JSONObject) projectSpec.get("distributeTopics"));
+            topicDistrib = new TopicDistribModuleSpecs((JSONObject) projectSpec.get("distributeTopics"), metaSpecs);
         }
         if(runTopicCluster){
-            topicCluster = new TopicClusterModuleSpecs((JSONObject) projectSpec.get("clusterTopics"));
+            topicCluster = new TopicClusterModuleSpecs((JSONObject) projectSpec.get("clusterTopics"), metaSpecs);
         }
         if(runTopicMap){
-            topicMap = new TopicMappingModuleSpecs((JSONObject) projectSpec.get("mapTopics"));
+            topicMap = new TopicMappingModuleSpecs((JSONObject) projectSpec.get("mapTopics"), metaSpecs);
         }
         LogPrint.printCompleteStep();
     }

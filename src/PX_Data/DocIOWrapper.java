@@ -5,9 +5,7 @@ import org.json.simple.JSONObject;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Wrapper class to store document data and write JSON files
@@ -200,7 +198,12 @@ public class DocIOWrapper {
      * @return lemmas list
      */
     public List<String> getLemmas(){
-        return lemmas;
+        if(lemmas != null){
+            return lemmas;
+        } else if(lemmaString != null){
+            return Arrays.asList(lemmaString.split(" "));
+        }
+        return new ArrayList<>();
     }
 
     /**
@@ -335,6 +338,7 @@ public class DocIOWrapper {
             root.put("numLemmas", numLemmas);
             JSONArray topicDistrib = getDistribJSON(mainTopicDistribution);
             root.put("mainTopicDistribution", topicDistrib);
+            root.put("lemmas", lemmaString);
             if(subTopicDistribution != null){
                 topicDistrib = getDistribJSON(subTopicDistribution);
                 root.put("subTopicDistribution", topicDistrib);

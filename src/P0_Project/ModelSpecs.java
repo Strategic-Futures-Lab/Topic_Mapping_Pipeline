@@ -29,18 +29,18 @@ public class ModelSpecs {
     /**
      * Constructor: reads the specification from a JSON object passed from TopicModelModuleSpecs
      * @param specs JSON object where specifications are written
-     * @param outputDir Output directory name to attach to filenames
+     * @param dataDir Output directory name to attach to filenames
      */
-    public ModelSpecs(JSONObject specs, String outputDir){
+    public ModelSpecs(JSONObject specs, String dataDir){
         topics = Math.toIntExact((long) specs.get("topics"));
         words = Math.toIntExact((long) specs.getOrDefault("words", (long) 20));
         docs = Math.toIntExact((long) specs.getOrDefault("docs", (long) 20));
         iterations = Math.toIntExact((long) specs.getOrDefault("iterations", (long) 1000));
-        topicOutput = outputDir + (String) specs.get("topicOutput");
+        topicOutput = dataDir + (String) specs.get("topicOutput");
         similarityOutput = (String) specs.getOrDefault("topicSimOutput", "");
         if(!similarityOutput.equals("")){
             outputSimilarity = true;
-            similarityOutput = outputDir+similarityOutput;
+            similarityOutput = dataDir + similarityOutput;
         }
         numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
     }

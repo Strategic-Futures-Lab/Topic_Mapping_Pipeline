@@ -11,7 +11,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         console.log(tab+" - "+msg)
     }
 
-    let topicFile, mapFile, sizeId, isMain;
+    let topicFile, mapFile, sizeId, sizeScale, isMain;
     let topicsData;
 
     function processArgs(){
@@ -21,6 +21,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         mapFile = args[1];
         isMain = (args[2] === "true")
         sizeId = args[3] || "";
+        sizeScale = JSON.parse(args[4]) || [5,40];
         LOG("mapping topics from "+topicFile+" to "+mapFile, 2);
     }
 
@@ -40,11 +41,12 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         LOG("generating hierarchy", depth);
         let hData = hierarchyData.make(topics, sizeId);
         LOG("generating bubble map", depth);
-        let sizeScale = d3.scaleLinear()
+        console.log(sizeScale)
+        let bubbleSizeScale = d3.scaleLinear()
             .domain([1, d3.max(hierarchyData.getSizes(hData))])
-            .range([5, 40]);
+            .range(sizeScale);
         let root = d3.hierarchy(hData)
-            .sum(d => sizeScale(d.size))
+            .sum(d => bubbleSizeScale(d.size))
             .sort((a, b) => {return b.value - a.value});
 
         let bubbleTreeMap = bubbletreemap()

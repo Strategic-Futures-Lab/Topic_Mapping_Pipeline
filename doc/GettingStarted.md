@@ -14,6 +14,9 @@ to add them to the project structure in your IDE:
 - `stanford-corenlp-3.9.2.jar` and `stanford-corenlp-3.9.2-models.jar` for lemmatising text;
 - `mallet.jar` and `mallet-deps.jar` for modelling topics.
 
+Finally, some modules will call [NodeJS](https://nodejs.org/en/) as some modules are written in JavaScript, you should
+therefore make sure you have installed it on your system.
+
 ---
 
 [Index](index.md) | [Next >](SystemOverview.md)
