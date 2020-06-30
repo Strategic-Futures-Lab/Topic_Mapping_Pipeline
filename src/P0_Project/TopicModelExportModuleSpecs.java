@@ -25,6 +25,10 @@ public class TopicModelExportModuleSpecs {
     public String subOutputCSV;
     /** Flag for exporting sub model as CSV, defaults to false if subTopics = "" and subOutputCSV = "" */
     public boolean exportSubTopicsCSV;
+    /** Filename for the CSV merged topic model file generated, optional, defaults to "" */
+    public String outputCSV;
+    /** Flag for exporting merged model as CSV, defaults to false if outputCSV = "" */
+    public boolean exportMergedTopicsCSV;
     /** Filename to the document data (from Topic Model Module) */
     public String documents;
     /** List of fields in docData to keep, optional, defaults to empty  */
@@ -55,6 +59,11 @@ public class TopicModelExportModuleSpecs {
             if(exportSubTopicsCSV){
                 subOutputCSV = metaSpecs.getOutputDir() + subOutputCSV;
             }
+        }
+        outputCSV = (String) specs.getOrDefault("outputCSV", "");
+        exportMergedTopicsCSV = outputCSV.length() > 0;
+        if(exportMergedTopicsCSV){
+            outputCSV = metaSpecs.getOutputDir() + outputCSV;
         }
         documents = metaSpecs.getDataDir() + (String) specs.get("documents");
         docFields = metaSpecs.useMetaDocFields() ?

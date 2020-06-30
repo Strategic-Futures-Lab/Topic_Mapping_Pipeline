@@ -27,6 +27,8 @@ public class ExportTopicModel {
     private String subOutput;
     private boolean exportSubTopicsCSV = false;
     private String subOutputCSV;
+    private boolean exportMergedTopicsCSV = false;
+    private String outputCSV;
     private String documentsFile;
     private List<String> docFields;
     private int numWordId;
@@ -75,6 +77,10 @@ public class ExportTopicModel {
             if(exportSubTopicsCSV){
                 subOutputCSV = exportSpecs.subOutputCSV;
             }
+        }
+        exportMergedTopicsCSV = exportSpecs.exportMergedTopicsCSV;
+        if(exportMergedTopicsCSV){
+            outputCSV = exportSpecs.outputCSV;
         }
         documentsFile = exportSpecs.documents;
         docFields = Arrays.asList(exportSpecs.docFields);
@@ -196,25 +202,29 @@ public class ExportTopicModel {
 
     private void SaveCSV(){
         if(exportMainTopicsCSV) {
-            saveCSV(mainOutputCSV, mainTopics);
+            saveCSV(mainOutputCSV, mainTopics, true);
         }
         if(exportSubTopicsCSV){
-            saveCSV(subOutputCSV, subTopics);
+            saveCSV(subOutputCSV, subTopics, false);
+        }
+        if(exportMergedTopicsCSV){
+            saveMergedTopicsCSV();
         }
     }
 
-    private void saveCSV(String filename, ConcurrentHashMap<String, TopicIOWrapper> topics){
+    private void saveCSV(String filename, ConcurrentHashMap<String, TopicIOWrapper> topics, boolean isMain){
         LogPrint.printNewStep("Saving "+filename, 1);
-        String[] mainTopicsLabels = new String[topics.size()];
+        String[] topicsLabels = new String[topics.size()];
         for (Map.Entry<String, TopicIOWrapper> t : topics.entrySet()) {
-            mainTopicsLabels[t.getValue().getIndex()] = t.getValue().getLabelString(numWordId);
+            String prefix = isMain ? "_mainTopic_" : "_subTopic_";
+            topicsLabels[t.getValue().getIndex()] = prefix+t.getValue().getLabelString(numWordId);
         }
         File file = new File(filename);
         file.getParentFile().mkdirs();
         CsvWriter csvWriter = new CsvWriter();
         csvWriter.setAlwaysDelimitText(true);
         try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){
-            createHeader(csvAppender, mainTopicsLabels);
+            createHeader(csvAppender, topicsLabels);
             for(Map.Entry<String, DocIOWrapper> d: documents.entrySet()){
                 DocIOWrapper doc = d.getValue();
                 csvAppender.appendField(doc.getId());
@@ -225,7 +235,8 @@ public class ExportTopicModel {
                 csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
                 csvAppender.appendField(doc.getRemoveReason());
                 if(!doc.isRemoved()){
-                    for(double weight: doc.getMainTopicDistribution()){
+                    double[] weights = isMain ? doc.getMainTopicDistribution() : doc.getSubTopicDistribution();
+                    for(double weight: weights){
                         csvAppender.appendField(Double.toString(weight));
                     }
                 }
@@ -246,9 +257,54 @@ public class ExportTopicModel {
         appender.appendField("_inModel");
         appender.appendField("_whyRemoved");
         for(String l:topicLabels){
-            appender.appendField("_topic_"+l);
+            appender.appendField(l);
         }
         appender.endLine();
+    }
+
+    private void saveMergedTopicsCSV(){
+        LogPrint.printNewStep("Saving "+outputCSV, 1);
+        String[] topicsLabels = new String[mainTopics.size()+subTopics.size()];
+        for (Map.Entry<String, TopicIOWrapper> t : mainTopics.entrySet()) {
+            topicsLabels[t.getValue().getIndex()] = "_mainTopic_"+t.getValue().getLabelString(numWordId);
+        }
+        if(exportSubTopics){
+            int offset = mainTopics.size();
+            for (Map.Entry<String, TopicIOWrapper> t : subTopics.entrySet()) {
+                topicsLabels[t.getValue().getIndex()+offset] = "_subTopic_"+t.getValue().getLabelString(numWordId);
+            }
+        }
+        File file = new File(outputCSV);
+        file.getParentFile().mkdirs();
+        CsvWriter csvWriter = new CsvWriter();
+        csvWriter.setAlwaysDelimitText(true);
+        try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){
+            createHeader(csvAppender, topicsLabels);
+            for(Map.Entry<String, DocIOWrapper> d: documents.entrySet()){
+                DocIOWrapper doc = d.getValue();
+                csvAppender.appendField(doc.getId());
+                for(String f: docFields){
+                    csvAppender.appendField(doc.getData(f));
+                }
+                csvAppender.appendField(Integer.toString(doc.getNumLemmas()));
+                csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
+                csvAppender.appendField(doc.getRemoveReason());
+                if(!doc.isRemoved()){
+                    for(double weight: doc.getMainTopicDistribution()){
+                        csvAppender.appendField(Double.toString(weight));
+                    }
+                    if(exportSubTopics){
+                        for(double weight: doc.getSubTopicDistribution()){
+                            csvAppender.appendField(Double.toString(weight));
+                        }
+                    }
+                }
+                csvAppender.endLine();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        LogPrint.printCompleteStep();
     }
 
 }

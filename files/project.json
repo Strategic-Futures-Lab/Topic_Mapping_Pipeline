@@ -71,6 +71,7 @@
     "subOutput": "subModel.json",
     "mainOutputCSV": "mainModel.csv",
     "subOutputCSV": "subModel.csv",
+    "outputCSV": "models.csv",
     "numWordId": 5
   },
   "indexLabels": {
