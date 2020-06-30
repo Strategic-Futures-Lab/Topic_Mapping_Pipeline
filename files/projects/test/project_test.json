@@ -15,7 +15,7 @@
     "dataDir": "output/tmp/",
     "outputDir": "output/",
     "modelType": "hierarchical",
-    "docFields": ["title", "university", "money", "authors", "date"]
+    "docFields": ["title", "abstract", "university", "money", "authors", "date"]
   },
   "input": {
     "module": "CSV",
@@ -27,9 +27,9 @@
   "lemmatise": {
     "corpus": "corpus.json",
     "textFields": ["title", "abstract"],
-    "docFields": ["title", "university", "money", "authors", "date"],
+    "docFields": [],
     "stopWords": [],
-    "minLemmas": 10,
+    "minLemmas": 20,
     "removeLowCounts": 0,
     "output": "lemmas.json"
   },
@@ -38,19 +38,19 @@
     "modelType": "hierarchical",
     "dataDir": "topicModel/",
     "mainModel": {
-      "topics": 20,
-      "words": 30,
-      "docs": 50,
-      "iterations": 100,
+      "topics": 10,
+      "words": 20,
+      "docs": 30,
+      "iterations": 1000,
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
       "numWordId": 5
     },
     "subModel": {
       "topics": 50,
-      "words": 30,
-      "docs": 50,
-      "iterations": 100,
+      "words": 20,
+      "docs": 30,
+      "iterations": 1000,
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
       "numWordId": 5
@@ -66,7 +66,7 @@
     "mainTopics": "topicModel/mainTopics.json",
     "subTopics": "topicModel/subTopics.json",
     "documents": "topicModel/documents.json",
-    "docFields": ["title", "university", "money", "authors", "date"],
+    "docFields": [],
     "mainOutput": "mainModel.json",
     "subOutput": "subModel.json",
     "mainOutputCSV": "mainModel.csv",

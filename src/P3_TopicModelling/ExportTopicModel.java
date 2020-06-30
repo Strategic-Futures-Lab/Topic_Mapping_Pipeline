@@ -238,15 +238,15 @@ public class ExportTopicModel {
     }
 
     private void createHeader(CsvAppender appender, String[] topicLabels) throws IOException{
-        appender.appendField("docId");
+        appender.appendField("_docId");
         for(String f: docFields){
             appender.appendField(f);
         }
-        appender.appendField("wordCount");
-        appender.appendField("includedInModel");
-        appender.appendField("reasonForRemoval");
+        appender.appendField("_wordCount");
+        appender.appendField("_inModel");
+        appender.appendField("_whyRemoved");
         for(String l:topicLabels){
-            appender.appendField(l);
+            appender.appendField("_topic_"+l);
         }
         appender.endLine();
     }
