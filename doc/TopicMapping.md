@@ -51,6 +51,7 @@ If you are setting the `mapType` to `bubble`, here are the additional specificat
     ...
     "bubbleSize": "-",
     "bubbleScale": [5, 40],
+    "targetSize": [1000,1000],
     "nodeCommand": "node"
   },
 ...}
@@ -64,6 +65,8 @@ specified;
 - `bubbleScale` lets you customise the lower and upper boundaries of the bubble size scale, it is optional and defaults
 to `[5,40]` meaning 5 pixels minimum radius (size 1 in the data) and 40 pixels maximum radius (maximum size in the 
 data);
+- `targetSize` lets you customise the target width and height of the bubble map, it is optional and defaults
+to `[1000,1000]` meaning 1000 pixels width (first) and 1000 pixels height (second);
 - `nodeCommand` lets you adjust the command used to invoke NodeJS: by default the command `node` will be used, but some
 system have NodeJS linked to the command `nodejs`.
 

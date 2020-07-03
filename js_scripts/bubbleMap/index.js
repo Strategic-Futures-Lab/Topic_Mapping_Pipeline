@@ -11,7 +11,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         console.log(tab+" - "+msg)
     }
 
-    let topicFile, mapFile, sizeId, sizeScale, isMain;
+    let topicFile, mapFile, sizeId, sizeScale, isMain, targetSize;
     let topicsData;
 
     function processArgs(){
@@ -22,6 +22,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         isMain = (args[2] === "true")
         sizeId = args[3] || "";
         sizeScale = JSON.parse(args[4]) || [5,40];
+        targetSize = JSON.parse(args[5]) || [1000,1000];
         LOG("mapping topics from "+topicFile+" to "+mapFile, 2);
     }
 
@@ -53,8 +54,8 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
             .padding(1)
             .curvature(8)
             .hierarchyRoot(root)
-            .width(1000)
-            .height(1000);
+            .width(targetSize[0])
+            .height(targetSize[1]);
 
         let bubbleMapData = bubbleTreeMap
             .doLayout()

@@ -18,6 +18,8 @@ public class TopicMappingModuleSpecs {
     public String bubbleSize;
     /** Bubble scale boundaries, only for bubble map, optional, defaults to [5, 40] */
     public int[] bubbleScale; // = new int[]{5, 40};
+    /** Target size for the map, only for bubble map, optional, defaults to [1000, 1000] */
+    public int[] targetSize; // = new int[]{5, 40};
     /** Filename to sub topic data (from Topic Model module), optional, defaults to "" */
     public String subTopics;
     /** Flag for mapping sub topics, defaults to false if subTopics = "" */
@@ -39,6 +41,9 @@ public class TopicMappingModuleSpecs {
         bubbleScale = specs.containsKey("bubbleScale") ?
                 JSONIOWrapper.getIntArray((JSONArray) specs.get("bubbleScale")) :
                 new int[]{5,40};
+        targetSize = specs.containsKey("targetSize") ?
+                JSONIOWrapper.getIntArray((JSONArray) specs.get("targetSize")) :
+                new int[]{1000,1000};
         subTopics = (String) specs.getOrDefault("subTopics", "");
         mapSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(mapSubTopics){

@@ -16,6 +16,7 @@ public class BubbleMap {
     private String mapType;
     private String bubbleSize;
     private String bubbleScale;
+    private String targetSize;
     private boolean mapSubTopics;
     private String subTopicsFile;
     private String subOutput;
@@ -47,6 +48,7 @@ public class BubbleMap {
         mapType = mapSpecs.mapType;
         bubbleSize = mapSpecs.bubbleSize;
         bubbleScale = "["+mapSpecs.bubbleScale[0]+","+mapSpecs.bubbleScale[1]+"]";
+        targetSize = "["+mapSpecs.targetSize[0]+","+mapSpecs.targetSize[1]+"]";
         mapSubTopics = mapSpecs.mapSubTopics;
         if(mapSubTopics){
             subTopicsFile = mapSpecs.subTopics;
@@ -67,6 +69,7 @@ public class BubbleMap {
         args[2] = "true";
         args[3] = bubbleSize;
         args[4] = bubbleScale;
+        args[5] = targetSize;
         callNodeJS(args);
         if(mapSubTopics){
             args[0] = subTopicsFile;
