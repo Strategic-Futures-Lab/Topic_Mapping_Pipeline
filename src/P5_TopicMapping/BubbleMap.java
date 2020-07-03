@@ -63,7 +63,7 @@ public class BubbleMap {
     }
 
     private void StartMapping(){
-        String[] args = new String[5];
+        String[] args = new String[6];
         args[0] = mainTopicsFile;
         args[1] = mainOutput;
         args[2] = "true";
