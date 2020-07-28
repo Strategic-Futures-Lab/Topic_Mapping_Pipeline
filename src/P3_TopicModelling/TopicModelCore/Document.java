@@ -1,6 +1,8 @@
 package P3_TopicModelling.TopicModelCore;
 
-public class Document {
+import java.io.Serializable;
+
+public class Document implements Serializable {
     public String ID, Lemma;
 
     public Document(String ID, String Lemma){

@@ -29,6 +29,10 @@ public class ProjectManager {
     public boolean runTopicModelExport;
     /** Topic Model Export module specifications */
     public TopicModelExportModuleSpecs topicModelExport;
+    /** If Document Infer module should run */
+    public boolean runDocumentInfer;
+    /** Document Infer module specifications */
+    public DocumentInferModuleSpecs documentInfer;
     /** If Index Label module should run */
     public boolean runLabelIndex;
     /** Label Index module specifications */
@@ -67,6 +71,7 @@ public class ProjectManager {
         runLemmatise = (boolean) specs.get("lemmatise");
         runModel = (boolean) specs.get("model");
         runTopicModelExport = (boolean) specs.get("exportTopicModel");
+        runDocumentInfer = (boolean) specs.get("inferDocuments");
         runLabelIndex = (boolean) specs.get("indexLabels");
         runTopicDistrib = (boolean) specs.get("distributeTopics");
         runTopicCluster = (boolean) specs.get("clusterTopics");
@@ -97,6 +102,9 @@ public class ProjectManager {
         }
         if(runTopicModelExport){
             topicModelExport = new TopicModelExportModuleSpecs((JSONObject) projectSpec.get("exportTopicModel"), metaSpecs);
+        }
+        if(runDocumentInfer){
+            documentInfer = new DocumentInferModuleSpecs((JSONObject) projectSpec.get("inferDocuments"), metaSpecs);
         }
         if(runLabelIndex){
             labelIndex = new LabelIndexModuleSpecs((JSONObject) projectSpec.get("indexLabels"), metaSpecs);

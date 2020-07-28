@@ -14,6 +14,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +40,8 @@ public class TopicModelling {
     private int nWords;
     private int nDocs;
     private int nIterations;
+    private String name;
+    private boolean serialise;
     private String outputDir;
     private String docOutput;
     private String topicOutput;
@@ -47,7 +52,7 @@ public class TopicModelling {
         TopicModelling startClass = new TopicModelling();
         startClass.ProcessArguments(specs, modelSpecs, reader);
         startClass.AddLemmasToModel();
-        startClass.RunTopicModel(0);
+        startClass.RunTopicModel();
         startClass.GetAndSetDocumentDistributions();
         startClass.GetAndSetTopicDetails();
         startClass.GetAndSetTopicSimilarity();
@@ -64,7 +69,7 @@ public class TopicModelling {
         LemmaReader reader = new LemmaReader(specs.lemmas);
         startClass.ProcessArguments(specs, specs.mainModel, reader);
         startClass.AddLemmasToModel();
-        startClass.RunTopicModel(0);
+        startClass.RunTopicModel();
         startClass.GetAndSetDocumentDistributions();
         startClass.GetAndSetTopicDetails();
         startClass.GetAndSetTopicSimilarity();
@@ -90,6 +95,8 @@ public class TopicModelling {
         nWords = modelSpecs.words;
         nDocs = modelSpecs.docs;
         nIterations = modelSpecs.iterations;
+        name = modelSpecs.serialiseName;
+        serialise = modelSpecs.serialise;
         topicOutput = modelSpecs.topicOutput;
         if(modelSpecs.outputSimilarity){
             simOutput = modelSpecs.similarityOutput;
@@ -100,6 +107,9 @@ public class TopicModelling {
         LogPrint.printNote("Saving "+nWords+" words and "+nDocs+" docs");
         if(modelSpecs.outputSimilarity){
             LogPrint.printNote("Saving topic to topic similarity, identifying topics with "+numWordId+" labels");
+        }
+        if(serialise){
+            LogPrint.printNote("Serialising model with name "+name);
         }
     }
 
@@ -135,31 +145,52 @@ public class TopicModelling {
         }
     }
 
+    private void RunTopicModel(){
+        this.RunTopicModel(0);
+    }
+
     private void RunTopicModel(int number){
         LogPrint.printNewStep("Topic modelling", 0);
         LogPrint.printNote("Following output from Mallet\n");
 
         tModel = new TopicModel(DocumentList);
         tModel.numTopics = nTopics;
-        tModel.name = "topicModelNum"+number;
+        tModel.name = name+number;
         tModel.SEED = RANDOM_SEEDS[number];
         tModel.ITER = nIterations;
 
-        if(number == 0){
-            tModel.Model(false, true, outputDir);
-        } else {
-            tModel.Model(false, false, outputDir);
-        }
+        tModel.Model(false, true, outputDir);
 
         if(tModel.topicDistributions == null || tModel.topicDistributions.isEmpty()){
             LogPrint.printNote("Model "+number+" failed! Trying again\n");
             RunTopicModel(number);
         } else {
-            LogPrint.printNote("Model "+number+" completed");
+            LogPrint.printNote("Model "+name+number+" completed");
         }
 
         LogPrint.printNewStep("Topic modelling", 0);
         LogPrint.printCompleteStep();
+
+        if(serialise){
+            serialiseModel(number);
+        }
+    }
+
+    private void serialiseModel(int number){
+        LogPrint.printNewStep("Serialising model", 0);
+        try{
+            FileOutputStream fileOut = new FileOutputStream(outputDir + name + number + ".ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(tModel);
+            out.close();
+            fileOut.close();
+
+            LogPrint.printCompleteStep();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error: Could not serialize data!");
+            LogPrint.printNoteError(e.getMessage());
+            System.exit(1);
+        }
     }
 
     private void GetAndSetDocumentDistributions(){

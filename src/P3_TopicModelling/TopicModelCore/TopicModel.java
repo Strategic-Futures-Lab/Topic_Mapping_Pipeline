@@ -1,6 +1,7 @@
 package P3_TopicModelling.TopicModelCore;
 
 import P2_Lemmatise.Lemmatizer.StanfordLemmatizer;
+import PY_Helper.LogPrint;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.SerialPipes;
@@ -46,23 +47,18 @@ public class TopicModel implements Serializable {
 
     public void Model(boolean serialiseModel, boolean recreateCorpus) { Model(serialiseModel, recreateCorpus, "output"); }
 
-    public void Model(boolean serialiseModel, boolean recreateCorpus, String rotLoc)
-    {
+    public void Model(boolean serialiseModel, boolean recreateCorpus, String rotLoc){
 
-        if(recreateCorpus)
-        {
+        if(recreateCorpus) {
             //Save all data in mallet style
-            try
-            {
+            try {
                 File file = new File(rotLoc+File.separator+"modelCorpus.txt");
                 file.getParentFile().mkdirs();
                 FileWriter writer = new FileWriter(file);
 
                 int count = 0;
-                for (Document entry : documents)
-                {
-                    if(entry != null)
-                    {
+                for (Document entry : documents) {
+                    if(entry != null) {
                         writer.write(entry.ID + "\ten\t" + entry.Lemma + "\r\n");
                         numIDtoStringID.add(entry.ID);
                         stringIDtoNumID.put(entry.ID, count);
@@ -71,8 +67,7 @@ public class TopicModel implements Serializable {
                 }
 
                 writer.close();
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 System.out.println("Could not write file: " + e.getMessage());
                 System.exit(1);
             }
@@ -275,7 +270,8 @@ public class TopicModel implements Serializable {
             // Serialising all information to allow inferring of new documents
             try
             {
-                System.out.println("Serialising model...");
+                LogPrint.printNewStep("Serialising model "+name, 0);
+
                 FileOutputStream fileOut = new FileOutputStream(rotLoc + name + "_pipeList_" + numTopics + ".ser");
                 ObjectOutputStream out = new ObjectOutputStream(fileOut);
                 out.writeObject(pipeList);
@@ -311,10 +307,11 @@ public class TopicModel implements Serializable {
                 out.writeObject(topics);
                 out.close();
                 fileOut.close();
-            } catch (IOException e)
-            {
-                System.out.println("Error: Could not serialize data!");
-                System.out.println(e.getMessage());
+
+                LogPrint.printCompleteStep();
+            } catch (IOException e) {
+                LogPrint.printNoteError("Error: Could not serialize data!");
+                LogPrint.printNoteError(e.getMessage());
                 System.exit(1);
             }
         }
@@ -358,6 +355,31 @@ public class TopicModel implements Serializable {
             System.exit(1);
         }*/
 
+    }
+
+    public double[] InferTopics(String lemmatisedText, int iterations){
+
+        double[] newProbabilities;
+
+        try {
+            //Create new instance from the pipeline we already have to ensure the same things happens to it, then load our extra document
+            InstanceList newInstance = new InstanceList(instances.getPipe());
+            newInstance.addThruPipe(new Instance(lemmatisedText, null, "infer", null));
+
+            TopicInferencer inferencer = model.getInferencer();
+
+            //Uses Gibbs sampling to infer a topic distribution from the new instance (document)
+            //In the form of: (instance, numInterations, thinning, burnIn)
+            inferencer.setRandomSeed(20);
+            newProbabilities = inferencer.getSampledDistribution(newInstance.get(0), iterations, 1, 5);    // 100000, 1, 5
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            System.err.println(e.getCause());
+            return new double[0];
+        }
+
+        return newProbabilities;
     }
 
     public double[] InferTopics(String UID, String text, StanfordLemmatizer slem, boolean serverProcess){

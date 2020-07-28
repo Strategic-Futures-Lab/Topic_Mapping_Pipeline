@@ -3,6 +3,7 @@ import P1_Input.PDFInput;
 import P2_Lemmatise.Lemmatise;
 import P0_Project.ProjectManager;
 import P3_TopicModelling.HierarchicalTopicModelling;
+import P3_TopicModelling.InferDocuments;
 import P3_TopicModelling.TopicModelling;
 import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
@@ -63,6 +64,9 @@ public class TopicMapping {
         if(projectManager.runTopicModelExport){
             this.RunExport();
         }
+        if(projectManager.runDocumentInfer){
+            this.RunDocumentInference();
+        }
         if(projectManager.runLabelIndex){
             this.RunLabelIndex();
         }
@@ -103,6 +107,10 @@ public class TopicMapping {
 
     private void RunExport(){
         times.add(ExportTopicModel.ExportTopicModel(projectManager.topicModelExport));
+    }
+
+    private void RunDocumentInference(){
+        times.add(InferDocuments.InferDocuments(projectManager.documentInfer));
     }
 
     private void RunLabelIndex(){

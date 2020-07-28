@@ -15,6 +15,10 @@ public class ModelSpecs {
     public int docs;
     /** Number of iteration for Gibbs Sampling, optional, defaults to 1000 */
     public int iterations;
+    /** Name of topic model when serialising (used if documents inferred from this model later), optional, defaults to "" (no serialisation) */
+    public String serialiseName = "";
+    /** Flag for serialising model, defaults to false if serialiseName = "" */
+    public boolean serialise = false;
     /** Filename for the JSON topic file generated, not including directory */
     public String topicOutput;
     /** Filename for the CSV similarity file, not including directory:
@@ -36,6 +40,8 @@ public class ModelSpecs {
         words = Math.toIntExact((long) specs.getOrDefault("words", (long) 20));
         docs = Math.toIntExact((long) specs.getOrDefault("docs", (long) 20));
         iterations = Math.toIntExact((long) specs.getOrDefault("iterations", (long) 1000));
+        serialiseName = (String) specs.getOrDefault("serialiseName", "");
+        serialise = !serialiseName.equals("");
         topicOutput = dataDir + (String) specs.get("topicOutput");
         similarityOutput = (String) specs.getOrDefault("topicSimOutput", "");
         if(!similarityOutput.equals("")){

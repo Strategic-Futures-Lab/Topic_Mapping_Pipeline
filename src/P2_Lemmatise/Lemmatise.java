@@ -17,7 +17,7 @@ public class Lemmatise {
     private ConcurrentHashMap<String, DocIOWrapper> Documents;
     private int docsProcessed = 0;
     private int totalDocs = 0;
-    private long startTime;
+    private long lemStartTime;
     private StanfordLemmatizer slem;
     private List<String> lowCounts;
 
@@ -100,7 +100,7 @@ public class Lemmatise {
         LogPrint.printNewStep("Lemmatisation", 0);
 
         totalDocs = Documents.size();
-        // startTime = System.currentTimeMillis();
+        lemStartTime = System.currentTimeMillis();
 
         //Parallel version of the lambada-style code. Please note:
         //1. You need to parallelise the entry set, and pass that to the method
@@ -111,7 +111,7 @@ public class Lemmatise {
         else
             Documents.entrySet().forEach(this::LemmatiseDocument);
 
-        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+        // long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
         LogPrint.printNewStep("Lemmatisation", 0);
         LogPrint.printCompleteStep();
         // LogPrint.printNewStep("Lemmatisation complete ", 1);
@@ -124,11 +124,11 @@ public class Lemmatise {
         if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0)
         {
             // System.out.println();
-            long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
-            String timeTakenStr = "time: " + Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
+            long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
+            String timeTakenStr = "time: " + Math.floorDiv(lemTimeTaken, 60) + " m, " + lemTimeTaken % 60 + " s.";
 
-            float timeLeft = ((float) timeTaken / (float) docsProcessed) * (totalDocs - docsProcessed);
-            String timeToGoStr = "remaining (est.)): " + Math.floor(timeLeft / 60) + " m, " + Math.floor(timeLeft % 60) + " s.";
+            float lemTimeLeft = ((float) lemTimeTaken / (float) docsProcessed) * (totalDocs - docsProcessed);
+            String timeToGoStr = "remaining (est.)): " + Math.floor(lemTimeLeft / 60) + " m, " + Math.floor(lemTimeLeft % 60) + " s.";
 
             float percentage = (((float) docsProcessed / (float) totalDocs) * 100);
 
@@ -136,7 +136,7 @@ public class Lemmatise {
             //         " | Percent Complete: " + (Math.round(percentage * 100f) / 100f) + "%");
 
             LogPrint.printNewStep("Lemmatised: " + docsProcessed +
-                    "documents | % complete: " + (Math.round(percentage * 100f) / 100f) + "%", 1);
+                    " documents | % complete: " + (Math.round(percentage * 100f) / 100f) + "%", 1);
 
             LogPrint.printStep(timeTakenStr + " | " + timeToGoStr, 1);
         }
@@ -193,7 +193,7 @@ public class Lemmatise {
                     .collect(Collectors.toList());
 
             Documents.entrySet().parallelStream().forEach(e->e.getValue().filterOutLemmas(lowCounts));
-            long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
+            // long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
             LogPrint.printCompleteStep();
 
             LogPrint.printNote("Found "+lowCounts.size()+" lemmas with count less than "+(removeLowCounts+1));

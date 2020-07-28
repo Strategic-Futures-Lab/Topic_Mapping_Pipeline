@@ -296,8 +296,12 @@ public class DocIOWrapper {
      * @param distribution topic distribution
      */
     public void setSubTopicDistribution(double[] distribution){
-        // sub topic model should have already formatted values
-        subTopicDistribution = distribution;
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setRoundingMode(RoundingMode.UP);
+        subTopicDistribution = new double[distribution.length];
+        for(int i = 0; i < distribution.length; i++){
+            subTopicDistribution[i] = Double.parseDouble(df.format(distribution[i]));
+        }
     }
 
     /**
