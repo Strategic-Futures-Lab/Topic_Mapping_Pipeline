@@ -298,10 +298,13 @@ public class DocIOWrapper {
     public void setSubTopicDistribution(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
-        subTopicDistribution = new double[distribution.length];
-        for(int i = 0; i < distribution.length; i++){
-            subTopicDistribution[i] = Double.parseDouble(df.format(distribution[i]));
+        if(distribution != null){
+            subTopicDistribution = new double[distribution.length];
+            for(int i = 0; i < distribution.length; i++){
+                subTopicDistribution[i] = Double.parseDouble(df.format(distribution[i]));
+            }
         }
+
     }
 
     /**

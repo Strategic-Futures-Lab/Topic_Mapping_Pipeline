@@ -69,9 +69,7 @@ public class HierarchicalTopicModelling {
         ConcurrentHashMap<String, TopicIOWrapper> mainTopics = MainTopicModel.getTopics();
         ConcurrentHashMap<String, TopicIOWrapper> subTopics = SubTopicModel.getTopics();
 
-//        List<Pair<Integer, List<Pair<Integer, Double>>>> assignment = new ArrayList<>(); // [(subTopic, [(mainTopic, sim)])]
         HashMap<Integer, HashMap<Integer, Double>> assignment = new HashMap<>();
-//        HashMap<String, ArrayList<String>> superSubGroups = new HashMap<>();
 
         LogPrint.printNewStep("Calculating hierarchy assignments", 0);
         for (int sT = 0; sT < SimilarityMatrix.length; sT++) {

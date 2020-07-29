@@ -2,9 +2,9 @@
   "run": {
     "input": false,
     "lemmatise": false,
-    "model": false,
+    "model": true,
     "exportTopicModel": false,
-    "inferDocuments": true,
+    "inferDocuments": false,
     "indexLabels": false,
     "distributeTopics": false,
     "clusterTopics": false,
@@ -43,7 +43,8 @@
       "words": 20,
       "docs": 30,
       "iterations": 1000,
-      "serialiseName": "trainedMainModel",
+      "llOutput": "mainLL.json",
+      "serialise": "trainedMainModel.ser",
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
       "numWordId": 5
@@ -53,7 +54,8 @@
       "words": 20,
       "docs": 30,
       "iterations": 1000,
-      "serialiseName": "trainedSubModel",
+      "llOutput": "subLL.json",
+      "serialise": "trainedSubModel.ser",
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
       "numWordId": 5
@@ -78,8 +80,8 @@
   },
   "inferDocuments": {
     "modelDir": "topicModel/",
-    "mainModelName": "trainedMainModel",
-    "subModelName": "trainedSubModel",
+    "mainModel": "trainedMainModel.ser",
+    "subModel": "trainedSubModel.ser",
     "lemmas": "lemmas_infer.json",
     "iterations": 1000,
     "docFields": [],
