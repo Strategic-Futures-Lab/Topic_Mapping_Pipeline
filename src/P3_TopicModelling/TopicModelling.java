@@ -23,7 +23,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TopicModelling {
 
-    private final int[] RANDOM_SEEDS = {1351727940, 1742863098, -1602079425, 1775435783, 568478633, -1728550799, -951342906, 201354591, 1964976895, 1996681054, -1470540617, 2021180607, 1963517091, -62811111, 1289694793, -1538086464, -336032733, 1785570484, 1255020924, 1973504944, 668901209, -1994103157, 1499498950, 1863986805, 767661644, 1106985431, 1044245999, -462881427, 667772453, -1412242423, 884961209, -2010762614, -958108485, -1949179036, -1730305825, 1389240794, 836782564, -785551752, 1933688975, -1999538859, -263090972, -508702554, 1140385921, 1267873921, -1344871923, -43961586, -233705489, 628409593, 899215101, 1093870969, -961964970, 771817120, 666140854, -1449071564, -1636392498, -7026344, 1974585266, -685538084, 366222201, -1186218688, 1079183802, -1051858470, 25585342, 855028013, 1678916685, 1972641650, 202789157, -1552096200, -1506270777, -1041494119, 1463369471, -1055350006, 1349843049, -1101551872, 1843673222, -644314819, -1303113477, -1069086690, 498408088, -114723521, -637117566, 1420898137, 366206483, 213561271, 1791833142, -919814411, 1104666572, 1089758161, -513481178, 291291728, -1821691956, -1915769653, 132274482, 1199014123, 1864061694, -1589540732, 295595372, -131466196, -2096364649, -699552916};
+    private final int[] RANDOM_SEEDS = {1351727940, 1742863098, -1602079425, 1775435783, 568478633, -1728550799, -951342906, 201354591, 1964976895, 1996681054,
+                                        -1470540617, 2021180607, 1963517091, -62811111, 1289694793, -1538086464, -336032733, 1785570484, 1255020924, 1973504944,
+                                        668901209, -1994103157, 1499498950, 1863986805, 767661644, 1106985431, 1044245999, -462881427, 667772453, -1412242423,
+                                        884961209, -2010762614, -958108485, -1949179036, -1730305825, 1389240794, 836782564, -785551752, 1933688975, -1999538859,
+                                        -263090972, -508702554, 1140385921, 1267873921, -1344871923, -43961586, -233705489, 628409593, 899215101, 1093870969,
+                                        -961964970, 771817120, 666140854, -1449071564, -1636392498, -7026344, 1974585266, -685538084, 366222201, -1186218688,
+                                        1079183802, -1051858470, 25585342, 855028013, 1678916685, 1972641650, 202789157, -1552096200, -1506270777, -1041494119,
+                                        1463369471, -1055350006, 1349843049, -1101551872, 1843673222, -644314819, -1303113477, -1069086690, 498408088, -114723521,
+                                        -637117566, 1420898137, 366206483, 213561271, 1791833142, -919814411, 1104666572, 1089758161, -513481178, 291291728,
+                                        -1821691956, -1915769653, 132274482, 1199014123, 1864061694, -1589540732, 295595372, -131466196, -2096364649, -699552916};
 
     private int skipCount = 0;
 
@@ -34,20 +43,28 @@ public class TopicModelling {
     private double[][] SimilarityMatrix;
     private List<List<WordData>> wordsAndWeights;
     private TopicModel tModel;
+
     private int nTopics;
-    private int nWords;
-    private int nDocs;
-    private int nIterations;
-    private String serialiseFile;
-    private boolean serialise;
+    private int nWords = 20;
+    private int nDocs = 20;
+    private int nIterations = 1000;
+    private String serialiseFile = "";
+    private boolean serialise = false;
     private String outputDir;
     private String docOutput;
     private String topicOutput;
-    private String simOutput;
-    private boolean outputSim;
-    private String llOutput;
-    private boolean outputLL;
-    private int numWordId;
+
+    private String simOutput = "";
+    private boolean outputSim = false;
+    private int numWordId = 3;
+    private String llOutput = "";
+    private boolean outputLL = false;
+    private int seedIndex = 0;
+    private double alphaSum = 1.0;
+    private double beta = 0.01;
+    private boolean symmetricAlpha = false;
+    private String topicLogOutput = "";
+    private boolean outputTopicLog = false;
 
     public static TopicModelling Model(TopicModelModuleSpecs specs, ModelSpecs modelSpecs, LemmaReader reader){
         TopicModelling startClass = new TopicModelling();
@@ -101,23 +118,35 @@ public class TopicModelling {
             serialiseFile = modelSpecs.serialiseFile;
         }
         topicOutput = modelSpecs.topicOutput;
+
         outputSim = modelSpecs.outputSimilarity;
         if(outputSim){
             simOutput = modelSpecs.similarityOutput;
         }
+        numWordId = modelSpecs.numWordId;
         outputLL = modelSpecs.outputLL;
         if(outputLL){
             llOutput = modelSpecs.llOutput;
         }
-        numWordId = modelSpecs.numWordId;
+        alphaSum = modelSpecs.alphaSum;
+        beta = modelSpecs.beta;
+        symmetricAlpha = modelSpecs.symmetricAlpha;
+        outputTopicLog = modelSpecs.outputTopicLog;
+        if(outputTopicLog){
+            topicLogOutput = modelSpecs.topicLogOutput;
+        }
         LogPrint.printCompleteStep();
         LogPrint.printNote("Modelling "+nTopics+" topics in "+nIterations+" iterations");
+        LogPrint.printNote("Using AlphaSum of "+alphaSum+" and beta of "+beta);
         LogPrint.printNote("Saving "+nWords+" words and "+nDocs+" docs");
         if(outputSim){
             LogPrint.printNote("Saving topic to topic similarity, identifying topics with "+numWordId+" labels");
         }
         if(outputLL){
             LogPrint.printNote("Saving model Log-Likelihood records");
+        }
+        if(outputTopicLog){
+            LogPrint.printNote("Saving topic history records");
         }
         if(serialise){
             LogPrint.printNote("Serialising model");
@@ -159,9 +188,12 @@ public class TopicModelling {
         LogPrint.printNote("Following output from Mallet\n");
 
         tModel = new TopicModel(DocumentList);
-        tModel.numTopics = nTopics;
-        tModel.SEED = RANDOM_SEEDS[0];
+        tModel.TOPICS = nTopics;
+        tModel.SEED = RANDOM_SEEDS[seedIndex];
         tModel.ITER = nIterations;
+        tModel.ALPHASUM = alphaSum;
+        tModel.BETA = beta;
+        tModel.SYMMETRICALPHA = symmetricAlpha;
 
         tModel.Model(outputDir);
 
@@ -176,12 +208,13 @@ public class TopicModelling {
         LogPrint.printCompleteStep();
 
         if(outputLL) saveLogLikehood();
+        if(outputTopicLog) saveTopicLog();
         if(serialise) serialiseModel();
     }
 
-    private void saveLogLikehood(){
-        JSONIOWrapper.SaveJSON(tModel.logLikelihood.toJSON(), llOutput, 0);
-    }
+    private void saveLogLikehood() { JSONIOWrapper.SaveJSON(tModel.logLikelihoodRecord.toJSON(), llOutput, 0); }
+
+    private void saveTopicLog() { JSONIOWrapper.SaveJSON(tModel.topicRecord.toJSON(), topicLogOutput, 0); }
 
     private void serialiseModel(){
         LogPrint.printNewStep("Serialising model", 0);

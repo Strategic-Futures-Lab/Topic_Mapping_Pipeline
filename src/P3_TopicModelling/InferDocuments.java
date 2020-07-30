@@ -4,7 +4,6 @@ import P0_Project.DocumentInferModuleSpecs;
 import P3_TopicModelling.TopicModelCore.TopicModel;
 import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
-import PX_Data.TopicIOWrapper;
 import PY_Helper.LogPrint;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
@@ -20,14 +19,13 @@ import java.io.ObjectInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class InferDocuments {
 
     private String modelDir;
-    private String mainModelName;
+    private String mainModelFile;
     private boolean inferFromSubModel;
-    private String subModelName;
+    private String subModelFile;
 
     private JSONObject metadata;
     private ConcurrentHashMap<String, DocIOWrapper> Documents;
@@ -82,11 +80,10 @@ public class InferDocuments {
 
     private void ProcessArguments(DocumentInferModuleSpecs specs, LemmaReader reader){
         LogPrint.printNewStep("Processing arguments", 0);
-        modelDir = specs.modelDir;
-        mainModelName = specs.mainModelName;
+        mainModelFile = specs.mainModel;
         inferFromSubModel = specs.inferFromSubModel;
         if(inferFromSubModel){
-            subModelName = specs.subModelName;
+            subModelFile = specs.subModel;
         }
 
         metadata = reader.getMetadata();
@@ -112,8 +109,8 @@ public class InferDocuments {
         }
         numWordId = specs.numWordId;
         LogPrint.printCompleteStep();
-        String serSubModelStr = inferFromSubModel ? " and from "+subModelName : "";
-        LogPrint.printNote("Inferring "+Documents.size()+" document(s) distributions from "+mainModelName+serSubModelStr);
+        String serSubModelStr = inferFromSubModel ? " and from sub-model" : "";
+        LogPrint.printNote("Inferring "+Documents.size()+" document(s) distributions from main model"+serSubModelStr);
         if(exportMainCSV) LogPrint.printNote("Exporting main topic distributions in CSV format too");
         if(exportSubCSV) LogPrint.printNote("Exporting sub topic distributions in CSV format too");
 
@@ -126,24 +123,22 @@ public class InferDocuments {
     private void LoadModels(int number){
         LogPrint.printNewStep("Loading main model", 0);
         mainModel = new TopicModel();
-        String mainModelPath = modelDir + mainModelName + number + ".ser";
         try{
-            mainModel = (TopicModel) (new ObjectInputStream(new FileInputStream(mainModelPath))).readObject();
+            mainModel = (TopicModel) (new ObjectInputStream(new FileInputStream(mainModelFile))).readObject();
             LogPrint.printCompleteStep();
         } catch (Exception e){
-            LogPrint.printNoteError("Enable to load model from "+mainModelPath);
+            LogPrint.printNoteError("Enable to load model from "+mainModelFile);
             LogPrint.printNoteError(e.getMessage());
             System.exit(1);
         }
         if(inferFromSubModel){
             LogPrint.printNewStep("Loading sub model", 0);
             subModel = new TopicModel();
-            String subModelPath = modelDir + subModelName + number + ".ser";
             try{
-                subModel = (TopicModel) (new ObjectInputStream(new FileInputStream(subModelPath))).readObject();
+                subModel = (TopicModel) (new ObjectInputStream(new FileInputStream(subModelFile))).readObject();
                 LogPrint.printCompleteStep();
             } catch (Exception e){
-                LogPrint.printNoteError("Enable to load model from "+subModelPath);
+                LogPrint.printNoteError("Enable to load model from "+subModelFile);
                 LogPrint.printNoteError(e.getMessage());
                 System.exit(1);
             }
@@ -222,9 +217,9 @@ public class InferDocuments {
         JSONObject root = new JSONObject();
         JSONArray documents = new JSONArray();
         JSONObject meta = (JSONObject) metadata.clone();
-        meta.put("nTopicsMain", mainModel.numTopics);
+        meta.put("nTopicsMain", mainModel.TOPICS);
         if(inferFromSubModel){
-            meta.put("nTopicsSub", subModel.numTopics);
+            meta.put("nTopicsSub", subModel.TOPICS);
         }
         root.put("metadata", meta);
         DocIOWrapper.PrintModel();

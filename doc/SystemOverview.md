@@ -12,25 +12,27 @@ Manager*** (package `P0_Project`, class `ProjectManager.java`).
 The Project Manager will then read the project file, and instantiate the appropriate ***Module Specs*** (package
 `P0_Project`, `...ModuleSpecs.java` classes), which will each interpret the specifications for their respective modules.
 
-`TopicMapping.java` will then call the appropriate modules (only those to be executed, in a specific order) which will
-execute according to the specifications set in their respective Module Spec class. These modules are the ones reading
+`TopicMapping.java` will then call the appropriate modules (only those to be executed, in order) which will execute
+according to the specifications set in their respective Module Spec class. These modules are the ones reading
 and writing data files.
 
 ## Modules Order
 
-There are 6 modules developed at the moment, running in the following order:
+There are 9 modules developed at the moment, running in the following order:
 1) ***Input*** (`P1_Input` package) reading text data and formatting it in a corpus JSON file;
 2) ***Lemmatise*** (`P2_Lemmatise` package) reading the corpus, lemmatising it, and generating a lemma JSON file;
 3) ***Model*** (`P3_TopicModelling` package) reading the lemmas, generating topic models (including hierarchical ones)
 and saving the topic and document data in JSON files;
 4) ***Export Model*** (`P3_TopicModelling` package) reading the model data outputs and generating concise model JSON 
 files, as well as complete CSV files;
-5) ***Label Index*** (`P4_Analysis.LabelIndex` package) reading the topic data and generating an index of their labels;
-6) ***Topic Distribution*** (`P4_Analysis.TopicDistribution` package) reading the topic and document data to calculate
+5) ***Infer Documents*** (`P3_TopicModelling` package) reading a topic model and lemmatised documents (not from the 
+model), to infer the topic distributions of those documents;
+6) ***Label Index*** (`P4_Analysis.LabelIndex` package) reading the topic data and generating an index of their labels;
+7) ***Topic Distribution*** (`P4_Analysis.TopicDistribution` package) reading the topic and document data to calculate
 the distribtution of topics over specific the documents (including per field and/or using specific values);
-7) ***Topic Clustering*** (`P4_Analysis.TopicClustering` package) reading the topic data and generating groups of
+8) ***Topic Clustering*** (`P4_Analysis.TopicClustering` package) reading the topic data and generating groups of
 sub topics and hierarchical clusters of topics;
-8) ***Topic Mapping*** (`P5_TopicMapping` package) reading the clustered topic data and generating the map data.
+9) ***Topic Mapping*** (`P5_TopicMapping` package) reading the clustered topic data and generating the map data.
 
 ## Project File
 
@@ -42,6 +44,7 @@ The ***project file*** is a JSON data file containing the specifications for the
     "lemmatise": true,
     "model": true,
     "exportTopicModel": true,
+    "inferDocuments": true,
     "indexLabels": true,
     "distributeTopics": true,
     "clusterTopics": true,
@@ -52,6 +55,7 @@ The ***project file*** is a JSON data file containing the specifications for the
   "lemmatise": { ... },         // specs for lemmatise module
   "model": { ... },             // specs for model module
   "exportTopicModel": { ... },  // specs for the topic model export module
+  "inferDocuments": { ... },    // specs for the document inference module
   "indexLabels": { ... },       // specs for label index module
   "distributeTopics": { ... },  // specs for topic distribution module
   "clusterTopics": { ... }      // specs for topic cluster module

@@ -1,7 +1,7 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 # Label Index Module
 
-The Label Index module is the fifth module of the Topic Mapping pipeline, and first in the `P4_Analysis` package.
+The Label Index module is the sixth module of the Topic Mapping pipeline, and first in the `P4_Analysis` package.
 It reads the top words from topic data to create an index of labels which is then saved in an ***Index JSON file***.
 
 The use of this module is optional.

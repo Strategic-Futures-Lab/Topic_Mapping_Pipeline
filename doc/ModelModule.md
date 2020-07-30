@@ -57,8 +57,16 @@ The specifiations for `mainModel` and `subModel` follow the same structure:
       "docs": 30,
       "iterations": 500,
       "topicOuput": "path",
+      "serialise": "path",
+      // Advanced options
       "topicSimOuput": "path",
-      "numWordId": 3
+      "numWordId": 3,
+      "llOutput": "path",
+      "topicLogOutput": "path",
+      "alphaSum": 1.0,
+      "symmetricAlpha": false,
+      "beta": 0.01,
+      "seed" : 0
     },
   ...}
 ...}
@@ -71,10 +79,27 @@ Where:
 - `iterations` is the number of iterations the Gibbs Sampling algorithm needs to perform, it is optional and defaults
 to 1000;
 - `topicOuput` is the path to the topic JSON file (excluding directory);
+- `serialise` is the path to the serialised model object (excluding directory), which will be used to
+[infer topics](InferenceModule.md), using this parameter is optional, and the model won't be serialised if this
+parameter is not specified.
+
+There are also advanced specifications:
 - `topicSimOuput` is the path to the CSV file saving the topic-to-topic similarity matrix (excluding directory), using
 this parameter is optional, and the data won't be saved if this parameter is not specified;
 - `numWordId` is the number of labels to use to identify a topic in a similarity matrix output, or hierarchical
-assignment output, it is optional and defaults to 3.
+assignment output, it is optional and defaults to 3;
+- `llOupout` is the path to the JSON file recording the evolution of the model's log-likelihood throughout the modelling
+process, this parameter is optional, and the data won't be saved if it is not specified;
+- `topicLogOutput` is the path to the JSON file recording the evolution of topics throughout the modelling process,
+this parameter is optional, and the data won't be saved if it is not specified;
+- `alphaSum` lets you set the sum of the topics' alpha values (document to topics distribution Dirichlet prior), this 
+parameter is optional and defaults to 1.0;
+- `symmetricAlpha` lets you set the symmetry of the alpha values during their optimisation stage, this parameter is
+optional and defaults to false;
+- `beta` lets you set the words' beta values (topic to words distribution Dirichlet prior), this parameter is optional
+and defaults tp 0.01;
+- `seed` lets you select one of 100 random seed for the model, it must therefore have a value between 0 and 99
+(included), this parameter is optional and defaults to 0.
 
 The specification for `hierarchy` should follow this structure:
 ```json5

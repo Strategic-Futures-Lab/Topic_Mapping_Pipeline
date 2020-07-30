@@ -27,6 +27,7 @@ The directories meta-parameters allow to set the directory of data file for the 
 - `outputDir` lets you represent the directory that will contain all the resulting data from the pipeline, to be
 used by other applications:
     - model export files from the [Export Model Module](ExportModule.md);
+    - inferred documents files from the [Document Inference Module](InferenceModule.md);
     - label index from the [Label Index Module](LabelIndexModule.md);
     - separate distribution files from the [Distribution Module](TopicDistributionModule.md);
     - map data files from the map modules.
@@ -58,7 +59,7 @@ It is optional, and will overwrite the module-level specification if set.
   },
 ... }
 ```
-`Lemmatise` and `ExportModel` are both module which will set and export a list of document data fields respectively.
+`Lemmatise`, `InferDocuments` and `ExportModel` are modules which will set or export a list of document data fieldsy.
 Because it is often the case that those lists are identical, you can use the meta-parameter `docFields` to set
 these module specifications in one place. It is optional, and will overwrite the module-level specification if set.
 

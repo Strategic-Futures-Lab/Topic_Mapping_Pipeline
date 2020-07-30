@@ -1,7 +1,7 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 # Topic Clustering Module
 
-The Topic Clustering module is the seventh module of the Topic Mapping pipeline, and third in the `P4_Analysis` package.
+The Topic Clustering module is the eighth module of the Topic Mapping pipeline, and third in the `P4_Analysis` package.
 It primarily produces a hierarchical clustering for a group of topics, in the form of a linkage table. If sub topics
 are given it will first generate groups of sub topics according to their assignment to main topics: i.e. if two or more
 sub topics were assigned to the same main topic, a group containing these sub topics will be created for that main

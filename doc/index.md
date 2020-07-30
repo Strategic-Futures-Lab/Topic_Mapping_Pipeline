@@ -8,6 +8,7 @@
     - [Lemmatise](LemmatiseModule.md)
     - [Topic Model](ModelModule.md)
         - [Export Topic Model](ExportModule.md)
+        - [Infer Documents](InferenceModule.md)
     - Analysis
         - [Label Indexing](LabelIndexModule.md)
         - [Topic Distribution](TopicDistributionModule.md)

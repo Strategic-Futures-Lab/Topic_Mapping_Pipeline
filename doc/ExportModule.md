@@ -9,7 +9,7 @@ The Export Model module is contained in the `P3_TopicModelling` package.
 
 ## Specifications
 
-The Export Model module entry in the project file should has the following structure:
+The Export Model module entry in the project file should have the following structure:
 ```json5
 {...
   "exportTopicModel": {
@@ -21,8 +21,9 @@ The Export Model module entry in the project file should has the following struc
     "subOutput": "path",
     "mainOutputCSV": "path",
     "subOutputCSV": "parh",
+    "outputCSV": "path",
     "numWordId": 3
-  }
+  },
 ...}
 ```
 Where:
@@ -41,6 +42,8 @@ overwritten by the meta-parameter `docFields`;
 is optional, and defaults to `""` meaning that no CSV should be created;
 - `subOutputCSV` is the path to the document CSV file listing documents and their weights in the sub topics, it is
 optional and defaults to `""` meaning that no CSV should be created, it is only used if sub topics are exported;
+- `outputCSV` is the path to the document CSV file listing documents and their weights in both the main and sub topics
+(each topic is annotated accordingly), it is optional and defaults to `""` meaning that no CSV should be created;
 - `numWordId` is the number of labels to use to identify a topic in the document CSV files.
 
 Note that sub-topics won't be exported if the meta-parameter `modelType` is set to `simple`.
@@ -80,17 +83,18 @@ Note that `docData` has been added to each top document, containing a list of ke
 
 Then, the document CSV file, if set in the specifications, following this structure:
 ```csv
-"docId", "key1",   "key2",   ..., "wordCount", "includedInModel", "reasonForRemoval", "topic-1-labels", "topic-2-labels", ...
-"0",     "value1", "value2", ..., "107",       "true",            "",                 "0.0197",         "0.0099",         ...
+"_docId", "key1",   "key2",   ..., "_wordCount", "_includedInModel", "_reasonForRemoval", "_mainTopic_topic-1-labels", "_mainTopic_topic-2-labels", ...
+"0",      "value1", "value2", ..., "107",        "true",             "",                  "0.0197",                    "0.0099",                    ...
 ```
 Each row represents a document, with `key1`, `key2`, etc. being the keys set in `docFields`. The CSV also includes the 
 `wordCount` per document, whether the document was included in the model or not, and, if not, the reason for its 
 removal (e.g. `"Too short"`). Finally, for each topic, identified by a list of their top labels, there is the weight of
-that topic in the document.
+that topic in the document. Each topic identifier is also annotated with either `_mainTopic_` or `_subTopic_` to help
+identify which model they are from. 
 
 ---
 
-[< Previous](ModelModule.md) | [Index](index.md) | [Next >](LabelIndexModule.md)
+[< Previous](ModelModule.md) | [Index](index.md) | [Next >](InferenceModule.md)
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International

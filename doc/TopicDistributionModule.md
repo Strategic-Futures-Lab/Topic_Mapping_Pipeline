@@ -1,7 +1,7 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 # Topic Distribution Module
 
-The Topic Distribution module is the sixth module of the Topic Mapping pipeline, and second in the `P4_Analysis` 
+The Topic Distribution module is the seventh module of the Topic Mapping pipeline, and second in the `P4_Analysis` 
 package. It reads the topic weights in documents to get customized topic distribution across document fields, e.g.
 authors, organisations, years, etc. It then saves this information either in the ***Topic JSON files***, or in separate
 ***Distribution JSON file***.

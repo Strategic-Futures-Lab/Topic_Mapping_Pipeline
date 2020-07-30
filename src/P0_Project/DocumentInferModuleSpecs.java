@@ -6,12 +6,10 @@ import org.json.simple.JSONObject;
 
 public class DocumentInferModuleSpecs {
 
-    /** Directory where model is located (from meta dataDir), optional, default to "" */
-    public String modelDir;
     /** Name of serialised main model */
-    public String mainModelName;
+    public String mainModel;
     /** Name of serialised sub model, optional, defaults to "" */
-    public String subModelName;
+    public String subModel;
     /** Flag for inferring from sub model, defaults to false if subModelName = "" */
     public boolean inferFromSubModel = false;
     /** Filename to lemma data to infer (from Lemmatise module) */
@@ -40,14 +38,13 @@ public class DocumentInferModuleSpecs {
 
     public DocumentInferModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         lemmas = metaSpecs.getDataDir() + (String) specs.get("lemmas");
-        modelDir = metaSpecs.getDataDir() + (String) specs.getOrDefault("modelDir", "");
-        if(!modelDir.endsWith("/")){
-            modelDir = modelDir + "/";
+        mainModel = metaSpecs.getDataDir() + (String) specs.get("mainModel");
+        subModel = (String) specs.getOrDefault("subModel", "");
+        inferFromSubModel = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subModel.length() > 0;
+        if(inferFromSubModel){
+            subModel = metaSpecs.getDataDir() + subModel;
         }
-        mainModelName = (String) specs.get("mainModelName");
-        subModelName = (String) specs.getOrDefault("subModelName", "");
-        inferFromSubModel = !subModelName.equals("");
-        iterations = Math.toIntExact((long) specs.getOrDefault("ietrations", (long) 100));
+        iterations = Math.toIntExact((long) specs.getOrDefault("iterations", (long) 100));
         docFields = metaSpecs.useMetaDocFields() ?
                 metaSpecs.docFields :
                 JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));

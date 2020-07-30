@@ -28,7 +28,7 @@
   "lemmatise": {
     "corpus": "corpus_infer.json",
     "textFields": ["title", "abstract"],
-    "docFields": [],
+    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "stopWords": [],
     "minLemmas": 10,
     "removeLowCounts": 0,
@@ -43,18 +43,20 @@
       "words": 20,
       "docs": 30,
       "iterations": 1000,
-      "llOutput": "mainLL.json",
       "serialise": "trainedMainModel.ser",
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
-      "numWordId": 5
+      "numWordId": 5,
+      "llOutput": "mainLL.json",
+      "topicLogOutput": "mainTopicLog.json",
+      "alphaSum": 0.5,
+      "beta": 0.1
     },
     "subModel": {
       "topics": 50,
       "words": 20,
       "docs": 30,
       "iterations": 1000,
-      "llOutput": "subLL.json",
       "serialise": "trainedSubModel.ser",
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
@@ -71,11 +73,10 @@
     "mainTopics": "topicModel/mainTopics.json",
     "subTopics": "topicModel/subTopics.json",
     "documents": "topicModel/documents.json",
-    "docFields": [],
+    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "mainOutput": "mainModel.json",
     "subOutput": "subModel.json",
-    "mainOutputCSV": "mainModel.csv",
-    "subOutputCSV": "subModel.csv",
+    "outputCSV": "model.csv",
     "numWordId": 5
   },
   "inferDocuments": {
@@ -84,10 +85,8 @@
     "subModel": "trainedSubModel.ser",
     "lemmas": "lemmas_infer.json",
     "iterations": 1000,
-    "docFields": [],
+    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "documentOutput": "inferred_documents.json",
-    "mainOutputCSV": "inferred_documents_main.csv",
-    "subOutputCSV": "inferred_documents_sub.csv",
     "outputCSV": "inferred_documents.csv",
     "numWordId": 5
   },

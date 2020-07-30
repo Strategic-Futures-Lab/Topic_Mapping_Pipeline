@@ -8,14 +8,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LogLikelihood {
+public class LogLikelihoodRecord {
 
-    public static class LLRecord{
+    public static class LLEntry {
         public int iteration;
         public double logLikelihood;
         public double logLikelihoodPerToken;
 
-        public LLRecord(int i, double ll, double llt){
+        public LLEntry(int i, double ll, double llt){
 
             DecimalFormat df = new DecimalFormat("#.####");
             df.setRoundingMode(RoundingMode.UP);
@@ -34,13 +34,13 @@ public class LogLikelihood {
         }
     }
 
-    public ArrayList<LLRecord> llRecords;
+    public ArrayList<LLEntry> llEntries;
     public int totalTokens;
     public double finalLogLikelihood;
     public double finalLogLikelihoodPerToken;
     public int iterations;
 
-    public LogLikelihood(List<String> records, int totalTokens, double finalLogLikelihood, int iterations){
+    public LogLikelihoodRecord(List<String> records, int totalTokens, double finalLogLikelihood, int iterations){
 
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
@@ -49,7 +49,7 @@ public class LogLikelihood {
         this.finalLogLikelihood = Double.parseDouble(df.format(finalLogLikelihood));
         this.finalLogLikelihoodPerToken = Double.parseDouble(df.format(this.finalLogLikelihood/(double)this.totalTokens));
         this.iterations = iterations;
-        this.llRecords = new ArrayList<>();
+        this.llEntries = new ArrayList<>();
 
         for(String r: records){
             String[] split = r.split("<");
@@ -58,7 +58,7 @@ public class LogLikelihood {
             split = split[1].split(" LL/token: ");
             double logLikelihoodPerToken = Double.parseDouble(split[1]);
             double logLikelihood = logLikelihoodPerToken * (double)totalTokens;
-            llRecords.add(new LLRecord(iteration, logLikelihood, logLikelihoodPerToken));
+            llEntries.add(new LLEntry(iteration, logLikelihood, logLikelihoodPerToken));
         }
     }
 
@@ -69,10 +69,10 @@ public class LogLikelihood {
         root.put("nTokens", totalTokens);
         root.put("nIter", iterations);
         JSONArray rec = new JSONArray();
-        for(LLRecord r: llRecords){
+        for(LLEntry r: llEntries){
             rec.add(r.toJSON());
         }
-        root.put("records", rec);
+        root.put("entries", rec);
         return root;
     }
 

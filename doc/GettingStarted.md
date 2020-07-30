@@ -10,7 +10,7 @@ Before compiling and running sources, make sure you have downloaded the dependen
 to add them to the project structure in your IDE:
 - `fastcsv-1.0.2.jar` for reading and writing csv files;
 - `json-simple-1.1.1.jar` for reading and writing json files;
-- `pdfbox-app-2.0.9.jar` for reading pdf documents (not used in this version of the pipeline yet);
+- `pdfbox-app-2.0.9.jar` for reading pdf documents;
 - `stanford-corenlp-3.9.2.jar` and `stanford-corenlp-3.9.2-models.jar` for lemmatising text;
 - `mallet.jar` and `mallet-deps.jar` for modelling topics.
 
