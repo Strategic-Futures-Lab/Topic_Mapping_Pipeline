@@ -131,6 +131,7 @@ public class TopicModelling {
         alphaSum = modelSpecs.alphaSum;
         beta = modelSpecs.beta;
         symmetricAlpha = modelSpecs.symmetricAlpha;
+        seedIndex=modelSpecs.seedIndex;
         outputTopicLog = modelSpecs.outputTopicLog;
         if(outputTopicLog){
             topicLogOutput = modelSpecs.topicLogOutput;
