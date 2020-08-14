@@ -52,13 +52,34 @@ Cite:
 }
 ```
 
+### D3 - Data Driven Documents
+
+[BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
+
+Cite:
+> Michael Bostock, Vadim Ogievetsky, and Jeffrey Heer. 2011.
+> D<sup>3</sup>: Data Driven Documents. In *IEEE Transactions on Visualization and Computer Graphics*, vol. 17 issue 12, pp. 2301-2309.
+
+```bibtex
+@article{bostock2011d3,
+  title      = {D$^3$ data-driven documents},
+  author     = {Bostock, Michael and Ogievetsky, Vadim and Heer, Jeffrey},
+  journal    = {IEEE transactions on visualization and computer graphics},
+  volume     = {17},
+  number     = {12},
+  pages      = {2301--2309},
+  year       = {2011},
+  publisher  = {IEEE}
+}
+```
+
 ### Bubble Treemap
 
 [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
 Cite:
 > Jochen Görtler, Christoph Schulz, Daniel Weiskopf, and Oliver Deussen. 2018.
-> Bubble Treemaps for Uncertainty Visualization. In *IEEE Transactions on Visualization and Computer Graphics*, vol. 24 issue 1, pp. 719-728
+> Bubble Treemaps for Uncertainty Visualization. In *IEEE Transactions on Visualization and Computer Graphics*, vol. 24 issue 1, pp. 719-728.
 ```bibtex
 @article{Goertler2018,
   author     = {Görtler, Jochen and Schulz, Christoph and Weiskopf, Daniel and Deussen, Oliver},
