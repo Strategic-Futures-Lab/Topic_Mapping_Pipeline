@@ -15,7 +15,9 @@ public class LemmatiseModuleSpecs {
     public String[] textFields;
     /** List of fields in docData to keep after process is done, optional, defaults to empty  */
     public String[] docFields;
-    /** List of stopwords to remove from lemmas, optional, defaults to empty */
+    /** List of stop-phrases to exclude from text before lemmatisation, optional, defaults to empty */
+    public String[] stopPhrases;
+    /** List of stop-words to remove from lemmas, optional, defaults to empty */
     public String[] stopWords;
     /** Minimum number of lemmas a document must have to be kept for topic modelling, optional, defaults to 1 */
     public int minLemmas;
@@ -34,6 +36,7 @@ public class LemmatiseModuleSpecs {
         docFields = metaSpecs.useMetaDocFields() ?
                 metaSpecs.docFields :
                 JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
+        stopPhrases = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopPhrases", new JSONArray()));
         stopWords = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopWords", new JSONArray()));
         minLemmas = Math.toIntExact((long) specs.getOrDefault("minLemmas", (long) 1));
         removeLowCounts = Math.toIntExact((long) specs.getOrDefault("removeLowCounts", (long) 0));

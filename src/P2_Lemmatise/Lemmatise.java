@@ -29,6 +29,7 @@ public class Lemmatise {
     private List<String> textFields;
     private List<String> docFields;
     private List<String> stopWords;
+    private List<String> stopPhrases;
     private int minLemmas;
     private int removeLowCounts;
     private int totalDocRemoved = 0;
@@ -61,6 +62,7 @@ public class Lemmatise {
         textFields = Arrays.asList(lemmaSpecs.textFields);
         docFields = Arrays.asList(lemmaSpecs.docFields);
         stopWords = Arrays.asList(lemmaSpecs.stopWords);
+        stopPhrases = Arrays.asList(lemmaSpecs.stopPhrases);
         minLemmas = lemmaSpecs.minLemmas;
         removeLowCounts = lemmaSpecs.removeLowCounts;
         LogPrint.printCompleteStep();
@@ -95,7 +97,6 @@ public class Lemmatise {
         slem = new StanfordLemmatizer();
         LogPrint.printNewStep("Loading lemmatiser", 0);
         LogPrint.printCompleteStep();
-        // System.out.println("Stanford Lemmatiser Loaded");
 
         LogPrint.printNewStep("Lemmatisation", 0);
 
@@ -111,36 +112,24 @@ public class Lemmatise {
         else
             Documents.entrySet().forEach(this::LemmatiseDocument);
 
-        // long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
         LogPrint.printNewStep("Lemmatisation", 0);
         LogPrint.printCompleteStep();
-        // LogPrint.printNewStep("Lemmatisation complete ", 1);
-        // LogPrint.printNote("Time taken: "+
-        //         Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
     }
 
     private void LemmatiseDocument(Map.Entry<String, DocIOWrapper> docEntry){
 
-        if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0)
-        {
-            // System.out.println();
+        if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0) {
             long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
             String timeTakenStr = "time: " + Math.floorDiv(lemTimeTaken, 60) + " m, " + lemTimeTaken % 60 + " s.";
-
             float lemTimeLeft = ((float) lemTimeTaken / (float) docsProcessed) * (totalDocs - docsProcessed);
             String timeToGoStr = "remaining (est.)): " + Math.floor(lemTimeLeft / 60) + " m, " + Math.floor(lemTimeLeft % 60) + " s.";
-
             float percentage = (((float) docsProcessed / (float) totalDocs) * 100);
-
-            // System.out.println("Lemmatising Row ID: " + docEntry.getKey() + " | Number: " + docsProcessed +
-            //         " | Percent Complete: " + (Math.round(percentage * 100f) / 100f) + "%");
-
             LogPrint.printNewStep("Lemmatised: " + docsProcessed +
                     " documents | % complete: " + (Math.round(percentage * 100f) / 100f) + "%", 1);
-
             LogPrint.printStep(timeTakenStr + " | " + timeToGoStr, 1);
         }
 
+        // getting the text from document
         DocIOWrapper doc = docEntry.getValue();
         String rawText = "";
         for(int i = 0; i < textFields.size(); i++){
@@ -150,22 +139,30 @@ public class Lemmatise {
         }
         rawText = rawText.trim();
         rawText = rawText.toLowerCase();
-//        for(String phrase: StopWords.STOPPHRASES) {
-//            rawText = rawText.replaceAll(phrase.toLowerCase(), " ");
-//        }
 
+        // remove stop-phrases
+        for(String phrase: stopPhrases){
+            rawText = rawText.replaceAll(phrase.toLowerCase(), " ");
+        }
+
+        // removing special characters
         rawText = rawText.replaceAll("\\n", " "); // returns
         rawText = rawText.replaceAll("\\r", " "); // carraige returns
         rawText = rawText.replaceAll("\\W", " "); // non word characters
-        rawText = rawText.trim().replaceAll(" +", " ");     //Trim all white space to single spaces
+        rawText = rawText.trim().replaceAll(" +", " "); //Trim all white space to single spaces
 
+        // lemmatising
         List<String> inputLemmas = StanfordLemmatizer.removeStopWords((slem.lemmatise(rawText)));
 
+        // remove stop-words
         inputLemmas.removeAll(stopWords);
 
+        // adding lemmas to document
         doc.setLemmas(inputLemmas);
+
+        // checking length of lemmas
         if(inputLemmas.size() < minLemmas){
-            doc.remove("Too short");
+            doc.setTooShort(true);
             totalDocRemoved++;
         }
 
@@ -175,7 +172,6 @@ public class Lemmatise {
     private void CleanLemmas(){
         if(removeLowCounts > 0){
             LogPrint.printNewStep("Cleaning low count lemmas", 0);
-            // startTime = System.currentTimeMillis();
             HashMap<String, Integer> lemmaCounts = new HashMap<>();
             for(Map.Entry<String, DocIOWrapper> doc: Documents.entrySet()){
                 for(String l: doc.getValue().getLemmas()){
@@ -193,18 +189,14 @@ public class Lemmatise {
                     .collect(Collectors.toList());
 
             Documents.entrySet().parallelStream().forEach(e->e.getValue().filterOutLemmas(lowCounts));
-            // long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
             LogPrint.printCompleteStep();
-
             LogPrint.printNote("Found "+lowCounts.size()+" lemmas with count less than "+(removeLowCounts+1));
-            // LogPrint.printNote("Time taken: "+
-            //         Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
 
         }
         Documents.entrySet().parallelStream().forEach(e->{
             DocIOWrapper doc = e.getValue();
             if(doc.getLemmas().size() < minLemmas && !doc.isRemoved()){
-                doc.remove("Too short");
+                doc.setTooShort(true);
                 totalDocRemoved++;
             }
             doc.makeLemmaString();
@@ -214,9 +206,22 @@ public class Lemmatise {
     private void OutputJSON(){
         JSONObject root = new JSONObject();
         JSONArray lemmas = new JSONArray();
-        metadata.put("nDocsRemoved", totalDocRemoved);
-        metadata.put("stopWords", String.join(",", stopWords));
-        if(removeLowCounts > 0) metadata.put("nLemmasRemoved", lowCounts.size());
+        metadata.put("nDocsTooShort", totalDocRemoved);
+        metadata.put("minDocSize", minLemmas);
+        JSONArray stopWordsArray = new JSONArray();
+        for(String w: stopWords){
+            stopWordsArray.add(w);
+        }
+        metadata.put("stopWords", stopWordsArray);
+        JSONArray stopPhrasesArray = new JSONArray();
+        for(String p: stopPhrases){
+            stopPhrasesArray.add(p);
+        }
+        metadata.put("stopPhrases", stopPhrasesArray);
+        if(removeLowCounts > 0) {
+            metadata.put("nLemmasRemoved", lowCounts.size());
+            metadata.put("minNLemmas", removeLowCounts);
+        }
         root.put("metadata", metadata);
         DocIOWrapper.PrintLemmas();
         for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){

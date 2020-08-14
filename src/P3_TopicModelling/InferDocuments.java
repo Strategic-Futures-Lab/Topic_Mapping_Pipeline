@@ -259,7 +259,6 @@ public class InferDocuments {
                 }
                 csvAppender.appendField(Integer.toString(doc.getNumLemmas()));
                 csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
-                csvAppender.appendField(doc.getRemoveReason());
                 if(!doc.isRemoved()){
                     double[] weights = isMain ? doc.getMainTopicDistribution() : doc.getSubTopicDistribution();
                     for(double weight: weights){
@@ -281,7 +280,6 @@ public class InferDocuments {
         }
         appender.appendField("_wordCount");
         appender.appendField("_inModel");
-        appender.appendField("_whyRemoved");
         for(String l:topicLabels){
             appender.appendField(l);
         }
@@ -314,7 +312,6 @@ public class InferDocuments {
                 }
                 csvAppender.appendField(Integer.toString(doc.getNumLemmas()));
                 csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
-                csvAppender.appendField(doc.getRemoveReason());
                 if(!doc.isRemoved()){
                     for(double weight: doc.getMainTopicDistribution()){
                         csvAppender.appendField(Double.toString(weight));

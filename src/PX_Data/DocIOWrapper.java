@@ -24,8 +24,7 @@ public class DocIOWrapper {
     private int numLemmas;
     private String lemmaString;
     private List<String> lemmas;
-    private boolean removed = false;
-    private String removeReason = "";
+    private boolean tooShort = false;
     // used or set by topic modelling module
     private double[] mainTopicDistribution;
     private double[] subTopicDistribution;
@@ -50,12 +49,11 @@ public class DocIOWrapper {
         this.docIndex = Math.toIntExact((long) jsonDoc.get("docIndex"));
         this.docData = JSONIOWrapper.getStringMap((JSONObject) jsonDoc.get("docData"));
         // set by lemmatise module
-        this.removed = (boolean) jsonDoc.getOrDefault("removed", false);
-        this.removeReason = (String) jsonDoc.getOrDefault("removeReason", "");
+        this.tooShort = (boolean) jsonDoc.getOrDefault("tooShort", false);
         this.lemmaString = (String) jsonDoc.getOrDefault("lemmas", "");
         this.numLemmas = Math.toIntExact((long) jsonDoc.getOrDefault("numLemmas", (long) 0));
         // set by model module
-        if(!this.removed){
+        if(!this.isRemoved()){
             JSONArray distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicDistribution", null);
             if(distrib != null){
                 this.mainTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
@@ -78,8 +76,7 @@ public class DocIOWrapper {
         this.docData = doc.docData;
         this.lemmaString = doc.lemmaString;
         this.numLemmas = doc.numLemmas;
-        this.removed = doc.removed;
-        this.removeReason = doc.removeReason;
+        this.tooShort = doc.tooShort;
         if(doc.mainTopicDistribution != null){
             this.mainTopicDistribution = doc.mainTopicDistribution;
             if(doc.subTopicDistribution != null){
@@ -245,13 +242,21 @@ public class DocIOWrapper {
         return numLemmas;
     }
 
+    // /**
+    //  * Removes the document from modelling, giving a reason
+    //  * @param reason reason for removal
+    //  */
+    // public void remove(String reason){
+    //     removed = true;
+    //     removeReason = reason;
+    // }
+
     /**
-     * Removes the document from modelling, giving a reason
-     * @param reason reason for removal
+     * Setter for tooShort flag
+     * @param b flag for tooShort attribute
      */
-    public void remove(String reason){
-        removed = true;
-        removeReason = reason;
+    public void setTooShort(boolean b){
+        tooShort = b;
     }
 
     /**
@@ -259,16 +264,16 @@ public class DocIOWrapper {
      * @return removed value
      */
     public boolean isRemoved(){
-        return removed;
+        return tooShort;
     }
 
-    /**
-     * Getter for removed reason
-     * @return remove reason
-     */
-    public String getRemoveReason(){
-        return removeReason;
-    }
+    // /**
+    //  * Getter for removed reason
+    //  * @return remove reason
+    //  */
+    // public String getRemoveReason(){
+    //     return removeReason;
+    // }
 
     /**
      * Setter for the distribution over main topics
@@ -331,9 +336,8 @@ public class DocIOWrapper {
         }
         root.put("docData", data);
         // Saving removed data
-        if(removed){
-            root.put("removed", true);
-            root.put("removeReason", removeReason);
+        if(tooShort){
+            root.put("tooShort", true);
         }
         // Saving Lemmas
         if(ToPrint.equals("Lemmas")){
@@ -341,7 +345,7 @@ public class DocIOWrapper {
             root.put("lemmas", lemmaString);
         }
         // Saving Model
-        else if(ToPrint.equals("Model") && !removed){
+        else if(ToPrint.equals("Model") && !this.isRemoved()){
             root.put("numLemmas", numLemmas);
             JSONArray topicDistrib = getDistribJSON(mainTopicDistribution);
             root.put("mainTopicDistribution", topicDistrib);

@@ -42,7 +42,6 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         LOG("generating hierarchy", depth);
         let hData = hierarchyData.make(topics, sizeId);
         LOG("generating bubble map", depth);
-        console.log(sizeScale)
         let bubbleSizeScale = d3.scaleLinear()
             .domain([1, d3.max(hierarchyData.getSizes(hData))])
             .range(sizeScale);
