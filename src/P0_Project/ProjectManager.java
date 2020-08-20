@@ -41,6 +41,10 @@ public class ProjectManager {
     public boolean runTopicDistrib;
     /** Topic Distribution module specifications */
     public TopicDistribModuleSpecs topicDistrib;
+    /** If Compare Topic Distribution module should run */
+    public boolean runCompareDistrib;
+    /** Compare Topic Distribution module specifications */
+    public CompareDistributionsModuleSpecs compareDistrib;
     /** If Topic Cluster module should run */
     public boolean runTopicCluster;
     /** Topic Cluster module specifications */
@@ -49,6 +53,10 @@ public class ProjectManager {
     public boolean runTopicMap;
     /** Topic Mapping module specifications */
     public TopicMappingModuleSpecs topicMap;
+    /** If Overwrite Map module should run */
+    public boolean runOverwriteMap;
+    /** Overwrite Map module specifications */
+    public OverwriteMapModuleSpecs overwriteMap;
 
     /**
      * Constructor, also triggers reading the project file and setting up the specs
@@ -67,15 +75,17 @@ public class ProjectManager {
      */
     private void getRuns(JSONObject specs){
         LogPrint.printNewStep("Getting modules to run", 0);
-        runInput = (boolean) specs.get("input");
-        runLemmatise = (boolean) specs.get("lemmatise");
-        runModel = (boolean) specs.get("model");
-        runTopicModelExport = (boolean) specs.get("exportTopicModel");
-        runDocumentInfer = (boolean) specs.get("inferDocuments");
-        runLabelIndex = (boolean) specs.get("indexLabels");
-        runTopicDistrib = (boolean) specs.get("distributeTopics");
-        runTopicCluster = (boolean) specs.get("clusterTopics");
-        runTopicMap = (boolean) specs.get("mapTopics");
+        runInput = (boolean) specs.getOrDefault("input", false);
+        runLemmatise = (boolean) specs.getOrDefault("lemmatise", false);
+        runModel = (boolean) specs.getOrDefault("model", false);
+        runDocumentInfer = (boolean) specs.getOrDefault("inferDocuments", false);
+        runTopicModelExport = (boolean) specs.getOrDefault("exportTopicModel", false);
+        runLabelIndex = (boolean) specs.getOrDefault("indexLabels", false);
+        runTopicDistrib = (boolean) specs.getOrDefault("distributeTopics", false);
+        runCompareDistrib = (boolean) specs.getOrDefault("compareDistributions", false);
+        runTopicCluster = (boolean) specs.getOrDefault("clusterTopics", false);
+        runTopicMap = (boolean) specs.getOrDefault("mapTopics", false);
+        runOverwriteMap = (boolean) specs.getOrDefault("overwriteMap", false);
         LogPrint.printCompleteStep();
     }
 
@@ -100,11 +110,11 @@ public class ProjectManager {
         if(runModel){
             model = new TopicModelModuleSpecs((JSONObject) projectSpec.get("model"), metaSpecs);
         }
-        if(runTopicModelExport){
-            topicModelExport = new TopicModelExportModuleSpecs((JSONObject) projectSpec.get("exportTopicModel"), metaSpecs);
-        }
         if(runDocumentInfer){
             documentInfer = new DocumentInferModuleSpecs((JSONObject) projectSpec.get("inferDocuments"), metaSpecs);
+        }
+        if(runTopicModelExport){
+            topicModelExport = new TopicModelExportModuleSpecs((JSONObject) projectSpec.get("exportTopicModel"), metaSpecs);
         }
         if(runLabelIndex){
             labelIndex = new LabelIndexModuleSpecs((JSONObject) projectSpec.get("indexLabels"), metaSpecs);
@@ -112,11 +122,17 @@ public class ProjectManager {
         if(runTopicDistrib){
             topicDistrib = new TopicDistribModuleSpecs((JSONObject) projectSpec.get("distributeTopics"), metaSpecs);
         }
+        if(runCompareDistrib){
+            compareDistrib = new CompareDistributionsModuleSpecs((JSONObject) projectSpec.get("compareDistributions"), metaSpecs);
+        }
         if(runTopicCluster){
             topicCluster = new TopicClusterModuleSpecs((JSONObject) projectSpec.get("clusterTopics"), metaSpecs);
         }
         if(runTopicMap){
             topicMap = new TopicMappingModuleSpecs((JSONObject) projectSpec.get("mapTopics"), metaSpecs);
+        }
+        if(runOverwriteMap){
+            overwriteMap = new OverwriteMapModuleSpecs((JSONObject) projectSpec.get("overwriteMap"), metaSpecs);
         }
         LogPrint.printCompleteStep();
     }

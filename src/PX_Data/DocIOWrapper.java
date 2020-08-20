@@ -28,6 +28,8 @@ public class DocIOWrapper {
     // used or set by topic modelling module
     private double[] mainTopicDistribution;
     private double[] subTopicDistribution;
+    // used of set by document inference module
+    private boolean inferred = false;
 
     /**
      * Basic constructor, typically used by Input modules
@@ -62,6 +64,8 @@ public class DocIOWrapper {
                     this.subTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
                 }
             }
+            // set by inference module
+            this.inferred = (boolean) jsonDoc.getOrDefault("inferred", false);
         }
     }
 
@@ -83,6 +87,7 @@ public class DocIOWrapper {
                 this.subTopicDistribution = doc.subTopicDistribution;
             }
         }
+        this.inferred = doc.inferred;
     }
 
     /**
@@ -91,6 +96,14 @@ public class DocIOWrapper {
      */
     public String getId(){
         return docId;
+    }
+
+    /**
+     * Adds a prefix to the doc id
+     * @param p prefix to add
+     */
+    public void prefixId(String p){
+        docId = p + docId;
     }
 
     /**
@@ -321,6 +334,22 @@ public class DocIOWrapper {
     }
 
     /**
+     * Setter for inferred flag
+     * @param b flag for inferred attribute
+     */
+    public void setInferred(boolean b){
+        inferred = b;
+    }
+
+    /**
+     * Getter for inferred value
+     * @return inferred value
+     */
+    public boolean isInferred(){
+        return inferred;
+    }
+
+    /**
      * Creates a JSON object of the document to save in JSON file
      * @return JSON object of the document
      */
@@ -338,6 +367,10 @@ public class DocIOWrapper {
         // Saving removed data
         if(tooShort){
             root.put("tooShort", true);
+        }
+        // Saving inferred data
+        if(inferred){
+            root.put("inferred", true);
         }
         // Saving Lemmas
         if(ToPrint.equals("Lemmas")){

@@ -35,6 +35,7 @@ public class ExportTopicModel {
 
     private ConcurrentHashMap<String, DocIOWrapper> documents;
     private JSONObject documentsMetadata;
+    private boolean hasInferredDocs;
     private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
     private JSONObject mainTopicsMetadata;
     private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
@@ -103,6 +104,9 @@ public class ExportTopicModel {
             DocIOWrapper doc = new DocIOWrapper(docEntry);
             documents.put(doc.getId(), doc);
         }
+        hasInferredDocs = documents.entrySet().stream()
+                .map(d -> d.getValue())
+                .anyMatch(d -> d.isInferred());
         input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
         mainTopicsMetadata = (JSONObject) input.get("metadata");
         mainTopics = new ConcurrentHashMap<>();
@@ -254,6 +258,7 @@ public class ExportTopicModel {
         }
         appender.appendField("_wordCount");
         appender.appendField("_inModel");
+        if(hasInferredDocs) appender.appendField("_inferred");
         for(String l:topicLabels){
             appender.appendField(l);
         }
@@ -287,6 +292,7 @@ public class ExportTopicModel {
                 }
                 csvAppender.appendField(Integer.toString(doc.getNumLemmas()));
                 csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
+                if(hasInferredDocs) csvAppender.appendField(Boolean.toString(doc.isInferred()));
                 if(!doc.isRemoved()){
                     for(double weight: doc.getMainTopicDistribution()){
                         csvAppender.appendField(Double.toString(weight));

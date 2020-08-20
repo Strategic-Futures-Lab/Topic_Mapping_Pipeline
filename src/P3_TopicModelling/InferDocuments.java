@@ -4,6 +4,7 @@ import P0_Project.DocumentInferModuleSpecs;
 import P3_TopicModelling.TopicModelCore.TopicModel;
 import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
+import PX_Data.TopicIOWrapper;
 import PY_Helper.LogPrint;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
@@ -19,34 +20,46 @@ import java.io.ObjectInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class InferDocuments {
 
-    private String modelDir;
     private String mainModelFile;
     private boolean inferFromSubModel;
     private String subModelFile;
 
-    private JSONObject metadata;
-    private ConcurrentHashMap<String, DocIOWrapper> Documents;
+    private boolean exportCSV;
+    private String csvOutput;
+    private List<String> docFields;
+    private int numWordId;
+    private boolean mergeMainTopics;
+    private String mainTopicsFile;
+    private String mainTopicsOutput;
+    private boolean mergeSubTopics;
+    private String subTopicsFile;
+    private String subTopicsOutput;
+    private boolean mergeDocuments;
+    private String documentsFile;
+    private String documentsOutput;
+
+    private JSONObject InferMetadata;
+    private ConcurrentHashMap<String, DocIOWrapper> DocumentsToInfer;
+
+    private JSONObject ModelDocumentsMetadata;
+    private ConcurrentHashMap<String, DocIOWrapper> ModelDocuments;
+    private JSONObject ModelMainTopicsMetadata;
+    private ConcurrentHashMap<String, TopicIOWrapper> ModelMainTopics;
+    private JSONArray ModelMainTopicsSimilarities;
+    private JSONObject ModelSubTopicsMetadata;
+    private ConcurrentHashMap<String, TopicIOWrapper> ModelSubTopics;
+    private JSONArray ModelSubTopicsSimilarities;
 
     private int docsProcessed = 0;
     private int totalDocs = 0;
     private long inferStartTime;
-
     private final static int UPDATE_FREQUENCY = 100;
 
     private int iterations;
-
-    private String docOutput;
-    private List<String> docFields;
-    private boolean exportMainCSV = false;
-    private String mainOutputCSV;
-    private boolean exportSubCSV = false;
-    private String subOutputCSV;
-    private boolean exportMergedCSV = false;
-    private String outputCSV;
-    private int numWordId;
 
     private TopicModel mainModel;
     private TopicModel subModel;
@@ -63,13 +76,9 @@ public class InferDocuments {
         InferDocuments startClass = new InferDocuments();
         LemmaReader reader = new LemmaReader(specs.lemmas);
         startClass.ProcessArguments(specs, reader);
-        startClass.LoadModels();
+        startClass.LoadData();
         startClass.InferDocuments();
-        startClass.SaveDocuments();
-        // startClass.GetAndSetTopicDetails();
-        // startClass.GetAndSetTopicSimilarity();
-        // startClass.SaveTopics();
-        // startClass.SaveDocuments(startClass.nTopics, -1);
+        startClass.SaveData();
 
         long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
 
@@ -80,47 +89,89 @@ public class InferDocuments {
 
     private void ProcessArguments(DocumentInferModuleSpecs specs, LemmaReader reader){
         LogPrint.printNewStep("Processing arguments", 0);
+
         mainModelFile = specs.mainModel;
         inferFromSubModel = specs.inferFromSubModel;
-        if(inferFromSubModel){
-            subModelFile = specs.subModel;
+        if(inferFromSubModel) subModelFile = specs.subModel;
+
+        exportCSV = specs.exportCSV;
+        if(exportCSV){
+            csvOutput = specs.csvOutput;
+            docFields = Arrays.asList(specs.docFields);
+            numWordId = specs.numWordId;
+        }
+        mergeMainTopics = specs.mergeMainTopics;
+        if(mergeMainTopics){
+            mainTopicsFile = specs.mainTopics;
+            mainTopicsOutput = specs.mainTopicsOutput;
+        }
+        mergeSubTopics = specs.mergeSubTopics && inferFromSubModel;
+        if(mergeSubTopics){
+            subTopicsFile = specs.subTopics;
+            subTopicsOutput = specs.subTopicsOutput;
+        }
+        mergeDocuments = specs.mergeDocuments;
+        if(mergeDocuments){
+            documentsFile = specs.documents;
+            documentsOutput = specs.documentsOutput;
         }
 
-        metadata = reader.getMetadata();
-        Documents = reader.getDocuments();
+        InferMetadata = reader.getMetadata();
+        DocumentsToInfer = reader.getDocuments();
 
         iterations = specs.iterations;
 
-        docOutput = specs.documentOutput;
-        docFields = Arrays.asList(specs.docFields);
-        exportMainCSV = specs.exportMainCSV;
-        if(exportMainCSV){
-            mainOutputCSV = specs.mainOutputCSV;
-        }
-        if(inferFromSubModel){
-            exportSubCSV = specs.exportSubCSV;
-            if(exportSubCSV){
-                subOutputCSV = specs.subOutputCSV;
-            }
-        }
-        exportMergedCSV = specs.exportMergedTopicsCSV;
-        if(exportMergedCSV){
-            outputCSV = specs.outputCSV;
-        }
-        numWordId = specs.numWordId;
         LogPrint.printCompleteStep();
         String serSubModelStr = inferFromSubModel ? " and from sub-model" : "";
-        LogPrint.printNote("Inferring "+Documents.size()+" document(s) distributions from main model"+serSubModelStr);
-        if(exportMainCSV) LogPrint.printNote("Exporting main topic distributions in CSV format too");
-        if(exportSubCSV) LogPrint.printNote("Exporting sub topic distributions in CSV format too");
+        LogPrint.printNote("Inferring "+ DocumentsToInfer.size()+" document(s) distributions from main model"+serSubModelStr);
+        if(exportCSV) LogPrint.printNote("Exporting inferred topic distributions in CSV format");
+        if(mergeMainTopics) LogPrint.printNote("Merging inferred main topic data with model main topic data");
+        if(mergeSubTopics) LogPrint.printNote("Merging inferred sub topic data with model sub topic data");
+        if(mergeDocuments) LogPrint.printNote("Merging inferred document data with model document data");
 
     }
 
-    private void LoadModels(){
-        LoadModels(0);
+    private void LoadData(){
+        loadModels();
+        loadDataFiles();
     }
 
-    private void LoadModels(int number){
+    private void loadDataFiles(){
+        if(mergeDocuments || mergeMainTopics || mergeSubTopics)
+            LogPrint.printNewStep("Loading data", 0);
+        if(mergeDocuments){
+            JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
+            ModelDocumentsMetadata = (JSONObject) input.get("metadata");
+            JSONArray docs = (JSONArray) input.get("documents");
+            ModelDocuments = new ConcurrentHashMap<>();
+            for(JSONObject docEntry: (Iterable<JSONObject>) docs) {
+                DocIOWrapper doc = new DocIOWrapper(docEntry);
+                ModelDocuments.put(doc.getId(), doc);
+            }
+        }
+        if(mergeMainTopics){
+            JSONObject input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
+            ModelMainTopicsMetadata = (JSONObject) input.get("metadata");
+            ModelMainTopics = new ConcurrentHashMap<>();
+            for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
+                TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
+                ModelMainTopics.put(topic.getId(), topic);
+            }
+            ModelMainTopicsSimilarities = (JSONArray) input.get("similarities");
+        }
+        if(mergeSubTopics){
+            JSONObject input = JSONIOWrapper.LoadJSON(subTopicsFile, 1);
+            ModelSubTopicsMetadata = (JSONObject) input.get("metadata");
+            ModelSubTopics = new ConcurrentHashMap<>();
+            for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
+                TopicIOWrapper topic = new TopicIOWrapper(topicEntry);
+                ModelSubTopics.put(topic.getId(), topic);
+            }
+            ModelSubTopicsSimilarities = (JSONArray) input.get("similarities");
+        }
+    }
+
+    private void loadModels(){
         LogPrint.printNewStep("Loading main model", 0);
         mainModel = new TopicModel();
         try{
@@ -143,10 +194,10 @@ public class InferDocuments {
                 System.exit(1);
             }
         }
-        GetTopicWords();
+        getTopicWords();
     }
 
-    private void GetTopicWords(){
+    private void getTopicWords(){
         LogPrint.printNewStep("Getting topic labels", 0);
         mainTopicWords = getTopicWords(mainModel);
         if(inferFromSubModel){
@@ -178,10 +229,10 @@ public class InferDocuments {
     private void InferDocuments(){
         LogPrint.printNewStep("Inferring documents", 0);
 
-        totalDocs = Documents.size();
+        totalDocs = DocumentsToInfer.size();
         inferStartTime = System.currentTimeMillis();
 
-        Documents.entrySet().forEach(this::inferDocument);
+        DocumentsToInfer.entrySet().forEach(this::inferDocument);
 
         LogPrint.printNewStep("Inferring documents", 0);
         LogPrint.printCompleteStep();
@@ -205,53 +256,44 @@ public class InferDocuments {
         }
 
         DocIOWrapper doc = document.getValue();
-        doc.setMainTopicDistribution(mainModel.InferTopics(doc.getLemmaString(), iterations));
-        if(inferFromSubModel){
-            doc.setSubTopicDistribution((subModel.InferTopics(doc.getLemmaString(), iterations)));
+        doc.prefixId("infer_");
+        doc.setInferred(true);
+        if(!doc.isRemoved()){
+            doc.setMainTopicDistribution(mainModel.InferTopics(doc.getLemmaString(), iterations));
+            if(inferFromSubModel){
+                doc.setSubTopicDistribution((subModel.InferTopics(doc.getLemmaString(), iterations)));
+            }
         }
         docsProcessed++;
     }
 
-    private void SaveDocuments(){
+    private void SaveData(){
         LogPrint.printNewStep("Saving data", 0);
-        JSONObject root = new JSONObject();
-        JSONArray documents = new JSONArray();
-        JSONObject meta = (JSONObject) metadata.clone();
-        meta.put("nTopicsMain", mainModel.TOPICS);
+        if(exportCSV) saveCSV();
+        if(mergeDocuments) saveMergedDocuments();
+        if(mergeMainTopics) saveMergedTopics(ModelMainTopics, ModelMainTopicsMetadata, ModelMainTopicsSimilarities, mainTopicsOutput, true);
+        if(mergeSubTopics) saveMergedTopics(ModelSubTopics, ModelSubTopicsMetadata, ModelSubTopicsSimilarities, subTopicsOutput, false);
+    }
+
+    private void saveCSV(){
+        LogPrint.printNewStep("Saving "+ csvOutput, 1);
+        String[] topicsLabels = new String[mainTopicWords.size()+subTopicWords.size()];
+        for (Map.Entry<Integer, String> t : mainTopicWords.entrySet()) {
+            topicsLabels[t.getKey()] = "_mainTopic_"+t.getValue();
+        }
         if(inferFromSubModel){
-            meta.put("nTopicsSub", subModel.TOPICS);
+            int offset = mainTopicWords.size();
+            for (Map.Entry<Integer, String> t : subTopicWords.entrySet()) {
+                topicsLabels[t.getKey()+offset] = "_subTopic_"+t.getValue();
+            }
         }
-        root.put("metadata", meta);
-        DocIOWrapper.PrintModel();
-        for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){
-            documents.add(entry.getValue().toJSON());
-        }
-        root.put("documents", documents);
-        JSONIOWrapper.SaveJSON(root, docOutput, 1);
-
-        SaveCSV();
-    }
-
-    private void SaveCSV(){
-        if(exportMainCSV) saveCSV(mainOutputCSV, mainTopicWords, true);
-        if(exportSubCSV) saveCSV(subOutputCSV, subTopicWords, false);
-        if(exportMergedCSV) saveMergedTopicsCSV();
-    }
-
-    private void saveCSV(String filename, HashMap<Integer, String> topicWords, boolean isMain){
-        LogPrint.printNewStep("Saving "+filename, 1);
-        String[] topicsLabels = new String[topicWords.size()];
-        for (Map.Entry<Integer, String> t : topicWords.entrySet()) {
-            String prefix = isMain ? "_mainTopic_" : "_subTopic_";
-            topicsLabels[t.getKey()] = prefix+t.getValue();
-        }
-        File file = new File(filename);
+        File file = new File(csvOutput);
         file.getParentFile().mkdirs();
         CsvWriter csvWriter = new CsvWriter();
         csvWriter.setAlwaysDelimitText(true);
         try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){
             createHeader(csvAppender, topicsLabels);
-            for(Map.Entry<String, DocIOWrapper> d: Documents.entrySet()){
+            for(Map.Entry<String, DocIOWrapper> d: DocumentsToInfer.entrySet()){
                 DocIOWrapper doc = d.getValue();
                 csvAppender.appendField(doc.getId());
                 for(String f: docFields){
@@ -259,10 +301,15 @@ public class InferDocuments {
                 }
                 csvAppender.appendField(Integer.toString(doc.getNumLemmas()));
                 csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
+                csvAppender.appendField(Boolean.toString(doc.isInferred()));
                 if(!doc.isRemoved()){
-                    double[] weights = isMain ? doc.getMainTopicDistribution() : doc.getSubTopicDistribution();
-                    for(double weight: weights){
+                    for(double weight: doc.getMainTopicDistribution()){
                         csvAppender.appendField(Double.toString(weight));
+                    }
+                    if(inferFromSubModel){
+                        for(double weight: doc.getSubTopicDistribution()){
+                            csvAppender.appendField(Double.toString(weight));
+                        }
                     }
                 }
                 csvAppender.endLine();
@@ -280,53 +327,89 @@ public class InferDocuments {
         }
         appender.appendField("_wordCount");
         appender.appendField("_inModel");
+        appender.appendField("_inferred");
         for(String l:topicLabels){
             appender.appendField(l);
         }
         appender.endLine();
     }
 
-    private void saveMergedTopicsCSV(){
-        LogPrint.printNewStep("Saving "+outputCSV, 1);
-        String[] topicsLabels = new String[mainTopicWords.size()+subTopicWords.size()];
-        for (Map.Entry<Integer, String> t : mainTopicWords.entrySet()) {
-            topicsLabels[t.getKey()] = "_mainTopic_"+t.getValue();
+    private void saveMergedDocuments(){
+        JSONObject root = new JSONObject();
+        JSONArray documents = new JSONArray();
+        JSONObject meta = (JSONObject) ModelDocumentsMetadata.clone();
+        meta.put("nDocsInferred", getNDocsInferred(DocumentsToInfer) + getNDocsInferred(ModelDocuments));
+        meta.put("nDocsTooShort", getNDocsRemoved(DocumentsToInfer) + getNDocsRemoved(ModelDocuments));
+        meta.put("totalDocs", DocumentsToInfer.size()+ModelDocuments.size());
+        root.put("metadata", meta);
+        DocIOWrapper.PrintModel();
+        for(Map.Entry<String, DocIOWrapper> entry: ModelDocuments.entrySet()){
+            documents.add(entry.getValue().toJSON());
         }
-        if(inferFromSubModel){
-            int offset = mainTopicWords.size();
-            for (Map.Entry<Integer, String> t : subTopicWords.entrySet()) {
-                topicsLabels[t.getKey()+offset] = "_subTopic_"+t.getValue();
-            }
+        for(Map.Entry<String, DocIOWrapper> entry: DocumentsToInfer.entrySet()){
+            DocIOWrapper doc = entry.getValue();
+            documents.add(doc.toJSON());
         }
-        File file = new File(outputCSV);
-        file.getParentFile().mkdirs();
-        CsvWriter csvWriter = new CsvWriter();
-        csvWriter.setAlwaysDelimitText(true);
-        try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){
-            createHeader(csvAppender, topicsLabels);
-            for(Map.Entry<String, DocIOWrapper> d: Documents.entrySet()){
+        root.put("documents", documents);
+        JSONIOWrapper.SaveJSON(root, documentsOutput, 1);
+    }
+
+    private int getNDocsRemoved(ConcurrentHashMap<String, DocIOWrapper> docs){
+        return docs.entrySet().stream()
+                .map(d -> d.getValue())
+                .filter(d -> d.isRemoved())
+                .collect(Collectors.toList())
+                .size();
+    }
+
+    private int getNDocsInferred(ConcurrentHashMap<String, DocIOWrapper> docs){
+        return docs.entrySet().stream()
+                .map(d -> d.getValue())
+                .filter(d -> d.isInferred())
+                .collect(Collectors.toList())
+                .size();
+    }
+
+    private void saveMergedTopics(ConcurrentHashMap<String, TopicIOWrapper> topics, JSONObject metadata, JSONArray similarities, String output, boolean isMain) {
+        mergeInferredDocsWithTopics(topics, isMain);
+        JSONObject root = new JSONObject();
+        JSONArray JsonTopics = new JSONArray();
+        JSONObject meta = (JSONObject) metadata.clone();
+        int topicDocsTooShort = getIntJson(ModelSubTopicsMetadata, "nDocsTooShort", 0);
+        int topicTotalDocs = getIntJson(ModelSubTopicsMetadata, "totalDocs", 0);
+        int topicDocsInferred = getIntJson(ModelSubTopicsMetadata, "nDocsInferred", 0);
+        meta.put("nDocsInferred", getNDocsInferred(DocumentsToInfer) + topicDocsInferred);
+        meta.put("nDocsTooShort", getNDocsRemoved(DocumentsToInfer) + topicDocsTooShort);
+        meta.put("totalDocs", DocumentsToInfer.size() + topicTotalDocs);
+        root.put("metadata", meta);
+        for (Map.Entry<String, TopicIOWrapper> entry : topics.entrySet()) {
+            JsonTopics.add(entry.getValue().toJSON());
+        }
+        root.put("topics", JsonTopics);
+        root.put("similarities", similarities);
+        JSONIOWrapper.SaveJSON(root, output, 1);
+    }
+
+    private void mergeInferredDocsWithTopics(ConcurrentHashMap<String, TopicIOWrapper> topics, boolean isMain){
+        for(Map.Entry<String, TopicIOWrapper> t: topics.entrySet()){
+            TopicIOWrapper topic = t.getValue();
+            int index = topic.getIndex();
+            List<TopicIOWrapper.JSONTopicWeight> topicInferredDocs = new ArrayList<>();
+            for(Map.Entry<String, DocIOWrapper> d: DocumentsToInfer.entrySet()){
                 DocIOWrapper doc = d.getValue();
-                csvAppender.appendField(doc.getId());
-                for(String f: docFields){
-                    csvAppender.appendField(doc.getData(f));
-                }
-                csvAppender.appendField(Integer.toString(doc.getNumLemmas()));
-                csvAppender.appendField(Boolean.toString(!doc.isRemoved()));
-                if(!doc.isRemoved()){
-                    for(double weight: doc.getMainTopicDistribution()){
-                        csvAppender.appendField(Double.toString(weight));
-                    }
-                    if(inferFromSubModel){
-                        for(double weight: doc.getSubTopicDistribution()){
-                            csvAppender.appendField(Double.toString(weight));
-                        }
+                if(doc.isInferred() && !doc.isRemoved()){
+                    double[] topicDistribution = isMain ? doc.getMainTopicDistribution() : doc.getSubTopicDistribution();
+                    double topicWeight = topicDistribution[index];
+                    if(topicWeight > 0){
+                        topicInferredDocs.add(new TopicIOWrapper.JSONTopicWeight(doc.getId(), topicDistribution[index]));
                     }
                 }
-                csvAppender.endLine();
             }
-        } catch (Exception e){
-            e.printStackTrace();
+            topic.addToDocs(topicInferredDocs);
         }
-        LogPrint.printCompleteStep();
+    }
+
+    private int getIntJson(JSONObject jsonObject, String name, int def){
+        return Math.toIntExact((long) jsonObject.getOrDefault(name, (long) def));
     }
 }

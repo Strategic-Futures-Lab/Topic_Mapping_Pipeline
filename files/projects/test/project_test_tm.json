@@ -1,14 +1,14 @@
 {
   "run": {
-    "input": false,
-    "lemmatise": false,
+    "input": true,
+    "lemmatise": true,
     "model": true,
-    "exportTopicModel": false,
     "inferDocuments": false,
-    "indexLabels": false,
-    "distributeTopics": false,
-    "clusterTopics": false,
-    "mapTopics": false
+    "exportTopicModel": true,
+    "indexLabels": true,
+    "distributeTopics": true,
+    "clusterTopics": true,
+    "mapTopics": true
   },
   "metaParameters": {
     "projectDir": "files/",
@@ -20,28 +20,28 @@
   },
   "input": {
     "module": "CSV",
-    "source": "test_infer.csv",
+    "source": "test_train.csv",
     "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract",
       "authors": "Authors", "money":  "Money", "date": "Date"},
-    "output": "corpus_infer.json"
+    "output": "corpus_train.json"
   },
   "lemmatise": {
-    "corpus": "corpus_infer.json",
+    "corpus": "corpus_train.json",
     "textFields": ["title", "abstract"],
     "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "stopWords": [],
     "minLemmas": 10,
     "removeLowCounts": 0,
-    "output": "lemmas_infer.json"
+    "output": "lemmas_train.json"
   },
   "model": {
     "lemmas": "lemmas_train.json",
     "modelType": "hierarchical",
     "dataDir": "topicModel/",
     "mainModel": {
-      "topics": 10,
+      "topics": 15,
       "words": 20,
-      "docs": 30,
+      "docs": 50,
       "iterations": 1000,
       "serialise": "trainedMainModel.ser",
       "topicOutput": "mainTopics.json",
@@ -69,6 +69,7 @@
       "assignmentOutput": "assignment.csv"
     }
   },
+  "inferDocuments": { },
   "exportTopicModel": {
     "mainTopics": "topicModel/mainTopics.json",
     "subTopics": "topicModel/subTopics.json",
@@ -77,17 +78,6 @@
     "mainOutput": "mainModel.json",
     "subOutput": "subModel.json",
     "outputCSV": "model.csv",
-    "numWordId": 5
-  },
-  "inferDocuments": {
-    "modelDir": "topicModel/",
-    "mainModel": "trainedMainModel.ser",
-    "subModel": "trainedSubModel.ser",
-    "lemmas": "lemmas_infer.json",
-    "iterations": 1000,
-    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
-    "documentOutput": "inferred_documents.json",
-    "outputCSV": "inferred_documents.csv",
     "numWordId": 5
   },
   "indexLabels": {

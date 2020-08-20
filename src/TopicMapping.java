@@ -7,9 +7,11 @@ import P3_TopicModelling.InferDocuments;
 import P3_TopicModelling.TopicModelling;
 import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
+import P4_Analysis.TopicDistribution.CompareDistributions;
 import P4_Analysis.TopicDistribution.TopicDistribution;
 import P5_TopicMapping.BubbleMap;
 import P3_TopicModelling.ExportTopicModel;
+import P5_TopicMapping.OverwriteMap;
 import PY_Helper.LogPrint;
 
 import java.util.ArrayList;
@@ -61,11 +63,11 @@ public class TopicMapping {
         if(projectManager.runModel){
             this.RunModel();
         }
-        if(projectManager.runTopicModelExport){
-            this.RunExport();
-        }
         if(projectManager.runDocumentInfer){
             this.RunDocumentInference();
+        }
+        if(projectManager.runTopicModelExport){
+            this.RunExport();
         }
         if(projectManager.runLabelIndex){
             this.RunLabelIndex();
@@ -73,11 +75,17 @@ public class TopicMapping {
         if(projectManager.runTopicDistrib){
             this.RunTopicDistrib();
         }
+        if(projectManager.runCompareDistrib){
+            this.RunCompareDistrib();
+        }
         if(projectManager.runTopicCluster){
             this.RunTopicCluster();
         }
         if(projectManager.runTopicMap){
             this.RunTopicMap();
+        }
+        if(projectManager.runOverwriteMap){
+            this.RunOverwriteMap();
         }
     }
 
@@ -105,12 +113,12 @@ public class TopicMapping {
 
     }
 
-    private void RunExport(){
-        times.add(ExportTopicModel.ExportTopicModel(projectManager.topicModelExport));
-    }
-
     private void RunDocumentInference(){
         times.add(InferDocuments.InferDocuments(projectManager.documentInfer));
+    }
+
+    private void RunExport(){
+        times.add(ExportTopicModel.ExportTopicModel(projectManager.topicModelExport));
     }
 
     private void RunLabelIndex(){
@@ -121,6 +129,10 @@ public class TopicMapping {
         times.add(TopicDistribution.Distribute(projectManager.topicDistrib));
     }
 
+    private void RunCompareDistrib(){
+        times.add(CompareDistributions.Compare(projectManager.compareDistrib));
+    }
+
     private void RunTopicCluster(){
         times.add(TopicClustering.Cluster(projectManager.topicCluster));
     }
@@ -129,5 +141,9 @@ public class TopicMapping {
         if(projectManager.topicMap.mapType.equals("bubble")){
             times.add(BubbleMap.MapTopics(projectManager.topicMap));
         }
+    }
+
+    private void RunOverwriteMap(){
+        times.add(OverwriteMap.Overwrite(projectManager.overwriteMap));
     }
 }

@@ -134,7 +134,42 @@ public class JSONIOWrapper {
         return root;
     }
 
+    public static JSONArray LoadJSONArray(String filename, int depth){
+        LogPrint.printNewStep("Loading "+filename, depth);
+
+        JSONArray root = new JSONArray();
+
+        JSONParser parser = new JSONParser();
+        try (FileReader file = new FileReader(filename)){
+            root = (JSONArray) parser.parse(file);
+            LogPrint.printCompleteStep();
+        }
+        catch (IOException | ParseException e){
+            LogPrint.printNoteError("Error while loading "+filename);
+            e.printStackTrace();
+        }
+        return root;
+    }
+
     public static void SaveJSON(JSONObject obj, String filename, int depth){
+        LogPrint.printNewStep("Saving "+filename, depth);
+        try {
+            File file = new File(filename);
+            file.getParentFile().mkdirs();
+            FileWriter writer = new FileWriter(file);
+            String str = obj.toJSONString();
+            writer.write(str);
+            writer.flush();
+
+            LogPrint.printCompleteStep();
+        }
+        catch(IOException e){
+            LogPrint.printNoteError("Error while saving "+filename);
+            e.printStackTrace();
+        }
+    }
+
+    public static void SaveJSONArray(JSONArray obj, String filename, int depth){
         LogPrint.printNewStep("Saving "+filename, depth);
         try {
             File file = new File(filename);

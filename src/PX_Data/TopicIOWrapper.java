@@ -5,21 +5,29 @@ import org.json.simple.JSONObject;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TopicIOWrapper {
 
     /**
+     * Comparator class to sort JSONTopicWeights
+     */
+    public class SortByWeight implements Comparator<JSONTopicWeight>{
+        public int compare(JSONTopicWeight a, JSONTopicWeight b){
+            return Double.compare(b.weight - a.weight, 0.0);
+        }
+    }
+
+    /**
      * Class to represent an instance with weight in a topic, e.g.: words or document.
      */
     public static class JSONTopicWeight {
+
         public String ID;
         public double weight;
         public HashMap<String, String> data;
+        public double initialWeight;
 
         /**
          * Constructor
@@ -32,27 +40,7 @@ public class TopicIOWrapper {
             df.setRoundingMode(RoundingMode.UP);
             this.weight = Double.parseDouble(df.format(weight));
             this.data = new HashMap<>();
-        }
-
-        /**
-         * Constructor from JSON object
-         * @param jsonWeight JSON object of the instance
-         */
-        public JSONTopicWeight(JSONObject jsonWeight){
-            this.ID = (String) jsonWeight.get("id");
-            this.weight = (double) jsonWeight.get("weight");
-            this.data = JSONIOWrapper.getStringMap((JSONObject) jsonWeight.getOrDefault("data", new JSONObject()));
-        }
-
-        /**
-         * Constructor from JSON object
-         * @param jsonWeight JSON object of the instance
-         * @param customName custom name of the instance
-         */
-        public JSONTopicWeight(JSONObject jsonWeight, String customName){
-            this.ID = (String) jsonWeight.get(customName);
-            this.weight = (double) jsonWeight.get("weight");
-            this.data = JSONIOWrapper.getStringMap((JSONObject) jsonWeight.getOrDefault("data", new JSONObject()));
+            this.initialWeight = this.weight;
         }
 
         /**
@@ -65,6 +53,24 @@ public class TopicIOWrapper {
             this.ID = (String) jsonWeight.get(customName);
             this.weight = (double) jsonWeight.get("weight");
             this.data = JSONIOWrapper.getStringMap((JSONObject) jsonWeight.getOrDefault(customDataName, new JSONObject()));
+            this.initialWeight = (double) jsonWeight.getOrDefault("initial", this.weight);
+        }
+
+        /**
+         * Constructor from JSON object
+         * @param jsonWeight JSON object of the instance
+         * @param customName custom name of the instance
+         */
+        public JSONTopicWeight(JSONObject jsonWeight, String customName){
+            this(jsonWeight, customName, "data");
+        }
+
+        /**
+         * Constructor from JSON object
+         * @param jsonWeight JSON object of the instance
+         */
+        public JSONTopicWeight(JSONObject jsonWeight){
+            this(jsonWeight, "id", "data");
         }
 
         /**
@@ -91,6 +97,9 @@ public class TopicIOWrapper {
                     d.put(e.getKey(), e.getValue());
                 }
                 obj.put("data", d);
+            }
+            if(initialWeight != weight){
+                obj.put("initial", initialWeight);
             }
             return obj;
         }
@@ -382,6 +391,18 @@ public class TopicIOWrapper {
     }
 
     /**
+     * Adds entry to the list of documents, mainly used after inference
+     * the list is then reordered and filtered to keep the initial length
+     * @param newDocs the new document distribution to add
+     */
+    public void addToDocs(List<JSONTopicWeight> newDocs){
+        int nDocs = docs.size();
+        docs.addAll(newDocs);
+        docs.sort(new SortByWeight());
+        docs = docs.subList(0, nDocs);
+    }
+
+    /**
      * Add a topic id as main topic
      * @param id main topic id
      */
@@ -427,6 +448,19 @@ public class TopicIOWrapper {
      */
     public void addTotal(JSONTopicWeight total){
         distributionTotals.add(total);
+    }
+
+    /**
+     * Finds an entry from distributionTotals with ID id
+     * @param id ID to match
+     * @return distribution total
+     * @throws NoSuchElementException if no math found
+     */
+    public JSONTopicWeight findTotal(String id) throws NoSuchElementException{
+        Optional<JSONTopicWeight> total = distributionTotals.stream()
+                .filter(t -> t.ID.equals(id))
+                .findAny();
+        return total.get();
     }
 
     /**

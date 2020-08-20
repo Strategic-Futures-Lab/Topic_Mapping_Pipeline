@@ -35,7 +35,7 @@ public class TopicModelExportModuleSpecs {
     public String[] docFields;
     /** Number of words to identify a topic in csv outputs,
      * optional, defaults to 3 */
-    public int numWordId;
+    public int numWordId = 3;
 
     /**
      * Constructor: reads the specification from the "mapTopics" entry in the project file
