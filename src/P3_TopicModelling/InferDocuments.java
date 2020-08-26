@@ -277,7 +277,8 @@ public class InferDocuments {
 
     private void saveCSV(){
         LogPrint.printNewStep("Saving "+ csvOutput, 1);
-        String[] topicsLabels = new String[mainTopicWords.size()+subTopicWords.size()];
+        int subTopicsSize = inferFromSubModel ? subTopicWords.size() : 0;
+        String[] topicsLabels = new String[mainTopicWords.size()+subTopicsSize];
         for (Map.Entry<Integer, String> t : mainTopicWords.entrySet()) {
             topicsLabels[t.getKey()] = "_mainTopic_"+t.getValue();
         }
@@ -375,9 +376,9 @@ public class InferDocuments {
         JSONObject root = new JSONObject();
         JSONArray JsonTopics = new JSONArray();
         JSONObject meta = (JSONObject) metadata.clone();
-        int topicDocsTooShort = getIntJson(ModelSubTopicsMetadata, "nDocsTooShort", 0);
-        int topicTotalDocs = getIntJson(ModelSubTopicsMetadata, "totalDocs", 0);
-        int topicDocsInferred = getIntJson(ModelSubTopicsMetadata, "nDocsInferred", 0);
+        int topicDocsTooShort = getIntJson(metadata, "nDocsTooShort", 0);
+        int topicTotalDocs = getIntJson(metadata, "totalDocs", 0);
+        int topicDocsInferred = getIntJson(metadata, "nDocsInferred", 0);
         meta.put("nDocsInferred", getNDocsInferred(DocumentsToInfer) + topicDocsInferred);
         meta.put("nDocsTooShort", getNDocsRemoved(DocumentsToInfer) + topicDocsTooShort);
         meta.put("totalDocs", DocumentsToInfer.size() + topicTotalDocs);
