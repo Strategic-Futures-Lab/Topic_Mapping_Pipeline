@@ -27,6 +27,7 @@ public class TopicModel implements Serializable {
     public double ALPHASUM = 1.0;
     public double BETA = 0.01;
     public boolean SYMMETRICALPHA = false;
+    public int OPTIMINTERVAL = 50;
 
     public List<Document> documents;
     public List<String> numIDtoStringID = new ArrayList<>();
@@ -117,8 +118,8 @@ public class TopicModel implements Serializable {
         int wordPerTopicPrint = 10;
         model.setTopicDisplay(topicPrintInterval, wordPerTopicPrint);
         // setting the interval for optimising alpha and beta parameters
-        int optimizeInterval = 50;
-        model.setOptimizeInterval(optimizeInterval);
+
+        model.setOptimizeInterval(OPTIMINTERVAL);
         // adding custom log handler to capture model data
         MalletLogHandler logHandler = new MalletLogHandler();
         ParallelTopicModel.logger.addHandler(logHandler);

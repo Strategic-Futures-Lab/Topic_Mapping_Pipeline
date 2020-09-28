@@ -63,6 +63,7 @@ public class TopicModelling {
     private double alphaSum = 1.0;
     private double beta = 0.01;
     private boolean symmetricAlpha = false;
+    private int optimInterval = 50;
     private String topicLogOutput = "";
     private boolean outputTopicLog = false;
 
@@ -131,6 +132,7 @@ public class TopicModelling {
         alphaSum = modelSpecs.alphaSum;
         beta = modelSpecs.beta;
         symmetricAlpha = modelSpecs.symmetricAlpha;
+        optimInterval = modelSpecs.optimInterval;
         seedIndex=modelSpecs.seedIndex;
         outputTopicLog = modelSpecs.outputTopicLog;
         if(outputTopicLog){
@@ -192,6 +194,7 @@ public class TopicModelling {
         tModel.TOPICS = nTopics;
         tModel.SEED = RANDOM_SEEDS[seedIndex];
         tModel.ITER = nIterations;
+        tModel.OPTIMINTERVAL = optimInterval;
         tModel.ALPHASUM = alphaSum;
         tModel.BETA = beta;
         tModel.SYMMETRICALPHA = symmetricAlpha;
