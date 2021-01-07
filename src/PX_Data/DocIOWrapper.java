@@ -99,6 +99,13 @@ public class DocIOWrapper {
     }
 
     /**
+     * Setter method for the document id
+     * **WARNING**: USE WITH CAUTION, IDEALLY ONLY BEFORE SAVING ON FILE
+     * @param id the new id
+     */
+    public void setId(String id){ docId = id; }
+
+    /**
      * Adds a prefix to the doc id
      * @param p prefix to add
      */
@@ -113,6 +120,13 @@ public class DocIOWrapper {
     public int getIndex(){
         return docIndex;
     }
+
+    /**
+     * Setter method for the document index
+     * **WARNING**: USE WITH CAUTION, IDEALLY ONLY BEFORE SAVING ON FILE
+     * @param index the new index
+     */
+    public void setIndex(int index){ docIndex = index; }
 
     /**
      * Adds a new data entry to the document
