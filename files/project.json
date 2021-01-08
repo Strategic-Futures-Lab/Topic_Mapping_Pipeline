@@ -39,10 +39,10 @@
     "modelType": "hierarchical",
     "dataDir": "topicModel/",
     "mainModel": {
-      "topics": 10,
+      "topics": 20,
       "words": 20,
       "docs": 50,
-      "iterations": 100,
+      "iterations": 1000,
       "serialise": "trainedMainModel.ser",
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
@@ -53,14 +53,15 @@
       "beta": 0.1
     },
     "subModel": {
-      "topics": 20,
+      "topics": 100,
       "words": 20,
       "docs": 30,
-      "iterations": 100,
+      "iterations": 1000,
       "serialise": "trainedSubModel.ser",
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
-      "numWordId": 5
+      "numWordId": 5,
+      "llOutput": "subLL.json"
     },
     "documentOutput": "documents.json",
     "hierarchy": {
