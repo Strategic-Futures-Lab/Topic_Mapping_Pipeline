@@ -101,11 +101,11 @@ public class HierarchicalTopicModelling {
                 // find the main topic
                 TopicIOWrapper mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
                 // assign the main topic to the sub topic
-                subTopic.addMainTopicId(mainTopic.getId());
+                subTopic.addMainTopicId(mainTopic.getId(), currentMax);
                 // if still under the maxAssignMain threshold
                 if(i<maxAssignMain){
                     // assign the sub topic to the main topic
-                    mainTopic.addSubTopicId(subTopic.getId());
+                    mainTopic.addSubTopicId(subTopic.getId(), currentMax);
                 }
             }
             // save this sub topic's assignments
