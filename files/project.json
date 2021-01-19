@@ -70,6 +70,7 @@
       "maxAssign": 1,
       "maxAssignMain": 1,
       "maxAssignSub": 3,
+      "assignmentType" :  "Perceptual",
       "assignmentOutput": "assignment.csv"
     }
   },
