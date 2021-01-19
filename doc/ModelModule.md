@@ -107,7 +107,10 @@ The specification for `hierarchy` should follow this structure:
   "model":{...
     "hierarchy": {
       "modelSimOutput": "path",
-      "maxAssign": 3,
+      "assignmentType" :  "Perceptual",
+      "maxAssign": 1,
+      "maxAssignMain": 1,
+      "maxAssignSub": 3,
       "assignmentOutput": "path"
     },
   ...}
@@ -118,6 +121,8 @@ Where:
 - `modelSimOutput` is the path to the CSV file saving the main-to-sub topic similarity matrix (excluding directory),
 using this parameter is optional, and the data won't be saved if this parameter is not specified;
 - `maxAssign` is the number of main topics assigned to a sub topic, it is optional and defaults to 1;
+- `assignementType` defult is the "Perceptual" meaning the sub/super topic assignemnets are calcualted based on the perceptual (top words) similarity of topics. 
+                    if it is set to "Document" the assignement will be calcualted based on the Cosine similarity of the document vectors.  
 - `assignmentOutput` is the path to the CSV file saving the sub to main topic assignement data (excluding directory),
 using this parameter is optional, and the data won't be saved if this parameter is not specified.
 
