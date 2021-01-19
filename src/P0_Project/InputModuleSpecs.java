@@ -22,7 +22,7 @@ public class InputModuleSpecs{
     /** Filename for the JSON corpus file generated */
     public String output;
     /** used by pdf intput */
-    public int wordsPerDoc;
+    public Long wordsPerDoc;
 
     /**
      * Constructor: reads the specification from the "input" entry in the project file
@@ -34,7 +34,7 @@ public class InputModuleSpecs{
         fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));
         output = metaSpecs.getDataDir() + (String) specs.get("output");
         if(module.equals("PDF")){
-            wordsPerDoc = Math.toIntExact((long) specs.getOrDefault("wordsPerdoc", 100));
+            wordsPerDoc = Long.valueOf(Math.toIntExact((long) specs.getOrDefault("wordsPerDoc", -1)));
         }
     }
 }
