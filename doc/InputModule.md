@@ -22,6 +22,7 @@ The Input module entry in the project file should have the following structure:
       "module": "module name", 
       "source": "path",
       "fields": {"key": "value", ...},
+      "wordsPerDoc" : -1,
       "output": "path"
   }
 ...}
@@ -34,6 +35,7 @@ Where:
     - `"GTR"` for the GTR Input;
 - `source` is the path to the input file or directory (depending on sub module used);
 - `output` is the path to the output corpus JSON file;
+- `wordsPerDoc` the size of the chunks for long files. -1 is the deafult value meaning the file will NOT be divided into chunks.
 - `fields` details the document attributes to read from a formatted data input (CSV or JSON), for example:
     - the input csv file has the columns `A,B,C,D,E`, and `fields` has the value `{"a":"A","b":"B","d":"D"}`, then each
     document saved in the corpus file will have `"docData":{"a":...,"b":...,"d":...}` with the values from columns `A`,
