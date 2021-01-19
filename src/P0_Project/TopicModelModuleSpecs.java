@@ -34,9 +34,15 @@ public class TopicModelModuleSpecs {
     /** Flag for writing assignment between main and sub topics if "hierarchical" module used,
      * defaults to false if assignmentOutput = "" */
     public boolean outputAssignment = false;
-    /** Maximum number of main topics assigned to a sub topic, if "hierarchical" module used,
+    /** Maximum number of topics assigned between main and sub topics, if "hierarchical" module used,
      * optional, defaults to 1 */
     public int maxAssign;
+    /** Maximum number of sub topics assigned to a main topic, if "hierarchical" module used,
+     * optional, defaults to maxAssign */
+    public int maxAssignMain;
+    /** Maximum number of main topics assigned to a sub topic, if "hierarchical" module used,
+     * optional, defaults to maxAssign */
+    public int maxAssignSub;
 
     /**
      * Constructor: reads the specification from the "model" entry in the project file
@@ -57,6 +63,8 @@ public class TopicModelModuleSpecs {
             subModel = new ModelSpecs((JSONObject) specs.get("subModel"), dataDir);
             JSONObject hierarchySpecs = (JSONObject) specs.get("hierarchy");
             maxAssign = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssign", (long) 1));
+            maxAssignMain = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssignMain", (long) maxAssign));
+            maxAssignSub = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssignSub", (long) maxAssign));
             similarityOutput = (String) hierarchySpecs.getOrDefault("modelSimOutput", "");
             if(!similarityOutput.equals("")){
                 outputSimilarity = true;

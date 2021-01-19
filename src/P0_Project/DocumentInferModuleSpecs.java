@@ -10,6 +10,8 @@ public class DocumentInferModuleSpecs {
 
     /** Filename to lemma data to infer (from Lemmatise module) */
     public String lemmas;
+    /** Name for model document file (from previous Topic Model or Document Infer modules) */
+    public String documents = "";
     /** Number of iterations for the inferencer to go through, optional, defaults to 100 */
     public int iterations = 100;
     /** Directory where model are located, optional, defautls to "" */
@@ -25,8 +27,6 @@ public class DocumentInferModuleSpecs {
     public String mainTopics = "";
     /** Name for sub topic file, only required if subTopicsOutput != "" */
     public String subTopics = "";
-    /** Name for model document file, only required if documentsOutput != "" */
-    public String documents = "";
 
     // OUTPUT
 
@@ -67,6 +67,7 @@ public class DocumentInferModuleSpecs {
         if(!modelDir.endsWith("/")){
             modelDir = modelDir+"/";
         }
+        documents = modelDir + (String) specs.get("documents");
         mainModel = modelDir + (String) specs.get("mainModel");
         subModel = (String) specs.getOrDefault("subModel", "");
         inferFromSubModel = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subModel.length() > 0;
@@ -87,7 +88,6 @@ public class DocumentInferModuleSpecs {
         mergeDocuments = documentsOutput.length() > 0;
         if(mergeDocuments){
             documentsOutput = outputDir + documentsOutput;
-            documents = modelDir + (String) specs.get("documents");
         }
         mainTopicsOutput = (String) specs.getOrDefault("mainTopicsOutput", "");
         mergeMainTopics = mainTopicsOutput.length() > 0;

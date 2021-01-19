@@ -3,6 +3,7 @@ const d3 = require('../libs/d3.min.js');
 //const planck = require('../libs/planck.min.js');
 const bubbletreemap = require('../libs/bubbletreemap.js');
 const hierarchyData = require('../hierarchy/hierarchyData.js');
+const {round, transform, isObject} = require('../libs/lodash.min.js');
 
 (function Main(){
 
@@ -11,7 +12,9 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         console.log(tab+" - "+msg)
     }
 
-    let topicFile, mapFile, sizeId, sizeScale, isMain, targetSize;
+    // parameters
+    let topicFile, mapFile, sizeId, sizeScale, isMain, targetSize, outputFormat;
+    // returns
     let topicsData;
 
     function processArgs(){
@@ -23,6 +26,7 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         sizeId = args[3] || "";
         sizeScale = JSON.parse(args[4]) || [5,40];
         targetSize = JSON.parse(args[5]) || [1000,1000];
+        outputFormat = args[6] || "full";
         LOG("mapping topics from "+topicFile+" to "+mapFile, 2);
     }
 
@@ -68,17 +72,23 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         });
         LOG("building map data", depth);
         let tmpTopics = bubblesData.map(d=>{
-            return {
+            let tData = {
                 "topicId": d.data.topicData.topicId,
                 "clusterId": d.data.topicData.clusterId,
-                "size": d.data.size,
+                "size": round(d.data.size, 3),
                 "labels": d.data.topicData.topWords,
                 "bubbleMap": {
-                    "r": d.r,
-                    "cx": d.x,
-                    "cy": d.y
+                    "r": round(d.r, 3),
+                    "cx": round(d.x, 3),
+                    "cy": round(d.y, 3)
                 }
             }
+            if(typeof d.data.topicData.mainTopicIds !== 'undefined'){
+                tData["mainTopicIds"] = d.data.topicData.mainTopicIds
+            } else if(typeof d.data.topicData.subTopicIds !== 'undefined'){
+                tData["subTopicIds"] = d.data.topicData.subTopicIds
+            }
+            return tData
         });
 
         let mapData = {
@@ -89,8 +99,40 @@ const hierarchyData = require('../hierarchy/hierarchyData.js');
         return mapData;
     }
 
+    function getKeysMap(){
+        if(outputFormat === "short"){
+            return {
+                "topics": "t",
+                "topicId": "tId",
+                "clusterId": "cId",
+                "size": "s",
+                "labels": "l",
+                "label": "l",
+                "weight": "w",
+                "bubbleMap": "bM",
+                "mainTopicIds": "mTIds",
+                "subTopicIds": "sTIds",
+                "bubbleMapBorder": "bMB",
+                "transform": "t",
+                "strokeWidth": "s",
+                "subMap": "sMap",
+                "mainTopicId": "mTId"
+            }
+        }
+        return { }
+    }
+
+    function replaceKeysDeep(obj, keysMap){
+        return transform(obj, function(result, value, key){
+            let currentKey = keysMap[key] || key;
+            result[currentKey] = isObject(value) ? replaceKeysDeep(value, keysMap) : value;
+        })
+    }
+
     function saveMap(data){
         try{
+            LOG("formatting data output", 2)
+            data = replaceKeysDeep(data, getKeysMap())
             LOG("saving map data", 2);
             fs.writeFileSync(mapFile, JSON.stringify(data));
         } catch(err){

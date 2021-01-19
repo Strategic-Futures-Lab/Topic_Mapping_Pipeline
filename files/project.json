@@ -1,16 +1,14 @@
 {
   "run": {
-    "input": false,
-    "lemmatise": false,
-    "model": false,
+    "input": true,
+    "lemmatise": true,
+    "model": true,
     "inferDocuments": false,
-    "exportTopicModel": false,
-    "indexLabels": false,
-    "distributeTopics": false,
-    "compareDistributions": false,
-    "clusterTopics": false,
-    "mapTopics": false,
-    "overwriteMap": true
+    "exportTopicModel": true,
+    "indexLabels": true,
+    "distributeTopics": true,
+    "clusterTopics": true,
+    "mapTopics": true
   },
   "metaParameters": {
     "projectDir": "files/",
@@ -22,91 +20,108 @@
   },
   "input": {
     "module": "CSV",
-    "source": "test_infer.csv",
+    "source": "test_train.csv",
     "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract",
       "authors": "Authors", "money":  "Money", "date": "Date"},
-    "output": "corpus_infer.json"
+    "output": "corpus_train.json"
   },
   "lemmatise": {
-    "corpus": "corpus_infer.json",
+    "corpus": "corpus_train.json",
     "textFields": ["title", "abstract"],
     "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "stopWords": [],
     "minLemmas": 10,
     "removeLowCounts": 0,
-    "output": "lemmas_infer.json"
+    "output": "lemmas_train.json"
   },
-  "model": { },
-  "inferDocuments": {
-    "modelDir": "previous/topicModel/",
-    "mainModel": "trainedMainModel.ser",
-    "subModel": "trainedSubModel.ser",
-    "documents": "documents.json",
-    "mainTopics": "mainTopics.json",
-    "subTopics": "subTopics.json",
-    "lemmas": "lemmas_infer.json",
-    "iterations": 1000,
-    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
-    "documentsOutput": "inferred/documents.json",
-    "mainTopicsOutput": "inferred/mainTopics.json",
-    "subTopicsOutput": "inferred/subTopics.json",
-    "csvOutput": "inferred/documents.csv",
-    "numWordId": 5
+  "model": {
+    "lemmas": "lemmas_train.json",
+    "modelType": "hierarchical",
+    "dataDir": "topicModel/",
+    "mainModel": {
+      "topics": 20,
+      "words": 20,
+      "docs": 50,
+      "iterations": 1000,
+      "serialise": "trainedMainModel.ser",
+      "topicOutput": "mainTopics.json",
+      "topicSimOutput": "mainTopicsSim.csv",
+      "numWordId": 5,
+      "llOutput": "mainLL.json",
+      "topicLogOutput": "mainTopicLog.json",
+      "alphaSum": 0.5,
+      "beta": 0.1
+    },
+    "subModel": {
+      "topics": 100,
+      "words": 20,
+      "docs": 30,
+      "iterations": 1000,
+      "serialise": "trainedSubModel.ser",
+      "topicOutput": "subTopics.json",
+      "topicSimOutput": "subTopicsSim.csv",
+      "numWordId": 5,
+      "llOutput": "subLL.json"
+    },
+    "documentOutput": "documents.json",
+    "hierarchy": {
+      "modelSimOutput": "modelSim.csv",
+      "maxAssign": 1,
+      "maxAssignMain": 1,
+      "maxAssignSub": 3,
+      "assignmentOutput": "assignment.csv"
+    }
   },
+  "inferDocuments": { },
   "exportTopicModel": {
-    "mainTopics": "inferred/mainTopics.json",
-    "subTopics": "inferred/subTopics.json",
-    "documents": "inferred/documents.json",
+    "mainTopics": "topicModel/mainTopics.json",
+    "subTopics": "topicModel/subTopics.json",
+    "documents": "topicModel/documents.json",
     "docFields": ["title", "abstract", "university", "money", "authors", "date"],
-    "mainOutput": "inferred_mainModel.json",
-    "subOutput": "inferred_subModel.json",
-    "outputCSV": "inferred_model.csv",
+    "mainOutput": "mainModel.json",
+    "subOutput": "subModel.json",
+    "outputCSV": "model.csv",
     "numWordId": 5
   },
   "indexLabels": {
-    "documents": "inferred/documents.json",
-    "mainTopics": "inferred/mainTopics.json",
-    "subTopics": "inferred/subTopics.json",
+    "documents": "topicModel/documents.json",
+    "mainTopics": "topicModel/mainTopics.json",
+    "subTopics": "topicModel/subTopics.json",
     "useAllDocuments": false,
     "useAllLabels": false,
-    "output": "inferred_labelIndex.json"
+    "output": "labelIndex.json"
   },
   "distributeTopics": {
-    "documents": "inferred/documents.json",
-    "mainTopics": "inferred/mainTopics.json",
-    "subTopics": "inferred/subTopics.json",
-    "mainOutput": "inferred_mainTopics_distrib.json",
-    "subOutput": "inferred_subTopics_distrib.json",
+    "documents": "topicModel/documents.json",
+    "mainTopics": "topicModel/mainTopics.json",
+    "subTopics": "topicModel/subTopics.json",
+    "mainOutput": "mainTopics_distrib.json",
+    "subOutput": "subTopics_distrib.json",
     "distributions": [{},{
       "fieldName": "university",
       "valueField": "money",
-      "output": "inferred_distributionUni.json"
+      "output": "distributionUni.json"
     },{
       "fieldName": "date",
-      "output": "inferred_distributionDate.json"
+      "output": "distributionDate.json"
     }]
   },
-  "compareDistributions": {
-    "mainTopics": "inferred_mainTopics_distrib.json",
-    "subTopics": "inferred_subTopics_distrib.json",
-    "previousMainTopics": "previous/mainTopics_distrib.json",
-    "previousSubTopics": "previous/subTopics_distrib.json",
-    "distributions": ["-"],
-    "mainOutput": "mainTopics_distribComp.csv",
-    "subOutput": "subTopics_distribComp.csv",
-    "output": "topics_distribComp.csv",
-    "numWordId": 5
+  "clusterTopics": {
+    "mainTopics": "mainTopics_distrib.json",
+    "subTopics": "subTopics_distrib.json",
+    "linkageMethod": "max",
+    "clusters": 5,
+    "mainOutput": "mainTopics_cluster.json",
+    "subOutput": "subTopics_cluster.json"
   },
-  "clusterTopics": { },
-  "mapTopics": { },
-  "overwriteMap": {
-    "mainDistribution": "inferred_mainTopics_distrib.json",
-    "subDistribution": "inferred_subTopics_distrib.json",
-    "mainMap": "previous/mainMap.json",
-    "subMaps": "previous/subMaps.json",
-    "mainMapOutput": "inferred_mainMap.json",
-    "subMapsOutput": "inferred_subMaps.json",
-    "sizeName": "-",
-    "overwriteLabels": true
+  "mapTopics": {
+    "mainTopics": "mainTopics_cluster.json",
+    "subTopics": "subTopics_cluster.json",
+    "mapType": "bubble",
+    "bubbleSize": "-",
+    "bubbleScale": [10, 40],
+    "mainOutput": "mainMap.json",
+    "subOutput": "subMaps.json",
+    "nodeCommand": "nodejs"
   }
 }

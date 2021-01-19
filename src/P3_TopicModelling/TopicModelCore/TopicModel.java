@@ -7,6 +7,7 @@ import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.TokenSequence2FeatureSequence;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.topics.ParallelTopicModel;
+import cc.mallet.topics.TopicModelDiagnostics;
 import cc.mallet.topics.TopicInferencer;
 import cc.mallet.types.*;
 
@@ -27,6 +28,7 @@ public class TopicModel implements Serializable {
     public double ALPHASUM = 1.0;
     public double BETA = 0.01;
     public boolean SYMMETRICALPHA = false;
+    public int OPTIMINTERVAL = 50;
 
     public List<Document> documents;
     public List<String> numIDtoStringID = new ArrayList<>();
@@ -117,8 +119,8 @@ public class TopicModel implements Serializable {
         int wordPerTopicPrint = 10;
         model.setTopicDisplay(topicPrintInterval, wordPerTopicPrint);
         // setting the interval for optimising alpha and beta parameters
-        int optimizeInterval = 50;
-        model.setOptimizeInterval(optimizeInterval);
+
+        model.setOptimizeInterval(OPTIMINTERVAL);
         // adding custom log handler to capture model data
         MalletLogHandler logHandler = new MalletLogHandler();
         ParallelTopicModel.logger.addHandler(logHandler);
@@ -129,6 +131,24 @@ public class TopicModel implements Serializable {
             System.out.println(e.getMessage());
             return;
         }
+
+        TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, 10);
+
+        //Write mallet diagnostics to file
+        try {
+            File file = new File(outputDir+File.separator+"malletDiagnostics.xml");
+            file.getParentFile().mkdirs();
+            FileWriter writer = new FileWriter(file);
+            writer.write(diagnostics.toXML());
+            writer.close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Could not write file malletDiagnostics");
+            LogPrint.printNoteError(e.getMessage());
+            System.exit(1);
+        }
+
+
+
         // removing log handler
         ParallelTopicModel.logger.removeHandler(logHandler);
         // storing log-likelihood

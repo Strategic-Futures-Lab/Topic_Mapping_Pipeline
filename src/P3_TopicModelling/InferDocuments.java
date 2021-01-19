@@ -47,6 +47,7 @@ public class InferDocuments {
 
     private JSONObject ModelDocumentsMetadata;
     private ConcurrentHashMap<String, DocIOWrapper> ModelDocuments;
+
     private JSONObject ModelMainTopicsMetadata;
     private ConcurrentHashMap<String, TopicIOWrapper> ModelMainTopics;
     private JSONArray ModelMainTopicsSimilarities;
@@ -90,6 +91,7 @@ public class InferDocuments {
     private void ProcessArguments(DocumentInferModuleSpecs specs, LemmaReader reader){
         LogPrint.printNewStep("Processing arguments", 0);
 
+        documentsFile = specs.documents;
         mainModelFile = specs.mainModel;
         inferFromSubModel = specs.inferFromSubModel;
         if(inferFromSubModel) subModelFile = specs.subModel;
@@ -112,7 +114,6 @@ public class InferDocuments {
         }
         mergeDocuments = specs.mergeDocuments;
         if(mergeDocuments){
-            documentsFile = specs.documents;
             documentsOutput = specs.documentsOutput;
         }
 
@@ -137,20 +138,20 @@ public class InferDocuments {
     }
 
     private void loadDataFiles(){
-        if(mergeDocuments || mergeMainTopics || mergeSubTopics)
-            LogPrint.printNewStep("Loading data", 0);
-        if(mergeDocuments){
-            JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
-            ModelDocumentsMetadata = (JSONObject) input.get("metadata");
-            JSONArray docs = (JSONArray) input.get("documents");
-            ModelDocuments = new ConcurrentHashMap<>();
-            for(JSONObject docEntry: (Iterable<JSONObject>) docs) {
-                DocIOWrapper doc = new DocIOWrapper(docEntry);
-                ModelDocuments.put(doc.getId(), doc);
-            }
+        LogPrint.printNewStep("Loading data", 0);
+        // loading previous documents
+        JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
+        ModelDocumentsMetadata = (JSONObject) input.get("metadata");
+        JSONArray docs = (JSONArray) input.get("documents");
+        ModelDocuments = new ConcurrentHashMap<>();
+        for(JSONObject docEntry: (Iterable<JSONObject>) docs) {
+            DocIOWrapper doc = new DocIOWrapper(docEntry);
+            ModelDocuments.put(doc.getId(), doc);
         }
+        adjustDocIds();
+        // loading previous models, only if merging later
         if(mergeMainTopics){
-            JSONObject input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
+            input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
             ModelMainTopicsMetadata = (JSONObject) input.get("metadata");
             ModelMainTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
@@ -160,7 +161,7 @@ public class InferDocuments {
             ModelMainTopicsSimilarities = (JSONArray) input.get("similarities");
         }
         if(mergeSubTopics){
-            JSONObject input = JSONIOWrapper.LoadJSON(subTopicsFile, 1);
+            input = JSONIOWrapper.LoadJSON(subTopicsFile, 1);
             ModelSubTopicsMetadata = (JSONObject) input.get("metadata");
             ModelSubTopics = new ConcurrentHashMap<>();
             for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
@@ -169,6 +170,43 @@ public class InferDocuments {
             }
             ModelSubTopicsSimilarities = (JSONArray) input.get("similarities");
         }
+    }
+
+    private void adjustDocIds(){
+        int inferIdCount = -1;
+        int indexCount = -1;
+        // check if previous list of docs already had inferred docs and save the max id
+        for(Map.Entry<String, DocIOWrapper> entry: ModelDocuments.entrySet()){
+            String id = entry.getKey();
+            if(id.startsWith("infer_")){
+                int docId = Integer.parseInt(id.replace("infer_", ""));
+                if(docId>inferIdCount){
+                    inferIdCount = docId;
+                }
+            }
+            int docIndex = entry.getValue().getIndex();
+            if(docIndex>indexCount){
+                indexCount = docIndex;
+            }
+        }
+        ConcurrentHashMap<String, DocIOWrapper> newMap = new ConcurrentHashMap<>();
+        // adjust the ids for inferred docs
+        for(Map.Entry<String, DocIOWrapper> entry: DocumentsToInfer.entrySet()){
+            String id = entry.getKey();
+            DocIOWrapper doc = entry.getValue();
+            int docIndex = doc.getIndex();
+            // increment doc id to avoid conflict with previous inferred docs
+            doc.setId(String.valueOf(Integer.parseInt(id)+inferIdCount+1));
+            doc.setIndex(docIndex+indexCount+1);
+            // add prefix to id
+            doc.prefixId("infer_");
+            newMap.put(doc.getId(), doc);
+            // clear the doc from the previous list
+            DocumentsToInfer.remove(id);
+        }
+        // replace the map with updated ids
+        DocumentsToInfer = newMap;
+
     }
 
     private void loadModels(){
@@ -256,7 +294,6 @@ public class InferDocuments {
         }
 
         DocIOWrapper doc = document.getValue();
-        doc.prefixId("infer_");
         doc.setInferred(true);
         if(!doc.isRemoved()){
             doc.setMainTopicDistribution(mainModel.InferTopics(doc.getLemmaString(), iterations));
@@ -269,7 +306,9 @@ public class InferDocuments {
 
     private void SaveData(){
         LogPrint.printNewStep("Saving data", 0);
+        // saving only the inferred docs in csv
         if(exportCSV) saveCSV();
+        //
         if(mergeDocuments) saveMergedDocuments();
         if(mergeMainTopics) saveMergedTopics(ModelMainTopics, ModelMainTopicsMetadata, ModelMainTopicsSimilarities, mainTopicsOutput, true);
         if(mergeSubTopics) saveMergedTopics(ModelSubTopics, ModelSubTopicsMetadata, ModelSubTopicsSimilarities, subTopicsOutput, false);
@@ -348,8 +387,7 @@ public class InferDocuments {
             documents.add(entry.getValue().toJSON());
         }
         for(Map.Entry<String, DocIOWrapper> entry: DocumentsToInfer.entrySet()){
-            DocIOWrapper doc = entry.getValue();
-            documents.add(doc.toJSON());
+            documents.add(entry.getValue().toJSON());
         }
         root.put("documents", documents);
         JSONIOWrapper.SaveJSON(root, documentsOutput, 1);

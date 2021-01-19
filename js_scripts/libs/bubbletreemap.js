@@ -6,6 +6,7 @@
 //}(this, function (exports,planck) { 'use strict';
 const planck = require('./planck.min.js');
 const d3 = require('./d3.min.js');
+const {round} = require('./lodash.min.js')
 
     function getLayerClusters(hierarchyRoot, layerDepth, padding) {
         var clusters = [];
@@ -457,14 +458,33 @@ const d3 = require('./d3.min.js');
                 startAngleTemp -= 2 * Math.PI;
             }
 
+            // modifs by P. Le Bras
+            // rounding the paths to reduce object size
+
+            // arc generates path with M, A, L, Z
+            // will recursively split and join
+            let path =  arcGen({
+                innerRadius: arc.radius,
+                outerRadius: arc.radius,
+                startAngle: startAngleTemp,
+                endAngle: arc.endAngle
+            }).split("M").map(m=>
+                m.split("Z").map(z=>
+                    z.split("L").map(l=>
+                        l.split("A").map(a=>
+                            a.split(",").map(c=>
+                                c.split(" ").map(s=>
+                                    s !== "" ? round(Number(s), 3) : ""
+                                ).join(" ")
+                            ).join(",")
+                        ).join("A")
+                    ).join("L")
+                ).join("Z")
+            ).join("M")
+
             paths.push({
-                d: arcGen({
-                    innerRadius: arc.radius,
-                    outerRadius: arc.radius,
-                    startAngle: startAngleTemp,
-                    endAngle: arc.endAngle
-                }),
-                transform: "translate(" + arc.center.x + "," + arc.center.y + ")"
+                d: path,
+                transform: "translate(" + round(arc.center.x,3) + "," + round(arc.center.y,3) + ")"
             });
         });
 

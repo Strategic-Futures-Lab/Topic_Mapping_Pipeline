@@ -29,3 +29,8 @@ lib/**
 *.iml
 files/output/**
 files/projects/**
+
+# Added by Ana
+files/**
+local/**
+

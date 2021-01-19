@@ -42,6 +42,8 @@ public class ModelSpecs {
     public double beta = 0.01;
     /** Flag for running a symmetrical optimization of alpha, optional, defaults to false */
     public boolean symmetricAlpha = false;
+    /** Number of iterations between parameter optimisation */
+    public int optimInterval = 50;
     /** Filename for the JSON topic log file, not including directory, optional, defaults to "" */
     public String topicLogOutput = "";
     /** Flag for writing the topic log file, defaults to false if topicLogOutput = "" */
@@ -74,6 +76,7 @@ public class ModelSpecs {
             outputLL = true;
             llOutput = dataDir + llOutput;
         }
+        optimInterval = Math.toIntExact((long) specs.getOrDefault("optimInterval", (long) 50));
         seedIndex = Math.toIntExact((long) specs.getOrDefault("seed", (long) 0));
         alphaSum = (double) specs.getOrDefault("alphaSum", 1.0);
         beta = (double) specs.getOrDefault("beta", 0.01);

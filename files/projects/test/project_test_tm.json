@@ -66,6 +66,8 @@
     "hierarchy": {
       "modelSimOutput": "modelSim.csv",
       "maxAssign": 1,
+      "maxAssignMain": 1,
+      "maxAssignSub": 3,
       "assignmentOutput": "assignment.csv"
     }
   },

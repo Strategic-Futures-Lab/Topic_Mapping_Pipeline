@@ -65,7 +65,8 @@ public class HierarchicalTopicModelling {
     }
 
     private void AssignTopicHierarchy() {
-        int maxAssign = specs.maxAssign;
+        int maxAssignMain = specs.maxAssignMain;
+        int maxAssignSub = specs.maxAssignSub;
         ConcurrentHashMap<String, TopicIOWrapper> mainTopics = MainTopicModel.getTopics();
         ConcurrentHashMap<String, TopicIOWrapper> subTopics = SubTopicModel.getTopics();
 
@@ -81,7 +82,9 @@ public class HierarchicalTopicModelling {
             HashMap<Integer, Double> assigns = new HashMap<>();
 
             List<Integer> usedIdx = new ArrayList<>();
-            for(int i = 0; i < maxAssign; i++){
+            // while under the maxAssignSub threshold
+            for(int i = 0; i < maxAssignSub; i++){
+                // find the next highest similarity between this sub topic and the main topics
                 double currentMax = 0.00;
                 int currentMaxIdx = 0;
                 for(int mT = 0; mT < currentRow.length; mT++){
@@ -90,15 +93,22 @@ public class HierarchicalTopicModelling {
                         currentMaxIdx = mT;
                     }
                 }
+                // remove the main topic found from list of potential assignment for this sub topic
                 usedIdx.add(currentMaxIdx);
-
-                assigns.put(currentMaxIdx, currentMax);
-
                 // if no difference check: assign directly
+                // save the assignment
+                assigns.put(currentMaxIdx, currentMax);
+                // find the main topic
                 TopicIOWrapper mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
-                mainTopic.addSubTopicId(subTopic.getId());
-                subTopic.addMainTopicId(mainTopic.getId());
+                // assign the main topic to the sub topic
+                subTopic.addMainTopicId(mainTopic.getId(), currentMax);
+                // if still under the maxAssignMain threshold
+                if(i<maxAssignMain){
+                    // assign the sub topic to the main topic
+                    mainTopic.addSubTopicId(subTopic.getId(), currentMax);
+                }
             }
+            // save this sub topic's assignments
             assignment.put(sT,assigns);
         }
         LogPrint.printCompleteStep();

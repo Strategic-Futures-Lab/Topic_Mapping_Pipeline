@@ -63,13 +63,14 @@ public class BubbleMap {
     }
 
     private void StartMapping(){
-        String[] args = new String[6];
+        String[] args = new String[7];
         args[0] = mainTopicsFile;
         args[1] = mainOutput;
         args[2] = "true";
         args[3] = bubbleSize;
         args[4] = bubbleScale;
         args[5] = targetSize;
+        args[6] = "full";
         callNodeJS(args);
         if(mapSubTopics){
             args[0] = subTopicsFile;

@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class TopicIOWrapper {
@@ -120,6 +121,9 @@ public class TopicIOWrapper {
                 }
                 obj.put("data", d);
             }
+            if(initialWeight != weight){
+                obj.put("initial", initialWeight);
+            }
             return obj;
         }
 
@@ -213,8 +217,8 @@ public class TopicIOWrapper {
     private List<JSONTopicWeight> docs; // list of top docs: ids + weights
     // set by hierarchical topic module:
     // default: empty list, only saved to JSON if filled
-    private List<String> mainTopicIds = new ArrayList<>(); // list of main topic ids topic belongs to if topic is sub
-    private List<String> subTopicIds = new ArrayList<>(); // list of sub topic ids topic has if topic is main
+    private List<JSONTopicWeight> mainTopicIds = new ArrayList<>(); // list of main topic ids topic belongs to if topic is sub
+    private List<JSONTopicWeight> subTopicIds = new ArrayList<>(); // list of sub topic ids topic has if topic is main
 
     // set by distribution module:
     // default: empty list, only saved to JSON if filled
@@ -263,12 +267,12 @@ public class TopicIOWrapper {
         }
         // non-necessary data only fill if exists in JSON
         JSONArray mainTopicIds = (JSONArray) jsonTopic.getOrDefault("mainTopicIds", new JSONArray());
-        for(String id: (Iterable<String>) mainTopicIds){
-            this.mainTopicIds.add(id);
+        for(JSONObject id: (Iterable<JSONObject>) mainTopicIds){
+            this.mainTopicIds.add(new JSONTopicWeight(id));
         }
         JSONArray subTopicIds = (JSONArray) jsonTopic.getOrDefault("subTopicIds", new JSONArray());
-        for(String id: (Iterable<String>) subTopicIds){
-            this.subTopicIds.add(id);
+        for(JSONObject id: (Iterable<JSONObject>) subTopicIds){
+            this.subTopicIds.add(new JSONTopicWeight(id));
         }
         JSONArray distributions = (JSONArray) jsonTopic.getOrDefault("distributions", new JSONArray());
         for(JSONObject distribObj: (Iterable<JSONObject>) distributions){
@@ -334,16 +338,16 @@ public class TopicIOWrapper {
     }
 
     /**
-     * Setter method for the id if topic is sub-topic
-     * @param id sup topic id to set
+     * Setter method for the group id if topic part of sub-map
+     * @param id main topic id to set
      */
     public void setGroupTopicId(String id){
         groupTopicId = id;
     }
 
     /**
-     * Getter method for the id if topic is sub-topic
-     * @return sub topic id
+     * Getter method for the group id if topic part of sub-map
+     * @return main topic id
      */
     public String getGroupTopicId(){
         return groupTopicId;
@@ -403,11 +407,11 @@ public class TopicIOWrapper {
     }
 
     /**
-     * Add a topic id as main topic
+     * Add a topic id to the list of assigned main topics
      * @param id main topic id
      */
-    public void addMainTopicId(String id){
-        mainTopicIds.add(id);
+    public void addMainTopicId(String id, double weight){
+        mainTopicIds.add(new JSONTopicWeight(id, weight));
     }
 
     /**
@@ -415,15 +419,15 @@ public class TopicIOWrapper {
      * @return main topic ids
      */
     public List<String> getMainTopicIds(){
-        return mainTopicIds;
+        return mainTopicIds.stream().map(t -> t.ID).collect(Collectors.toList());
     }
 
     /**
-     * Add a topic id as sub topic
+     * Add a topic id to the list of assigned sub topics
      * @param id sub topic id
      */
-    public void addSubTopicId(String id){
-        subTopicIds.add(id);
+    public void addSubTopicId(String id, double weight){
+        subTopicIds.add(new JSONTopicWeight(id, weight));
     }
 
     /**
@@ -431,7 +435,7 @@ public class TopicIOWrapper {
      * @return sub topic ids
      */
     public List<String> getSubTopicIds(){
-        return subTopicIds;
+        return subTopicIds.stream().map(t -> t.ID).collect(Collectors.toList());
     }
 
     /**
@@ -486,12 +490,12 @@ public class TopicIOWrapper {
         // Save if non-empty
         if(!mainTopicIds.isEmpty()){
             JSONArray mainTopics = new JSONArray();
-            mainTopicIds.forEach(id->mainTopics.add(id));
+            mainTopicIds.forEach(id->mainTopics.add(id.toJSON()));
             root.put("mainTopicIds", mainTopics);
         }
         if(!subTopicIds.isEmpty()){
             JSONArray subTopics = new JSONArray();
-            subTopicIds.forEach(id->subTopics.add(id));
+            subTopicIds.forEach(id->subTopics.add(id.toJSON()));
             root.put("subTopicIds", subTopics);
         }
         if(!distributions.isEmpty()) {
