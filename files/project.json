@@ -23,6 +23,7 @@
     "source": "test_train.csv",
     "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract",
       "authors": "Authors", "money":  "Money", "date": "Date"},
+    "wordsPerDoc" : -1,
     "output": "corpus_train.json"
   },
   "lemmatise": {
@@ -69,6 +70,7 @@
       "maxAssign": 1,
       "maxAssignMain": 1,
       "maxAssignSub": 3,
+      "assignmentType" :  "Perceptual",
       "assignmentOutput": "assignment.csv"
     }
   },
