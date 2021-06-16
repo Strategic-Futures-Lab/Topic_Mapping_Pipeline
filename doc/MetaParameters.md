@@ -59,7 +59,7 @@ It is optional, and will overwrite the module-level specification if set.
   },
 ... }
 ```
-`Lemmatise`, `InferDocuments` and `ExportModel` are modules which will set or export a list of document data fieldsy.
+`Lemmatise`, `InferDocuments` and `ExportModel` are modules which will set or export a list of document data fields.
 Because it is often the case that those lists are identical, you can use the meta-parameter `docFields` to set
 these module specifications in one place. It is optional, and will overwrite the module-level specification if set.
 

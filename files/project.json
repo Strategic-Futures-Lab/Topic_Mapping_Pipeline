@@ -1,13 +1,13 @@
 {
   "run": {
-    "input": true,
-    "lemmatise": true,
-    "model": true,
+    "input": false,
+    "lemmatise": false,
+    "model": false,
     "inferDocuments": false,
-    "exportTopicModel": true,
-    "indexLabels": true,
-    "distributeTopics": true,
-    "clusterTopics": true,
+    "exportTopicModel": false,
+    "indexLabels": false,
+    "distributeTopics": false,
+    "clusterTopics": false,
     "mapTopics": true
   },
   "metaParameters": {
@@ -40,9 +40,9 @@
     "dataDir": "topicModel/",
     "mainModel": {
       "topics": 20,
-      "words": 20,
-      "docs": 50,
-      "iterations": 1000,
+      "words": 5,
+      "docs": 0,
+      "iterations": 100,
       "serialise": "trainedMainModel.ser",
       "topicOutput": "mainTopics.json",
       "topicSimOutput": "mainTopicsSim.csv",
@@ -53,15 +53,14 @@
       "beta": 0.1
     },
     "subModel": {
-      "topics": 100,
-      "words": 20,
-      "docs": 30,
-      "iterations": 1000,
+      "topics": 50,
+      "words": 5,
+      "docs": 0,
+      "iterations": 100,
       "serialise": "trainedSubModel.ser",
       "topicOutput": "subTopics.json",
       "topicSimOutput": "subTopicsSim.csv",
-      "numWordId": 5,
-      "llOutput": "subLL.json"
+      "numWordId": 5
     },
     "documentOutput": "documents.json",
     "hierarchy": {
@@ -119,9 +118,8 @@
     "subTopics": "subTopics_cluster.json",
     "mapType": "bubble",
     "bubbleSize": "-",
-    "bubbleScale": [10, 40],
+    "bubbleScale": [20, 40],
     "mainOutput": "mainMap.json",
-    "subOutput": "subMaps.json",
-    "nodeCommand": "nodejs"
+    "subOutput": "subMaps.json"
   }
 }

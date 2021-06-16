@@ -59,7 +59,7 @@ The specifiations for `mainModel` and `subModel` follow the same structure:
       "topicOuput": "path",
       "serialise": "path",
       // Advanced options
-      "topicSimOuput": "path",
+      "topicSimOutput": "path",
       "numWordId": 3,
       "llOutput": "path",
       "topicLogOutput": "path",
@@ -118,7 +118,7 @@ Where:
 - `modelSimOutput` is the path to the CSV file saving the main-to-sub topic similarity matrix (excluding directory),
 using this parameter is optional, and the data won't be saved if this parameter is not specified;
 - `maxAssign` is the number of main topics assigned to a sub topic, it is optional and defaults to 1;
-- `assignmentOutput` is the path to the CSV file saving the sub to main topic assignement data (excluding directory),
+- `assignmentOutput` is the path to the CSV file saving the sub to main topic assignment data (excluding directory),
 using this parameter is optional, and the data won't be saved if this parameter is not specified.
 
 ## Output
