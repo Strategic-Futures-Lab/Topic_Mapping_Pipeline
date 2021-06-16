@@ -30,7 +30,7 @@ public class TopicClustering {
         }
 
         public void addClusterIds(int nClusters){
-            LogPrint.printNewStep("Addeing cluster ids", 2);
+            LogPrint.printNewStep("Adding cluster ids", 2);
             int linkageSplitHeight = linkageTable.size() - nClusters;
             if(linkageTable.size() > 0){
                 exploreLinkageNode(linkageTable.size()-1, 0, linkageSplitHeight);
@@ -40,25 +40,25 @@ public class TopicClustering {
             LogPrint.printCompleteStep();
         }
 
-        private void exploreLinkageNode(int nodeIndex, int clusterNumber, int linkageSplitHeight){
+        private int exploreLinkageNode(int nodeIndex, int clusterNumber, int linkageSplitHeight){
             AgglomerativeClustering.ClusterRow node = linkageTable.get(nodeIndex);
+            int newClusterNum = (nodeIndex > linkageSplitHeight) ? clusterNumber+1 : clusterNumber;
             if(node.Node1 < topics.size()){ // one leaf
                 topics.get(node.Node1).setClusterId(Integer.toString(clusterNumber));
                 if(node.Node2 < topics.size()){ // two leaves
                     topics.get(node.Node2).setClusterId(Integer.toString(clusterNumber));
-                } else {
-                    int clstNum = (nodeIndex > linkageSplitHeight) ? clusterNumber+1 : clusterNumber;
-                    exploreLinkageNode(node.Node2 - topics.size(), clstNum, linkageSplitHeight);
+                } else { // second node not leaf
+                    return exploreLinkageNode(node.Node2 - topics.size(), newClusterNum, linkageSplitHeight);
                 }
-            } else if(node.Node2 < topics.size()){ // one leaf (other child)
+            } else if(node.Node2 < topics.size()){ // one leaf (first node not leaf)
                 topics.get(node.Node2).setClusterId(Integer.toString(clusterNumber));
-                int clstNum = (nodeIndex > linkageSplitHeight) ? clusterNumber+1 : clusterNumber;
-                exploreLinkageNode(node.Node1 - topics.size(), clstNum, linkageSplitHeight);
+                return exploreLinkageNode(node.Node1 - topics.size(), newClusterNum, linkageSplitHeight);
             } else { // no leaf
-                exploreLinkageNode(node.Node1 - topics.size(), clusterNumber, linkageSplitHeight);
-                int clstNum = (nodeIndex > linkageSplitHeight) ? clusterNumber+1 : clusterNumber;
-                exploreLinkageNode(node.Node2 - topics.size(), clstNum, linkageSplitHeight);
+                int prevClusterNum = exploreLinkageNode(node.Node1 - topics.size(), clusterNumber, linkageSplitHeight);
+                newClusterNum = (nodeIndex > linkageSplitHeight) ? prevClusterNum+1 : prevClusterNum;
+                return exploreLinkageNode(node.Node2 - topics.size(), newClusterNum, linkageSplitHeight);
             }
+            return clusterNumber;
         }
 
         public JSONObject toJSON(){

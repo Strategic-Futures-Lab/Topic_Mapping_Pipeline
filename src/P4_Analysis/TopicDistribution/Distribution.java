@@ -162,7 +162,7 @@ public class Distribution {
             TopicIOWrapper topic = topics.get(i);
             TopicIOWrapper.JSONTopicDistribution jsonDistribution = new TopicIOWrapper.JSONTopicDistribution(fieldName);
             if(valueName.length() > 0){
-                jsonDistribution.distributionValue = valueName;
+                jsonDistribution.setValueName(valueName);
             }
             double topicTotalWeight = 0.0;
             Map<String, MutableValue> sortedTopicDistribution = distribution[i].entrySet().stream()
@@ -173,7 +173,7 @@ public class Distribution {
                 double weight = Double.parseDouble(df.format(distribEntry.getValue().getValue()));
                 if(fieldName.length() > 0 && (countAdded < topPerTopic || topPerTopic ==-1)){
                     TopicIOWrapper.JSONTopicWeight jsonWeight = new TopicIOWrapper.JSONTopicWeight(distribEntry.getKey(), weight);
-                    jsonDistribution.values.add(jsonWeight);
+                    jsonDistribution.entries.add(jsonWeight);
                     countAdded++;
                 }
                 topicTotalWeight += weight;

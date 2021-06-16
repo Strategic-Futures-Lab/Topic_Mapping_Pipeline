@@ -10,25 +10,53 @@ import org.json.simple.JSONObject;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class overwriting existing map files (from other {@link P5_TopicMapping} modules) with new distribution values
+ * (from {@link P4_Analysis.TopicDistribution.TopicDistribution}) without changing the mapping information (position,
+ * or size).
+ * This class should mostly be used in the Document Inference Pipeline.
+ *
+ * @author P. Le Bras
+ * @version 1.0
+ */
 public class OverwriteMap {
 
+    /** Filename for JSON Distribution file, from which to overwrite main map. */
     private String mainDistribFile;
+    /** Filename for JSON main map file to overwrite. */
     private String mainMapFile;
+    /** Filename for JSON main map file to save after edit. */
     private String mainMapOutput;
+    /** Flag for overwriting the sub maps. */
     private boolean overwriteSubMaps;
+    /** Filename for JSON Distribution file, from which to overwrite sub maps. */
     private String subDistribFile;
+    /** Filename for JSON sub maps file to overwrite. */
     private String subMapsFile;
+    /** Filename for JSON sub maps file to save after edit, only required if subDistribFile != "" */
     private String subMapsOutput;
 
+    /** Flag for overwriting the size value of topics. */
     private boolean overwriteSize;
+    /** Name of distribution to use if overwriting the size value of topics. */
     private String sizeName;
+    /** Flag for overwriting the labels of topics. */
     private boolean overwriteLabels;
 
+    /** List of main topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
+    /** List of sub topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
+    /** Main map data in JSON format. */
     private JSONObject mainMap;
+    /** Sub map data in JSON format. */
     private JSONArray subMaps;
 
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param specs Specifications.
+     * @return String indicating the time taken to overwrite the map files.
+     */
     public static String Overwrite(OverwriteMapModuleSpecs specs){
         LogPrint.printModuleStart("Overwrite Map");
 
@@ -39,7 +67,6 @@ public class OverwriteMap {
         startClass.LoadData();
         startClass.OverwriteMaps();
         startClass.SaveMaps();
-        // startClass.OverwriteTopics();
 
         long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
 
@@ -48,6 +75,10 @@ public class OverwriteMap {
         return "Overwriting Map: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
+    /**
+     * Method processing the specification parameters.
+     * @param specs Specifications object.
+     */
     private void ProcessArguments(OverwriteMapModuleSpecs specs){
         LogPrint.printNewStep("Processing arguments", 0);
         mainDistribFile = specs.mainDistribFile;
@@ -71,6 +102,9 @@ public class OverwriteMap {
         if(overwriteLabels) LogPrint.printNote("Overwriting topic labels");
     }
 
+    /**
+     * Method loading topic data from the new distribution files and existing mapping data from the map files.
+     */
     private void LoadData(){
         LogPrint.printNewStep("Loading data", 0);
         mainTopics = loadTopicData(mainDistribFile);
@@ -81,6 +115,11 @@ public class OverwriteMap {
         }
     }
 
+    /**
+     * Method reading from a distribution file and loading a list of topics.
+     * @param filename Filename where to get the distribution data.
+     * @return The list of topics read from the file.
+     */
     private ConcurrentHashMap<String, TopicIOWrapper> loadTopicData(String filename){
         JSONObject input = JSONIOWrapper.LoadJSON(filename, 1);
         ConcurrentHashMap<String, TopicIOWrapper> topics = new ConcurrentHashMap<>();
@@ -91,6 +130,9 @@ public class OverwriteMap {
         return topics;
     }
 
+    /**
+     * Method launching the overwriting process.
+     */
     private void OverwriteMaps(){
         LogPrint.printNewStep("Overwriting map data", 0);
         overwriteMainMap();
@@ -98,10 +140,16 @@ public class OverwriteMap {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method overwriting the main map.
+     */
     private void overwriteMainMap(){
         overwriteMap(mainMap, mainTopics);
     }
 
+    /**
+     * Method overwriting each of the sub maps.
+     */
     private void overwriteSubMaps(){
         JSONObject[] maps = JSONIOWrapper.getJSONObjectArray(subMaps);
         JSONArray newSubMaps = new JSONArray();
@@ -114,6 +162,12 @@ public class OverwriteMap {
         subMaps = newSubMaps;
     }
 
+    /**
+     * Method overwriting a given JSON map data with the provided list of topics.
+     * @param map Map JSON data to overwrite.
+     * @param listOfTopics List of topics with updated information.
+     * @return The updated map JSON data.
+     */
     private JSONObject overwriteMap(JSONObject map, ConcurrentHashMap<String, TopicIOWrapper> listOfTopics){
         JSONObject[] topics = JSONIOWrapper.getJSONObjectArray((JSONArray) map.get("topics"));
         JSONArray newTopics = new JSONArray();
@@ -124,6 +178,13 @@ public class OverwriteMap {
         return map;
     }
 
+    /**
+     * Method overwriting a specific topic (from a map data) in JSON format with information from the provided
+     * list of topics.
+     * @param topic Topic JSON data to overwrite.
+     * @param listOfTopics List of topics with updated information.
+     * @return The updated topic JSON data.
+     */
     private JSONObject overwriteTopic(JSONObject topic, ConcurrentHashMap<String, TopicIOWrapper> listOfTopics){
         JSONObject newTopic = (JSONObject) topic.clone();
         String topicId = (String) topic.get("topicId");
@@ -146,6 +207,9 @@ public class OverwriteMap {
         return newTopic;
     }
 
+    /**
+     * Method writing the updated map JSON data on file(s).
+     */
     private void SaveMaps(){
         LogPrint.printNewStep("Saving new maps", 0);
         JSONIOWrapper.SaveJSON(mainMap, mainMapOutput, 1);

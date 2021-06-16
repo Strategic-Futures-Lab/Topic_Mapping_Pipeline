@@ -8,33 +8,58 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 /**
- * Wrapper class to store document data and write JSON files
+ * Class representing a document.
+ * Provides functionalities to create a new document, read it from JSON formatted objects, set and access attributes
+ * and transform it into a JSON format to write on file.
+ *
+ * @author P. Le Bras
+ * @version 1.0
  */
 public class DocIOWrapper {
 
+    /** Indicators of the level of information to save:
+     * <br>"" -> basic document data
+     * <br>"Lemmas" -> above + lemmatised text
+     * <br>"Model" -> above + topic weights */
     private static String ToPrint = "";
+    /** Sets {@link DocIOWrapper#ToPrint} to "Lemmas" */
     public static void PrintLemmas(){ToPrint = "Lemmas";}
+    /** Sets {@link DocIOWrapper#ToPrint} to "Model" */
     public static void PrintModel(){ToPrint = "Model";}
 
+    /** The document id. */
     private String docId;
+    /** The document index. */
     private int docIndex;
+    /** The document data, as read by the {@link P1_Input} modules. */
     private HashMap<String, String> docData;
     // used or set by lemmatise module
+    /** Temporary structure used by the {@link P2_Lemmatise.Lemmatise} module to construct the text to be lemmatised. */
     private HashMap<String, String> docTexts;
+    /** Number of lemmas for the document. */
     private int numLemmas;
+    /** The document lemmas. */
     private String lemmaString;
+    /** Temporary structure used by the {@link P2_Lemmatise.Lemmatise} module to store individual lemmas in a list a
+     * facilitate operations. */
     private List<String> lemmas;
+    /** Flag set by the {@link P2_Lemmatise.Lemmatise} module, marking the document as too short, excluding it from
+     * the model. */
     private boolean tooShort = false;
     // used or set by topic modelling module
+    /** The weight distribution of main topics in the document. */
     private double[] mainTopicDistribution;
+    /** The weight distribution of sub topics in the document. */
     private double[] subTopicDistribution;
     // used of set by document inference module
+    /** Flag set by the {@link P3_TopicModelling.InferDocuments} module, marking the document as inferred, ie not
+     * counting in the elaboration of topics. */
     private boolean inferred = false;
 
     /**
-     * Basic constructor, typically used by Input modules
-     * @param docId document id
-     * @param docIndex document index
+     * Basic constructor, typically used by Input modules.
+     * @param docId Document id.
+     * @param docIndex Document index.
      */
     public DocIOWrapper(String docId, int docIndex){
         this.docId = docId;
@@ -43,8 +68,8 @@ public class DocIOWrapper {
     }
 
     /**
-     * Constructor to load document from an existing JSON file
-     * @param jsonDoc document as JSON object
+     * Constructor to load document from an existing JSON file.
+     * @param jsonDoc Document as JSON object.
      */
     public DocIOWrapper(JSONObject jsonDoc){
         this.docId = (String) jsonDoc.get("docId");
@@ -71,8 +96,8 @@ public class DocIOWrapper {
 
     /**
      * Copy constructor, used by hierarchical topic model to have copies of docs
-     * across multiple topic models, not all fields required
-     * @param doc document to copy
+     * across multiple topic models, not all fields required.
+     * @param doc Document to copy.
      */
     public DocIOWrapper(DocIOWrapper doc){
         this.docId = doc.docId;
@@ -91,108 +116,108 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter method for the document id
-     * @return document id
+     * Getter method for the document id.
+     * @return The document id.
      */
     public String getId(){
         return docId;
     }
 
     /**
-     * Setter method for the document id
+     * Setter method for the document id.
      * **WARNING**: USE WITH CAUTION, IDEALLY ONLY BEFORE SAVING ON FILE
-     * @param id the new id
+     * @param id The new id.
      */
     public void setId(String id){ docId = id; }
 
     /**
-     * Adds a prefix to the doc id
-     * @param p prefix to add
+     * Adds a prefix to the doc id, eg for inferred documents.
+     * @param p Prefix to add.
      */
     public void prefixId(String p){
         docId = p + docId;
     }
 
     /**
-     * Getter method for the document index
-     * @return document index
+     * Getter method for the document index.
+     * @return The document index
      */
     public int getIndex(){
         return docIndex;
     }
 
     /**
-     * Setter method for the document index
+     * Setter method for the document index.
      * **WARNING**: USE WITH CAUTION, IDEALLY ONLY BEFORE SAVING ON FILE
-     * @param index the new index
+     * @param index The new index.
      */
     public void setIndex(int index){ docIndex = index; }
 
     /**
-     * Adds a new data entry to the document
-     * @param key data key
-     * @param value data value
+     * Adds a new data entry to the document.
+     * @param key Data key.
+     * @param value Data value.
      */
     public void addData(String key, String value){
         docData.put(key, value);
     }
 
     /**
-     * Getter method for the whole document data
-     * @return document data
+     * Getter method for the whole document data.
+     * @return The document data.
      */
     public HashMap<String, String> getDocData(){
         return docData;
     }
 
     /**
-     * Getter method for a particular data value, returns an empty string value if not found
-     * @param key data key
-     * @return data value
+     * Getter method for a particular data value, returns an empty string value if not found.
+     * @param key Data key.
+     * @return The data value.
      */
     public String getData(String key){
         return docData.getOrDefault(key, "");
     }
 
     /**
-     * Getter method for a particular data value, returns a default value if not found
-     * @param key data key
-     * @param def default value to return
-     * @return data value
+     * Getter method for a particular data value, returns a default value if not found.
+     * @param key Data key.
+     * @param def Default value to return.
+     * @return The data value.
      */
     public String getDataOr(String key, String def){
         return docData.getOrDefault(key, def);
     }
 
     /**
-     * Check method for a particular data key
-     * @param key data key
-     * @return boolean for key existing
+     * Checks for a particular data key.
+     * @param key Data key to check.
+     * @return Boolean for key existing.
      */
     public boolean hasData(String key){
         return docData.containsKey(key);
     }
 
     /**
-     * Filter the document data to keep only desirable entries
-     * @param keys keys to keep
+     * Filters the document data to keep only desirable entries.
+     * @param keys Data keys to keep.
      */
     public void filterData(List<String> keys){
         docData.entrySet().removeIf(e -> !keys.contains(e.getKey()));
     }
 
     /**
-     * Copy sets of document data to text data for lemmatising
-     * @param keys keys to copy
+     * Copies sets of document data to text data for lemmatisation.
+     * @param keys Data keys to copy.
      */
     public void addTexts(List<String> keys){
         docTexts = new HashMap<>();
-        keys.forEach(key -> addText(key));
+        keys.forEach(this::addText);
     }
 
     /**
-     * Copy document data entry to text data for lemmatising
-     * @param key data key
+     * Copies a document data entry to text data for lemmatisation.
+     * @param key Data key to copy.
      */
     public void addText(String key){
         if(docTexts == null) docTexts = new HashMap<>();
@@ -200,17 +225,17 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter methods for a text entry
-     * @param key entry key
-     * @return text value
+     * Getter methods for a text entry.
+     * @param key Entry key.
+     * @return The text value.
      */
     public String getText(String key){
         return docTexts.get(key);
     }
 
     /**
-     * Setter method for the document lemma string
-     * @param inputLemmas list of lemmas to add
+     * Setter method for the document lemmas.
+     * @param inputLemmas List of lemmas to set.
      */
     public void setLemmas(List<String> inputLemmas){
         numLemmas = inputLemmas.size();
@@ -218,8 +243,8 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter method for the list of lemmas
-     * @return lemmas list
+     * Getter method for the document's list of lemmas.
+     * @return The lemmas list.
      */
     public List<String> getLemmas(){
         if(lemmas != null){
@@ -231,21 +256,25 @@ public class DocIOWrapper {
     }
 
     /**
-     * Removes a single lemma from the lemmas list
-     * @param lemmaToRemove lemma to remove
+     * Removes a single lemma from the document's lemmas list.
+     * @param lemmaToRemove Lemma to remove.
      */
     public void removeLemma(String lemmaToRemove){
         lemmas.removeIf(lemmaToRemove::equals);
         numLemmas = lemmas.size();
     }
 
-    public void filterOutLemmas(List<String> lemmasToRemove){
+    /**
+     * Removes a set of lemmas from the document's lemmas list.
+     * @param lemmasToRemove List of lemmas to remove.
+     */
+    public void removeLemmas(List<String> lemmasToRemove){
         lemmas.removeIf(lemmasToRemove::contains);
         numLemmas = lemmas.size();
     }
 
     /**
-     * Construct the lemma string from the list of lemmas
+     * Constructs the lemma string from the list of lemmas.
      */
     public void makeLemmaString(){
         lemmaString = "";
@@ -254,16 +283,16 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter for lemmas
-     * @return lemma string
+     * Getter for the document's lemmas string.
+     * @return The lemma string.
      */
     public String getLemmaString(){
         return lemmaString;
     }
 
     /**
-     * Getter for number of lemmas
-     * @return number of lemmas
+     * Getter for number of lemmas.
+     * @return The number of lemmas.
      */
     public int getNumLemmas(){
         return numLemmas;
@@ -279,16 +308,16 @@ public class DocIOWrapper {
     // }
 
     /**
-     * Setter for tooShort flag
-     * @param b flag for tooShort attribute
+     * Setter for tooShort flag.
+     * @param b Boolean value to set.
      */
     public void setTooShort(boolean b){
         tooShort = b;
     }
 
     /**
-     * Getter for removed value
-     * @return removed value
+     * Getter for removed flag.
+     * @return The removed flag.
      */
     public boolean isRemoved(){
         return tooShort;
@@ -303,8 +332,8 @@ public class DocIOWrapper {
     // }
 
     /**
-     * Setter for the distribution over main topics
-     * @param distribution topic distribution
+     * Setter for the distribution over main topics.
+     * @param distribution The topic distribution to set.
      */
     public void setMainTopicDistribution(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
@@ -316,16 +345,16 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter for the distribution over main topics
-     * @return main topic distribution
+     * Getter for the distribution over main topics.
+     * @return The main topics distribution.
      */
     public double[] getMainTopicDistribution(){
         return mainTopicDistribution;
     }
 
     /**
-     * Setter for the distribution over sub topics
-     * @param distribution topic distribution
+     * Setter for the distribution over sub topics.
+     * @param distribution Topic distribution to set.
      */
     public void setSubTopicDistribution(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
@@ -340,32 +369,32 @@ public class DocIOWrapper {
     }
 
     /**
-     * Getter for the distribution over sub topics
-     * @return sub topic distribution
+     * Getter for the distribution over sub topics.
+     * @return The sub topics distribution.
      */
     public double[] getSubTopicDistribution(){
         return subTopicDistribution;
     }
 
     /**
-     * Setter for inferred flag
-     * @param b flag for inferred attribute
+     * Setter for inferred flag.
+     * @param b Boolean value to set.
      */
     public void setInferred(boolean b){
         inferred = b;
     }
 
     /**
-     * Getter for inferred value
-     * @return inferred value
+     * Getter for inferred flag.
+     * @return Boolean indicating an inferred document.
      */
     public boolean isInferred(){
         return inferred;
     }
 
     /**
-     * Creates a JSON object of the document to save in JSON file
-     * @return JSON object of the document
+     * Formats the document into a JSON object to write on file.
+     * @return The JSON formatted document.
      */
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
@@ -406,9 +435,9 @@ public class DocIOWrapper {
     }
 
     /**
-     * Generates a JSON Array from a topic distribution
-     * @param distrib distribution to convert
-     * @return JSON array of distribution
+     * Generates a JSON Array from a topic distribution.
+     * @param distrib Distribution to convert.
+     * @return The JSON formatted distribution array.
      */
     private JSONArray getDistribJSON(double[] distrib){
         JSONArray res = new JSONArray();

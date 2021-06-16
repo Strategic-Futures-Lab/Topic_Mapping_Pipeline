@@ -1,15 +1,23 @@
-package P5_TopicMapping;
+package P5_TopicMapping.BubbleMapping;
 
 import P0_Project.TopicMappingModuleSpecs;
 import PY_Helper.LogPrint;
 import PY_Helper.OSValidator;
-import org.apache.commons.logging.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class BubbleMap {
+/**
+ * Deprecated Class coordinating the mapping of topics (distributed and clustered) into a bubble map.
+ * Calls JS scripts to perform the mapping.
+ * @deprecated Replaced by Java only class {@link BubbleMap}.
+ *
+ * @author P. Le Bras
+ * @version 1.0
+ */
+@Deprecated
+public class BubbleMapJS {
 
     private String mainTopicsFile;
     private String mainOutput;
@@ -25,17 +33,17 @@ public class BubbleMap {
 
     public static String MapTopics(TopicMappingModuleSpecs mapSpecs){
 
-        LogPrint.printModuleStart("Bubble map");
+        LogPrint.printModuleStart("Bubble map - JS");
 
         long startTime = System.currentTimeMillis();
 
-        BubbleMap startClass = new BubbleMap();
+        BubbleMapJS startClass = new BubbleMapJS();
         startClass.ProcessArguments(mapSpecs);
         startClass.StartMapping();
 
         long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
 
-        LogPrint.printModuleEnd("Bubble map");
+        LogPrint.printModuleEnd("Bubble map - JS");
 
         return "Topic mapping (bubbles): "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
 

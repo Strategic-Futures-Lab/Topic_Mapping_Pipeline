@@ -188,7 +188,7 @@ public class Lemmatise {
                     .map(e->e.getKey())
                     .collect(Collectors.toList());
 
-            Documents.entrySet().parallelStream().forEach(e->e.getValue().filterOutLemmas(lowCounts));
+            Documents.entrySet().parallelStream().forEach(e->e.getValue().removeLemmas(lowCounts));
             LogPrint.printCompleteStep();
             LogPrint.printNote("Found "+lowCounts.size()+" lemmas with count less than "+(removeLowCounts+1));
 

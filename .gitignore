@@ -29,6 +29,7 @@ lib/**
 *.iml
 files/output/**
 files/projects/**
+javadoc/**
 
 # Added by Ana
 files/**

@@ -9,7 +9,8 @@ import P4_Analysis.LabelIndex.LabelIndexing;
 import P4_Analysis.TopicClustering.TopicClustering;
 import P4_Analysis.TopicDistribution.CompareDistributions;
 import P4_Analysis.TopicDistribution.TopicDistribution;
-import P5_TopicMapping.BubbleMap;
+import P5_TopicMapping.BubbleMapping.BubbleMapJS;
+import P5_TopicMapping.BubbleMapping.BubbleMap;
 import P3_TopicModelling.ExportTopicModel;
 import P5_TopicMapping.OverwriteMap;
 import PY_Helper.LogPrint;
@@ -138,7 +139,9 @@ public class TopicMapping {
     }
 
     private void RunTopicMap() {
-        if(projectManager.topicMap.mapType.equals("bubble")){
+        if(projectManager.topicMap.mapType.equals("bubbleJS")){
+            times.add(BubbleMapJS.MapTopics(projectManager.topicMap));
+        } else if(projectManager.topicMap.mapType.equals("bubble")){
             times.add(BubbleMap.MapTopics(projectManager.topicMap));
         }
     }
