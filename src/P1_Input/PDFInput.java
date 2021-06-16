@@ -38,7 +38,7 @@ public class PDFInput {
     // project specs
     private String sourceDirectory;
     private String outputFile;
-    private int wordsPerDoc = 500;
+    private Long wordsPerDoc;
 
     public static void PDFInput(InputModuleSpecs inputSpecs){
 
@@ -114,6 +114,43 @@ public class PDFInput {
      * This function will be called in case of NOT-dividing PDF files into chunks
      */
     private void ParsePDF(Pair<File,String> pdf){
+        File file = pdf.getLeft();
+        int subDocCount = 0;
+        // Divide the doc into chunks of wordsPerDoc
+        DocIOWrapper newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
+        try {
+            String rootName = file.getName();
+            rootName = rootName.substring(0, rootName.indexOf('.'));
+            LogPrint.printNote("Processing document: " + rootName);
+            //load file and parse text
+            PDDocument document = PDDocument.load(file);
+            String text = "";
+
+            for (int pageNumber = 1 ; pageNumber < document.getNumberOfPages(); pageNumber++) {
+                PDFTextStripper s = new PDFTextStripper();
+                s.setStartPage(pageNumber);
+                s.setEndPage(pageNumber);
+                String[] contentsOfPage = s.getText(document).split("\\s+");
+                for(String word : contentsOfPage) {
+                    text += word + " ";
+                }
+            }
+
+            newDoc.addData("fileName", rootName);
+            newDoc.addData("text", text.trim());
+
+            Docs.put(newDoc.getId(), newDoc);
+            docCount++;
+
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            numDocs = Docs.size();
+            LogPrint.printCompleteStep();
+            LogPrint.printNote("Number of documents recovered so far: " + numDocs);
+        }
+
 
     }
 
@@ -149,10 +186,9 @@ public class PDFInput {
                     newDoc.addData("splitNumber", String.format("%03d", subDocCount));
                     newDoc.addData("dataset", dataset);
                     newDoc.addData("fileName", rootName + "_" + String.format("%03d", subDocCount));
-                    newDoc.addData("title", document.getDocumentInformation().getTitle());
-                    int startPos = (subDocCount * wordsPerDoc);
+                    long startPos = (subDocCount * wordsPerDoc);
                     newDoc.addData("wordRange", startPos + " - " + (startPos + numWordsInString));
-                    newDoc.addData("pageRange", String.valueOf(returnPageNumebers(newDocString)));
+                    newDoc.addData("pageRange", String.valueOf(returnPageNumbers(newDocString)));
                     newDoc.addData("text", removePageNumber(newDocString.trim()).trim());
 
                     numWordsInString = 0;
@@ -174,10 +210,9 @@ public class PDFInput {
             newDoc.addData("splitNumber", String.format("%03d", subDocCount));
             newDoc.addData("dataset", dataset);
             newDoc.addData("fileName", rootName + "_" + String.format("%03d", subDocCount));
-            newDoc.addData("title", document.getDocumentInformation().getTitle());
-            int startPos = ((subDocCount) * wordsPerDoc);
+            long startPos = ((subDocCount) * wordsPerDoc);
             newDoc.addData("wordRange", startPos + " - " + (startPos + numWordsInString));
-            newDoc.addData("pageRange", String.valueOf(returnPageNumebers(newDocString)));
+            newDoc.addData("pageRange", String.valueOf(returnPageNumbers(newDocString)));
             newDoc.addData("text", removePageNumber(newDocString.trim()).trim());
             Docs.put(newDoc.getId(), newDoc);
 
@@ -188,38 +223,13 @@ public class PDFInput {
             numDocs = Docs.size();
             LogPrint.printCompleteStep();
             LogPrint.printNote("Number of documents recovered from current file: " + subDocCount, 1);
-            LogPrint.printNote("Number of documents recovered so far: " + numDocs);
-           // document.close();
-        }
+            LogPrint.printNote("Number of documents recovered so far: " + numDocs);        }
     }
 
 
-    private String removePageNumber(String text){
-        String outtext = "";
-        for(String word : text.split("\\s+")) {
-            if(!(word.contentEquals("[PAGENUMBER_")))
-                outtext += word + " ";
-        }
-        return outtext;
-    }
 
-    private List<Integer> returnPageNumebers(String text){
 
-        List<Integer> pagesRanges = new ArrayList<Integer>();
-        // add pagenumbers
-        for(String word : text.split("\\s+")) {
-            if(word.contains("[PAGENUMBER_")){
-                pagesRanges.add(Integer.valueOf(word.substring(12)));
-            }
-        }
 
-        if(!(text.split(" ")[0].contains("[PAGENUMBER_")) && (!pagesRanges.isEmpty()))
-            pagesRanges.add(pagesRanges.get(0) -1 );
-
-        Collections.sort(pagesRanges);
-
-        return pagesRanges;
-    }
 
 
     private String addPageNumebr(PDDocument document) throws IOException {
@@ -242,6 +252,32 @@ public class PDFInput {
         return text;
     }
 
+    private List<Integer> returnPageNumbers(String text){
+
+        List<Integer> pagesRanges = new ArrayList<Integer>();
+        // add pagenumbers
+        for(String word : text.split("\\s+")) {
+            if(word.contains("[PAGENUMBER_")){
+                pagesRanges.add(Integer.valueOf(word.substring(12)));
+            }
+        }
+
+        if(!(text.split(" ")[0].contains("[PAGENUMBER_")) && (!pagesRanges.isEmpty()))
+            pagesRanges.add(pagesRanges.get(0) -1 );
+
+        Collections.sort(pagesRanges);
+
+        return pagesRanges;
+    }
+
+    private String removePageNumber(String text){
+        String outtext = "";
+        for(String word : text.split("\\s+")) {
+            if(!(word.contentEquals("[PAGENUMBER_")))
+                outtext += word + " ";
+        }
+        return outtext;
+    }
 
     private void OutputJSON(){
         LogPrint.printNote("Saving to JSON file");

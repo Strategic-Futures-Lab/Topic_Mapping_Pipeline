@@ -43,6 +43,9 @@ public class TopicModelModuleSpecs {
     /** Maximum number of main topics assigned to a sub topic, if "hierarchical" module used,
      * optional, defaults to maxAssign */
     public int maxAssignSub;
+    /** Perceptual assignment type between main and sub topics if "hierarchical" module used,
+     * optional, defaults to "" */
+    public String assignmentType;
 
     /**
      * Constructor: reads the specification from the "model" entry in the project file
@@ -65,6 +68,7 @@ public class TopicModelModuleSpecs {
             maxAssign = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssign", (long) 1));
             maxAssignMain = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssignMain", (long) maxAssign));
             maxAssignSub = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssignSub", (long) maxAssign));
+            assignmentType = (String) hierarchySpecs.getOrDefault("assignmentType", "Perceptual");
             similarityOutput = (String) hierarchySpecs.getOrDefault("modelSimOutput", "");
             if(!similarityOutput.equals("")){
                 outputSimilarity = true;

@@ -1,6 +1,7 @@
 package P3_TopicModelling;
 
 import P0_Project.TopicModelModuleSpecs;
+import P3_TopicModelling.Similarity.PerceptualTopicsSimilarity;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import PX_Data.DocIOWrapper;
 import PX_Data.TopicIOWrapper;
@@ -57,8 +58,22 @@ public class HierarchicalTopicModelling {
     }
 
     private void GetAndSetModelSimilarity(){
-        SimilarityMatrix = TopicsSimilarity.GetSimilarityMatrix(specs.subModel.topics, SubTopicModel.getTopicDistributions(),
-                                                                specs.mainModel.topics, MainTopicModel.getTopicDistributions());
+        if(specs.assignmentType.equals("Perceptual")){
+            SimilarityMatrix = PerceptualTopicsSimilarity.GetSimilarityMatrixPerceptual(
+                    specs.subModel.topics,
+                    SubTopicModel.getTopicLabelsAndWeights(),
+                    specs.mainModel.topics,
+                    MainTopicModel.getTopicLabelsAndWeights(),
+                    specs.assignmentType
+            );
+
+        }else if(specs.assignmentType.equals("Document")){
+            SimilarityMatrix = TopicsSimilarity.GetSimilarityMatrix(specs.subModel.topics, SubTopicModel.getTopicDistributions(),
+                    specs.mainModel.topics, MainTopicModel.getTopicDistributions());
+        }
+
+
+
         if(specs.outputSimilarity){
             SaveSimilarityMatrix();
         }
@@ -85,14 +100,16 @@ public class HierarchicalTopicModelling {
             // while under the maxAssignSub threshold
             for(int i = 0; i < maxAssignSub; i++){
                 // find the next highest similarity between this sub topic and the main topics
-                double currentMax = 0.00;
                 int currentMaxIdx = 0;
+                double currentMax=0.00;
                 for(int mT = 0; mT < currentRow.length; mT++){
                     if(currentRow[mT] > currentMax && !usedIdx.contains(mT)){
                         currentMax = currentRow[mT];
                         currentMaxIdx = mT;
                     }
                 }
+
+
                 // remove the main topic found from list of potential assignment for this sub topic
                 usedIdx.add(currentMaxIdx);
                 // if no difference check: assign directly

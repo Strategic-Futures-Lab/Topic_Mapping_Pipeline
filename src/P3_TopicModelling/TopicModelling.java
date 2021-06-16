@@ -289,6 +289,25 @@ public class TopicModelling {
         LogPrint.printCompleteStep();
     }
 
+
+
+    public List<List<TopicIOWrapper.JSONTopicWeight>> getTopicLabelsAndWeights()
+    {
+        List<List<TopicIOWrapper.JSONTopicWeight>> wordsAndWeights = new ArrayList<>();
+
+
+        for(int t = 0; t < nTopics; t++){
+
+            List<WordData> wordDataList = new ArrayList<>();
+            TopicIOWrapper topicData = Topics.get(Integer.toString(t));
+            List<TopicIOWrapper.JSONTopicWeight> topicWords = topicData.getWords();
+
+            wordsAndWeights.add(topicWords);
+        }
+
+        return wordsAndWeights;
+    }
+
     private void GetAndSetTopicSimilarity(){
         SimilarityMatrix = TopicsSimilarity.GetSimilarityMatrix(nTopics, tModel.topicDistributions);
         if(outputSim){
