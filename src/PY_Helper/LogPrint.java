@@ -108,8 +108,13 @@ public class LogPrint {
     }
 
     public static void printNoteError(String msg){
+        printNoteError(msg, 0);
+    }
+
+    public static void printNoteError(String msg, int depth){
+        String tab = "  ".repeat(depth);
         String arrow = "➡ ";
-        System.out.print("\n"+ConsoleColors.RED+arrow+msg+ConsoleColors.RESET);
+        System.out.print("\n"+tab+ConsoleColors.RED+arrow+msg+ConsoleColors.RESET);
     }
 
     public static void printNewStep(String msg, int depth){
