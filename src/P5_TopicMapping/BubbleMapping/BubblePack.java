@@ -17,7 +17,7 @@ import java.util.HashSet;
  * It then adjusts the bubbles and pulls them together to their final position for the bubble map using a force layout.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class BubblePack {
 

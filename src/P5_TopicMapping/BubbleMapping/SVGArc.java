@@ -5,7 +5,7 @@ package P5_TopicMapping.BubbleMapping;
  * Adapted from D3: https://github.com/d3/d3-shape/blob/main/src/arc.js
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class SVGArc {
 

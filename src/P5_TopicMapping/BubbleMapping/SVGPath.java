@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
  * Adapted from D3: https://github.com/d3/d3-path/blob/main/src/path.js
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class SVGPath {
 

@@ -18,7 +18,7 @@ import java.util.*;
  * to Java data structures.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class JSONIOWrapper {
 

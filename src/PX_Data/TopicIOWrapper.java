@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * and transform it into a JSON format to write on file.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class TopicIOWrapper {
 

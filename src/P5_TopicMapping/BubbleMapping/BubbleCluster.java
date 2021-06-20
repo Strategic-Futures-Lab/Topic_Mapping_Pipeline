@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Class representing a cluster within a {@link BubbleNode} hierarchy.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class BubbleCluster {
 

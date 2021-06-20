@@ -1,5 +1,4 @@
-import P1_Input.CSVInput;
-import P1_Input.PDFInput;
+import P1_Input.*;
 import P2_Lemmatise.Lemmatise;
 import P0_Project.ProjectManager;
 import P3_TopicModelling.HierarchicalTopicModelling;
@@ -95,8 +94,14 @@ public class TopicMapping {
             case "CSV":
                 times.add(CSVInput.CSVInput(projectManager.input));
                 break;
+            case "GTR":
+                times.add(GTRInput.GTRInput(projectManager.input));
+                break;
             case "PDF":
-                PDFInput.PDFInput(projectManager.input);
+                times.add(PDFInput.PDFInput(projectManager.input));
+                break;
+            case "TXT":
+                times.add(TXTInput.TXTInput(projectManager.input));
                 break;
         }
     }

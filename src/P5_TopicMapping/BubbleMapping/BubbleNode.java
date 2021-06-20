@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * Class implementing a bubble node (with position, size and padding) from a topic similarity tree.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class BubbleNode extends HierarchyNode {
 

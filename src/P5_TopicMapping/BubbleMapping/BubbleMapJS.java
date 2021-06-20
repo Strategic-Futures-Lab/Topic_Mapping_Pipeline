@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
  * @deprecated Replaced by Java only class {@link BubbleMap}.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 @Deprecated
 public class BubbleMapJS {

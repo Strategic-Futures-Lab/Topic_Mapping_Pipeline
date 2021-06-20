@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Class providing a method to generate a border path for a set of bubbles after positioning ({@link BubblePack}).
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class BubbleBorder {
 

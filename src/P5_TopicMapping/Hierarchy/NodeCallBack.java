@@ -4,7 +4,7 @@ package P5_TopicMapping.Hierarchy;
  * Interface for to implement callbacks on hierarchy nodes
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public interface NodeCallBack<Node extends HierarchyNode> {
     /**

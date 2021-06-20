@@ -13,7 +13,7 @@ import java.util.stream.DoubleStream;
  * Class implementing a node from a topic similarity tree
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public abstract class HierarchyNode {
 

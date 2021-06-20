@@ -18,36 +18,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class reading a PDF directory input and writing it as a corpus JSON file.
+ *
+ * @author T. Methven, P. Le Bras, A. Gharavi
+ * @version 2
+ */
 public class PDFInput {
 
-    private final static int PROCESS_MAX_ROWS = Integer.MAX_VALUE;
-    private ConcurrentHashMap<String, DocIOWrapper> Docs = new ConcurrentHashMap<>();
+    /**  List of documents read from PDF directory. */
+    private final ConcurrentHashMap<String, DocIOWrapper> Docs = new ConcurrentHashMap<>();
+    /** Number of documents read from the CSV file. */
     private int numDocs;
+    /** Increment for the count of documents read. */
     private int docCount = 0;
 
-
-    private List<Pair<File,String>> fileList = new ArrayList<>();
-    private List<String> datasetList = new ArrayList<>();
+    /** List of PDF files found in the directory,
+     * also saves the file's directory name as 'dataset' field in the corpus document data. */
+    private final List<Pair<File,String>> fileList = new ArrayList<>();
 
     /**
+     * Flag for parsing PDFs in parallel.
      * WARNING: Running this is parallel will alter the final visualisation due to reordering of processing!
      * For now, this is being set to serial! As of 25/06/2018 it is quick enough that a fix is not forthcoming.
      */
     private final static boolean RUN_IN_PARALLEL = false;
 
     // project specs
+    /** PDF source directory name. */
     private String sourceDirectory;
+    /** File name for the produced JSON corpus. */
     private String outputFile;
-    private Long wordsPerDoc;
+    /** Number of words limit before splitting a document. */
+    private int wordsPerDoc;
 
-    public static void PDFInput(InputModuleSpecs inputSpecs){
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param inputSpecs Specifications.
+     * @return String indicating the time taken to read the CSV inout file and produce the JSON corpus file.
+     */
+    public static String PDFInput(InputModuleSpecs inputSpecs){
 
         LogPrint.printModuleStart("PDF Input");
 
         long startTime = System.currentTimeMillis();
 
         PDFInput startClass = new PDFInput();
-        startClass.processSpecs(inputSpecs);
+        startClass.ProcessArguments(inputSpecs);
         startClass.FindPDFs();
         startClass.ParsePDFs();
         startClass.OutputJSON();
@@ -55,10 +72,14 @@ public class PDFInput {
         long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
 
         LogPrint.printModuleEnd("PDF Input");
-        LogPrint.printNote("PDF Input " + Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
+        return "PDF Input: " + Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
     }
 
-    private void processSpecs(InputModuleSpecs inputSpecs){
+    /**
+     * Method processing the specification parameters.
+     * @param inputSpecs Specification object.
+     */
+    private void ProcessArguments(InputModuleSpecs inputSpecs){
         LogPrint.printNewStep("Processing arguments", 0);
         sourceDirectory = inputSpecs.source;
         outputFile = inputSpecs.output;
@@ -66,66 +87,79 @@ public class PDFInput {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method exploring the source directory, and it's sub-directories, for all PDF files.
+     */
     private void FindPDFs(){
-        LogPrint.printNewStep("Finding all PDFs", 0);
+        LogPrint.printNewStep("Finding all PDFs in "+sourceDirectory, 0);
         File directory = new File(sourceDirectory);
-        File[] files = directory.listFiles();
-        for(File file : files){
-            if(!file.isDirectory()){
-                if(file.getName().toLowerCase().endsWith(".pdf"))
-                    fileList.add(new Pair<>(file,directory.getName()));
+        if(!directory.isDirectory()){
+            // source is not a directory
+            LogPrint.printNoteError("Error, provided source is not a directory.");
+            System.exit(1);
+        } else {
+            findPDFsInDirectory(directory);
+            if(fileList.size() > 0){
+                LogPrint.printCompleteStep();
+                LogPrint.printNote("Found "+fileList.size()+" TXT files.", 0);
             } else {
-                FindPDFsInSubDirectory(file, file.getName());
+                // did not find any pdf file in the directory
+                LogPrint.printNoteError("Error, provided directory source does not contain .pdf files.");
+                System.exit(1);
             }
-        }
-
-        LogPrint.printNote("Number if files found: \t" + fileList.size());
-        LogPrint.printNote("File crawl complete...");
-    }
-
-    private void FindPDFsInSubDirectory(File directory, String dataset){
-        datasetList.add(dataset);
-        File[] files = directory.listFiles();
-        for(File file : files){
-            if(!file.isDirectory()  ){
-                if(file.getName().toLowerCase().endsWith(".pdf"))
-                    fileList.add(new Pair<>(file,dataset));
-            }else{
-                FindPDFsInSubDirectory(file, file.getName());
-            }
-        }
-    }
-
-    private void ParsePDFs(){
-        if(RUN_IN_PARALLEL){
-            if(wordsPerDoc > 0)
-                fileList.parallelStream().forEach(this::ParsePDFDivide);
-            else
-                fileList.parallelStream().forEach(this::ParsePDF);
-        } else{
-            if(wordsPerDoc > 0)
-                fileList.forEach(this::ParsePDFDivide);
-            else
-                fileList.forEach(this::ParsePDF);
         }
     }
 
     /**
-     * This function will be called in case of NOT-dividing PDF files into chunks
+     * Method recursively exploring a directory for PDF files.
+     * @param directory Directory to explore.
      */
-    private void ParsePDF(Pair<File,String> pdf){
+    private void findPDFsInDirectory(File directory){
+        for(File file : directory.listFiles()){
+            if(!file.isDirectory()  ){
+                if(file.getName().toLowerCase().endsWith(".pdf"))
+                    fileList.add(new Pair<>(file,directory.getName()));
+            }else{
+                findPDFsInDirectory(file);
+            }
+        }
+    }
+
+    /**
+     * Method launching the PDF parsing process.
+     */
+    private void ParsePDFs(){
+        LogPrint.printNewStep("Parsing PDF files:", 0);
+        if(RUN_IN_PARALLEL){
+            if(wordsPerDoc > 0)
+                fileList.parallelStream().forEach(this::ParsePDFDivide);
+            else
+                fileList.parallelStream().forEach(this::parsePDF);
+        } else{
+            if(wordsPerDoc > 0)
+                fileList.forEach(this::ParsePDFDivide);
+            else
+                fileList.forEach(this::parsePDF);
+        }
+        numDocs = Docs.size();
+        LogPrint.printNote("Number of documents parsed: " + numDocs, 0);
+    }
+
+    /**
+     * Method parsing a PDF file WITHOUT dividing it into chunks.
+     * @param pdf PDF file to parse, paired with it's dataset value.
+     */
+    private void parsePDF(Pair<File,String> pdf){
         File file = pdf.getLeft();
-        int subDocCount = 0;
-        // Divide the doc into chunks of wordsPerDoc
-        DocIOWrapper newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
+        String dataset = pdf.getRight();
         try {
             String rootName = file.getName();
+            LogPrint.printNewStep("Processing: "+rootName, 1);
             rootName = rootName.substring(0, rootName.indexOf('.'));
-            LogPrint.printNote("Processing document: " + rootName);
-            //load file and parse text
+            // load file
             PDDocument document = PDDocument.load(file);
             String text = "";
-
+            // parse text
             for (int pageNumber = 1 ; pageNumber < document.getNumberOfPages(); pageNumber++) {
                 PDFTextStripper s = new PDFTextStripper();
                 s.setStartPage(pageNumber);
@@ -135,53 +169,49 @@ public class PDFInput {
                     text += word + " ";
                 }
             }
-
+            document.close();
+            // create doc entry
+            DocIOWrapper newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
             newDoc.addData("fileName", rootName);
             newDoc.addData("text", text.trim());
-
+            newDoc.addData("dataset", dataset);
             Docs.put(newDoc.getId(), newDoc);
+            // increase doc count for next entry
             docCount++;
-
-            document.close();
         } catch (Exception e) {
+            LogPrint.printNoteError("Error while parsing PDF.");
             e.printStackTrace();
+            System.exit(1);
         } finally {
-            numDocs = Docs.size();
             LogPrint.printCompleteStep();
-            LogPrint.printNote("Number of documents recovered so far: " + numDocs);
         }
-
-
     }
 
-
+    /**
+     * Method parsing a PDF file AND dividing it into chunks.
+     * @param pdf PDF file to parse, paired with it's dataset value.
+     */
     private void ParsePDFDivide(Pair<File,String> pdf) {
         File file = pdf.getLeft();
         String dataset = pdf.getRight();
-
         int subDocCount = 0;
         try {
             String rootName = file.getName();
+            LogPrint.printNewStep("Processing: "+rootName, 1);
             rootName = rootName.substring(0, rootName.indexOf('.'));
-
-            //load file and parse text
+            // load file
             PDDocument document = PDDocument.load(file);
+            // initialise subtext string, corpus doc object and counters
             String newDocString = "";
             int numWordsInString = 0;
             subDocCount = 0;
-
-            LogPrint.printNote("Processing document: " + rootName);
-
-            /* Add the "[PAGENUMBER_"+ pageNumber + "]" to the text
-             * this will be used to save the page number to json file */
+            // parse the document and embed page number information in the text
             String text = addPageNumebr(document);
-
-            // Divide the doc into chunks of wordsPerDoc
-            DocIOWrapper newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
-
+            // Explore the document word by word and
             for (String word : text.split("\\s+")) {
-                // to allow non-subdivision of doc if wordsPerDoc = 0
                 if (numWordsInString == wordsPerDoc && wordsPerDoc > 0) {
+                    // create a new corpus documents when the word limit is reached
+                    DocIOWrapper newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
                     newDoc.addData("originalFileName", rootName);
                     newDoc.addData("splitNumber", String.format("%03d", subDocCount));
                     newDoc.addData("dataset", dataset);
@@ -190,68 +220,71 @@ public class PDFInput {
                     newDoc.addData("wordRange", startPos + " - " + (startPos + numWordsInString));
                     newDoc.addData("pageRange", String.valueOf(returnPageNumbers(newDocString)));
                     newDoc.addData("text", removePageNumber(newDocString.trim()).trim());
-
+                    Docs.put(newDoc.getId(), newDoc);
+                    docCount++;
+                    // reset counters and substring
                     numWordsInString = 0;
                     newDocString = "";
                     subDocCount++;
-
-                    Docs.put(newDoc.getId(), newDoc);
-                    newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
-                    docCount++;
                 }
                 if (word.length() > 1) {
                     newDocString += word + " ";
                     numWordsInString++;
                 }
             }
-
-            //Make sure to add the final part too, whatever words are left over!
-            newDoc.addData("originalFileName", rootName);
-            newDoc.addData("splitNumber", String.format("%03d", subDocCount));
-            newDoc.addData("dataset", dataset);
-            newDoc.addData("fileName", rootName + "_" + String.format("%03d", subDocCount));
-            long startPos = ((subDocCount) * wordsPerDoc);
-            newDoc.addData("wordRange", startPos + " - " + (startPos + numWordsInString));
-            newDoc.addData("pageRange", String.valueOf(returnPageNumbers(newDocString)));
-            newDoc.addData("text", removePageNumber(newDocString.trim()).trim());
-            Docs.put(newDoc.getId(), newDoc);
-
+            if(numWordsInString > 0){
+                // add the final part of the PDF
+                DocIOWrapper newDoc = new DocIOWrapper(Integer.toString(docCount), docCount);
+                newDoc.addData("originalFileName", rootName);
+                newDoc.addData("splitNumber", String.format("%03d", subDocCount));
+                newDoc.addData("dataset", dataset);
+                newDoc.addData("fileName", rootName + "_" + String.format("%03d", subDocCount));
+                long startPos = ((subDocCount) * wordsPerDoc);
+                newDoc.addData("wordRange", startPos + " - " + (startPos + numWordsInString));
+                newDoc.addData("pageRange", String.valueOf(returnPageNumbers(newDocString)));
+                newDoc.addData("text", removePageNumber(newDocString.trim()).trim());
+                Docs.put(newDoc.getId(), newDoc);
+                docCount++;
+            }
             document.close();
         } catch (Exception e) {
+            LogPrint.printNoteError("Error while parsing PDF.");
             e.printStackTrace();
+            System.exit(1);
         } finally {
-            numDocs = Docs.size();
             LogPrint.printCompleteStep();
-            LogPrint.printNote("Number of documents recovered from current file: " + subDocCount, 1);
-            LogPrint.printNote("Number of documents recovered so far: " + numDocs);        }
+            LogPrint.printNote("Number of sub-documents recovered: " + subDocCount+1, 1);
+        }
     }
 
-
-
-
-
-
-
+    /**
+     * Method parsing a PDF document page by page and inserting page numbers info ([PAGENUMBER_...)
+     * in the text String to later save the page data in the JSON corpus file.
+     * @param document PDF document to parse.
+     * @return PDF text String with inserted page numbers.
+     * @throws IOException If there is an error while parsing the document.
+     */
     private String addPageNumebr(PDDocument document) throws IOException {
-        /* Add the "[PAGENUMBER_"+ pageNumber + "]" to the text
-         * this will be used to save the page number to json file */
         int numberOfPages = document.getNumberOfPages();
-        String text = "";
-
+        StringBuilder text = new StringBuilder();
         for (int pageNumber = 1 ; pageNumber < numberOfPages; pageNumber++) {
             PDFTextStripper s = new PDFTextStripper();
             s.setStartPage(pageNumber);
             s.setEndPage(pageNumber);
             String[] contentsOfPage = s.getText(document).split("\\s+");
-            text += "[PAGENUMBER_"+ pageNumber + " ";
+            text.append("[PAGENUMBER_").append(pageNumber).append(" ");
             for(String word : contentsOfPage) {
-                text += word + " ";
+                text.append(word).append(" ");
             }
         }
-
-        return text;
+        return text.toString();
     }
 
+    /**
+     * Method returning the page range of a PDF text String (inserted with addPageNumber).
+     * @param text Text to check for page range.
+     * @return The page range.
+     */
     private List<Integer> returnPageNumbers(String text){
 
         List<Integer> pagesRanges = new ArrayList<Integer>();
@@ -270,6 +303,11 @@ public class PDFInput {
         return pagesRanges;
     }
 
+    /**
+     * Method removing the page number information (inserted with addPageNumber) from a PDF text String.
+     * @param text Text to remove the page number information from.
+     * @return Cleaned text.
+     */
     private String removePageNumber(String text){
         String outtext = "";
         for(String word : text.split("\\s+")) {
@@ -279,8 +317,10 @@ public class PDFInput {
         return outtext;
     }
 
+    /**
+     * Method writing the list of documents onto the JSON corpus file.
+     */
     private void OutputJSON(){
-        LogPrint.printNote("Saving to JSON file");
         JSONObject root = new JSONObject();
         JSONArray corpus = new JSONArray();
         JSONObject meta = new JSONObject();
@@ -290,7 +330,7 @@ public class PDFInput {
             corpus.add(entry.getValue().toJSON());
         }
         root.put("corpus", corpus);
-        JSONIOWrapper.SaveJSON(root, outputFile);
+        JSONIOWrapper.SaveJSON(root, outputFile, 0);
     }
 
 }

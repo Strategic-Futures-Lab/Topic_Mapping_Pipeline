@@ -5,10 +5,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * Class reading an validating specifications for the Topic Mapping module.
+ * Class reading an validating parameters for the Topic Mapping module ({@link P5_TopicMapping}).
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class TopicMappingModuleSpecs {
 

@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class should mostly be used in the Document Inference Pipeline.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class OverwriteMap {
 

@@ -12,7 +12,7 @@ import java.util.Arrays;
  * Class coordinating the mapping of topics (distributed and clustered) into a bubble map.
  *
  * @author P. Le Bras
- * @version 1.0
+ * @version 1
  */
 public class BubbleMap {
 
