@@ -16,9 +16,64 @@
         - [Topic Clustering](TopicClusteringModule.md)
     - [Topic Mapping](TopicMapping.md)
 
+## References
+
+### Latent Dirichlet Allocation
+
+> David M. Blei, Andrew Y. Ng, and Michael I. Jordan. 2003.
+> Latent dirichlet allocation. In *Journal of machine Learning research*, vol. 3, pp. 993–1022.
+```bibtex
+@Article{Blei2003,
+  author    = {Blei, David M. and Ng, Andrew Y. and Jordan, Michael I.},
+  journal   = {Journal of machine Learning research},
+  title     = {Latent dirichlet allocation},
+  year      = {2003},
+  pages     = {993--1022},
+  volume    = {3},
+  publisher = {JMLR. org},
+}
+```
+
+### Gibbs Sampling
+
+> Thomas L. Griffiths and Mark Steyvers. 2004.
+> Finding scientific topics. In *Proceedings of the National academy of Sciences*, vol. 101, suppl. 1, pp. 5228–5235.
+```bibtex
+@Article{Griffiths2004,
+  title={Finding scientific topics},
+  author={Griffiths, Thomas L and Steyvers, Mark},
+  journal={Proceedings of the National academy of Sciences},
+  volume={101},
+  number={suppl 1},
+  pages={5228--5235},
+  year={2004},
+  publisher={National Acad Sciences}
+}
+```
+
+### Bubble Treemap
+
+> Jochen Görtler, Christoph Schulz, Daniel Weiskopf, and Oliver Deussen. 2018.
+> Bubble Treemaps for Uncertainty Visualization. In *IEEE Transactions on Visualization and Computer Graphics*, vol. 24 issue 1, pp. 719-728.
+```bibtex
+@Article{Goertler2018,
+  author     = {Görtler, Jochen and Schulz, Christoph and Weiskopf, Daniel and Deussen, Oliver},
+  doi        = {10.1109/TVCG.2017.2743959},
+  journal    = {IEEE Transactions on Visualization and Computer Graphics},
+  number     = {1},
+  pages      = {719-728},
+  title      = {Bubble Treemaps for Uncertainty Visualization},
+  volume     = {24},
+  year       = {2018},
+  url        = {http://graphics.uni-konstanz.de/publikationen/Goertler2018BubbleTreemapsUncertainty},
+}
+```
+
 ## Third-Party Licenses Information
 
-### Stanford CoreNLP:
+### Stanford CoreNLP
+
+[Website](https://stanfordnlp.github.io/CoreNLP/)
 
 [GNU General Public License, v3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3))
 
@@ -38,6 +93,8 @@ Cite:
 
 ### Mallet
 
+[Website](http://mallet.cs.umass.edu/)
+
 [CPL 1.0](https://tldrlegal.com/license/common-public-license-1.0-(cpl-1.0))
 
 Cite:
@@ -51,6 +108,33 @@ Cite:
   year       = {2002},
 }
 ```
+
+### JBox2D
+
+[Website](http://www.jbox2d.org/)
+
+License: [BSD 2-Clause License](https://tldrlegal.com/license/bsd-2-clause-license-(freebsd))
+
+### FastCSV
+
+[GitHub](https://github.com/osiegmar/FastCSV)
+
+License: [MIT](https://tldrlegal.com/license/mit-license)
+
+### JSON-Simple
+
+[GitHub](https://github.com/fangyidong/json-simple)
+
+License: [Apache 2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
+
+### PDFBox
+
+[Website](https://pdfbox.apache.org/)
+
+License: [Apache 2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
+
+<!--
+No longer using technically.
 
 ### D3 - Data Driven Documents
 
@@ -93,6 +177,7 @@ Cite:
   url        = {http://graphics.uni-konstanz.de/publikationen/Goertler2018BubbleTreemapsUncertainty},
 }
 ```
+-->
 
 ---
 This work is licensed under a [Creative Commons Attribution 4.0 International
