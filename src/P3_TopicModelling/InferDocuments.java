@@ -290,7 +290,7 @@ public class InferDocuments {
             LogPrint.printNewStep("Inferred: " + docsProcessed +
                     " documents | % complete: " + (Math.round(percentage * 100f) / 100f) + "%", 1);
 
-            LogPrint.printStep(timeTakenStr + " | " + timeToGoStr, 1);
+            LogPrint.printLog(timeTakenStr + " | " + timeToGoStr, 1);
         }
 
         DocIOWrapper doc = document.getValue();

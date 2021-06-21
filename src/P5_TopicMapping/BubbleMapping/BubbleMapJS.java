@@ -116,7 +116,7 @@ public class BubbleMapJS {
             String line;
             while ((line = reader.readLine()) != null) {
                 // output.append(line + "\n");
-                LogPrint.printExternalStep(line, 1);
+                LogPrint.printExternalLog(line, 1);
             }
             int exitVal = process.waitFor();
             if (exitVal == 0) {

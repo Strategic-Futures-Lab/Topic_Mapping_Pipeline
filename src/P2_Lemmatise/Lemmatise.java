@@ -126,7 +126,7 @@ public class Lemmatise {
             float percentage = (((float) docsProcessed / (float) totalDocs) * 100);
             LogPrint.printNewStep("Lemmatised: " + docsProcessed +
                     " documents | % complete: " + (Math.round(percentage * 100f) / 100f) + "%", 1);
-            LogPrint.printStep(timeTakenStr + " | " + timeToGoStr, 1);
+            LogPrint.printLog(timeTakenStr + " | " + timeToGoStr, 1);
         }
 
         // getting the text from document
