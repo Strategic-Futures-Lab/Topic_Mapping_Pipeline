@@ -100,7 +100,7 @@ public class GTRInput {
         LogPrint.printNewStep("Processing arguments", 0);
         sourceFile = inputSpecs.source;
         csvFields = inputSpecs.fields;
-        xmlFields = inputSpecs.extraFields;
+        xmlFields = inputSpecs.GTR_fields;
         PIDField = inputSpecs.GTR_PID;
         outputFile = inputSpecs.output;
         LogPrint.printCompleteStep();
@@ -146,15 +146,20 @@ public class GTRInput {
      * Method crawling GtR to fetch additional data for each documents.
      */
     private void CrawlGtR(){
-        LogPrint.printNewStep("Fetching additional data from GtR", 0);
-        MissingRows = new ConcurrentHashMap<>();
-        MissingReasons = new ConcurrentHashMap<>();
-        if(RUN_IN_PARALLEL) { Docs.entrySet().parallelStream().forEach(this::getAdditionalData);}
-        else { Docs.entrySet().forEach(this::getAdditionalData);}
-        if(MissingRows.size() > 0){
-            retryFailed();
-        } else {
-            LogPrint.printCompleteStep();
+        if(!xmlFields.isEmpty()) {
+            LogPrint.printNewStep("Fetching additional data from GtR", 0);
+            MissingRows = new ConcurrentHashMap<>();
+            MissingReasons = new ConcurrentHashMap<>();
+            if (RUN_IN_PARALLEL) {
+                Docs.entrySet().parallelStream().forEach(this::getAdditionalData);
+            } else {
+                Docs.entrySet().forEach(this::getAdditionalData);
+            }
+            if (MissingRows.size() > 0) {
+                retryFailed();
+            } else {
+                LogPrint.printCompleteStep();
+            }
         }
     }
 

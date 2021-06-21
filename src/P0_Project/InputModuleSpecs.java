@@ -22,7 +22,7 @@ public class InputModuleSpecs{
     public HashMap<String, String> fields;
     /** Fields to lookup in external source (eg server API), only works if data from GTR.
      * Eg: ("t", "Title") will lookup "Title" (as implemented in the input module) and save it has "t" in the docData. */
-    public HashMap<String, String> extraFields;
+    public HashMap<String, String> GTR_fields;
     /** Field name containing the GtR project id, only works if data from GtR, defaults to 'ProjectId'.
      * Will be automatically added to the docData. */
     public String GTR_PID = "ProjectId";
@@ -48,11 +48,11 @@ public class InputModuleSpecs{
             fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));
         }
         if(module.equals("GTR")) {
-            extraFields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));
-            GTR_PID = (String) specs.getOrDefault("GTR_ProjectId", "ProjectId");
+            GTR_fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("GtR_fields"));
+            GTR_PID = (String) specs.getOrDefault("GtR_id", "ProjectId");
         }
         if(module.equals("TXT")) {
-            TXT_splitEmptyLines = (boolean) specs.getOrDefault("TXT_splitEmptyLines", false);
+            TXT_splitEmptyLines = (boolean) specs.getOrDefault("txt_splitEmptyLines", false);
         }
     }
 }
