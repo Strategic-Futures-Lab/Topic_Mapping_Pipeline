@@ -1,25 +1,33 @@
 package PY_Helper;
 
+/**
+ * Class checking the Operating System running the program.
+ *
+ * @author P. Le Bras
+ * @version 1
+ * @deprecated Was used for checking the bash command to run Node js.
+ */
+@Deprecated
 public class OSValidator {
 
-    private static String OS = System.getProperty("os.name").toLowerCase();
+    private static final String OS = System.getProperty("os.name").toLowerCase();
 
-    public static void main(String[] args) {
-
-        System.out.println(OS);
-
-        if (isWindows()) {
-            System.out.println("This is Windows");
-        } else if (isMac()) {
-            System.out.println("This is Mac");
-        } else if (isUnix()) {
-            System.out.println("This is Unix or Linux");
-        } else if (isSolaris()) {
-            System.out.println("This is Solaris");
-        } else {
-            System.out.println("Your OS is not support!!");
-        }
-    }
+    // public static void main(String[] args) {
+    //
+    //     System.out.println(OS);
+    //
+    //     if (isWindows()) {
+    //         System.out.println("This is Windows");
+    //     } else if (isMac()) {
+    //         System.out.println("This is Mac");
+    //     } else if (isUnix()) {
+    //         System.out.println("This is Unix or Linux");
+    //     } else if (isSolaris()) {
+    //         System.out.println("This is Solaris");
+    //     } else {
+    //         System.out.println("Your OS is not support!!");
+    //     }
+    // }
 
     public static boolean isWindows() {
         return OS.contains("win");
@@ -36,6 +44,7 @@ public class OSValidator {
     public static boolean isSolaris() {
         return OS.contains("sunos");
     }
+
     public static String getOS(){
         if (isWindows()) {
             return "win";
