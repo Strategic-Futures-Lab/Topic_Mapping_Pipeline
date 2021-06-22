@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Class reading a corpus JSON file, processing its document to lemmatise their texts and save them into a lemma JSON file.
  *
- * @author T. Methven, P. Le Bras.
+ * @author T. Methven, P. Le Bras
  * @version 2
  */
 public class Lemmatise {
