@@ -5,30 +5,33 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * Class for Lemmatise module project specification
+ * Class reading an validating parameters for the Lemmatise module ({@link P2_Lemmatise}).
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class LemmatiseModuleSpecs {
 
-    /** Filename to corpus data (from Input module) */
+    /** Filename of corpus JSON file (from Input module). */
     public String corpus;
-    /** List of fields in docData to use for text */
+    /** List of fields in docData to use for text. */
     public String[] textFields;
-    /** List of fields in docData to keep after process is done, optional, defaults to empty  */
+    /** List of fields in docData to keep after process is done, optional, defaults to empty.  */
     public String[] docFields;
-    /** List of stop-phrases to exclude from text before lemmatisation, optional, defaults to empty */
+    /** List of stop-phrases to exclude from text before lemmatisation, optional, defaults to empty. */
     public String[] stopPhrases;
-    /** List of stop-words to remove from lemmas, optional, defaults to empty */
+    /** List of stop-words to remove from lemmas, optional, defaults to empty. */
     public String[] stopWords;
-    /** Minimum number of lemmas a document must have to be kept for topic modelling, optional, defaults to 1 */
+    /** Minimum number of lemmas a document must have to be kept for topic modelling, optional, defaults to 1. */
     public int minLemmas;
-    /** Threshold count of lemmas, if under threshold lemma will be removed from model, optional, defaults to 0 */
+    /** Threshold count of lemmas, if under threshold lemma will be removed from model, optional, defaults to 0. */
     public int removeLowCounts;
-    /** Filename for the JSON lemma file generated */
+    /** Filename for the JSON lemma file generated. */
     public String output;
 
     /**
-     * Constructor: reads the specification from the "lemmatise" entry in the project file
-     * @param specs JSON object attached to "lemmatise"
+     * Constructor: reads the specification from the "lemmatise" entry in the project file.
+     * @param specs JSON object attached to "lemmatise".
      */
     public LemmatiseModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         corpus = metaSpecs.getDataDir() + (String) specs.get("corpus");

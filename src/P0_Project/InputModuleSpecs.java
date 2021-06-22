@@ -34,8 +34,8 @@ public class InputModuleSpecs{
     public boolean TXT_splitEmptyLines = false;
 
     /**
-     * Constructor: reads the specification from the "input" entry in the project file
-     * @param specs JSON object attached to "input"
+     * Constructor: reads the specification from the "input" entry in the project file.
+     * @param specs JSON object attached to "input".
      */
     public InputModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         module = (String) specs.get("module");
