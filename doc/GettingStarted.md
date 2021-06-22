@@ -1,7 +1,7 @@
 # Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 # Getting Started
 
-The pipeline is programed in Java. There are no compiled `.jar` library yet, you must therefore either run it through
+The pipeline is written in Java. There are no compiled `.jar` library yet, you must therefore either run it through
 a Java IDE (i.e. IntelliJ IDEA, or Eclipse), or compile and run via command line.
 
 The sources are in the `src` folder.
@@ -12,10 +12,11 @@ to add them to the project structure in your IDE:
 - `json-simple-1.1.1.jar` for reading and writing json files;
 - `pdfbox-app-2.0.9.jar` for reading pdf documents;
 - `stanford-corenlp-3.9.2.jar` and `stanford-corenlp-3.9.2-models.jar` for lemmatising text;
-- `mallet.jar` and `mallet-deps.jar` for modelling topics.
+- `mallet.jar` and `mallet-deps.jar` for modelling topics;
+- `jbox2d-library-2.2.1.1.jar` for mapping topics.
 
-Finally, some modules will call [NodeJS](https://nodejs.org/en/) as some modules are written in JavaScript, you should
-therefore make sure you have installed it on your system.
+Although it has been deprecated, the previous version of the mapping module has been written in JavaScript.
+If you wish to use this version, you will need to install [NodeJS](https://nodejs.org/en/) to execute JavaScript.
 
 ---
 
