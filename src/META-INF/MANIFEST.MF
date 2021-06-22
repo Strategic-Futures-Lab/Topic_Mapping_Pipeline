@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Main-Class: TopicMapping
+Class-Path: mallet-deps.jar fastcsv-1.0.2.jar pdfbox-app-2.0.9.jar scrip
+ t-10.jar stanford-corenlp-3.9.2-models.jar mallet.jar json-simple-1.1.1
+ .jar stanford-corenlp-3.9.2.jar
+

@@ -1,18 +1,4 @@
-/*
- * Created by Stefano Padilla.
- * Last update 22 / 2 / 2015
- * Copyright Heriot-Watt University
- * Agreed for use inside EPSRC
- */
-
 package P2_Lemmatise.Lemmatizer;
-
-/*
- * Using CoreNLP Library from Stanford
- * http://nlp.stanford.edu/software/corenlp.shtml
- *
- * Most of the code here comes from their examples.
- */
 
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
@@ -26,20 +12,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-public class
+/**
+ * Class instantiating and launching the lemmatizer provided by the CoreNLP library from Stanford
+ * (<a href="https://stanfordnlp.github.io/CoreNLP/"> https://stanfordnlp.github.io/CoreNLP/ </a>).
+ *
+ * @author S. Padilla, T. Methven, P. Le Bras
+ * @version 2
+ */
+public class StanfordLemmatizer {
 
-StanfordLemmatizer
-{
-
+    /** Lemmatizer pipeline, eg annotating + tokenising + PoS tagging + lemmatising. */
     protected StanfordCoreNLP pipeline;
 
+    /**
+     * Constructor, instantiates the lemmatisation pipeline.
+     */
     public StanfordLemmatizer() {
         // Create StanfordCoreNLP object properties, with POS tagging
         // (required for lemmatization), and lemmatization
         Properties props;
         props = new Properties();
         props.put("annotators", "tokenize, cleanxml, ssplit, pos, lemma");
-
 
         /*
          * This is a pipeline that takes in a string and returns various analyzed linguistic forms.
@@ -56,12 +49,16 @@ StanfordLemmatizer
          *  StanfordCoreNLP loads a lot of models, so you probably
          *  only want to do this once per execution
          */
-        this.pipeline = new StanfordCoreNLP( props);
+        this.pipeline = new StanfordCoreNLP(props);
 
     }
 
-    public List<String> lemmatise(String documentText)
-    {
+    /**
+     * Method processing a String text and returning its list of lemmas.
+     * @param documentText Text to process.
+     * @return The list containing the text's lemmas.
+     */
+    public List<String> lemmatise(String documentText) {
         List<String> lemmas = new LinkedList<String>();
         // Create an empty Annotation just with the given text
         Annotation document = new Annotation(documentText);
@@ -80,41 +77,38 @@ StanfordLemmatizer
         return lemmas;
     }
 
+    /**
+     * Method cleaning a given list of lemmas, removing common stop words and fixing know lemma issues.
+     * Uses {@link StopWords} and {@link ReplaceWords} to do so, check these classes to customise lists.
+     * @param words List of lemmas to clean.
+     * @return The cleaned list of lemmas.
+     */
     public static List<String> removeStopWords(List<String> words){
         List<String> newWords = new LinkedList<String>();
 
         for(String word: words){
-            boolean foundStopWord = false;
-
             // Remove tokenised words were the dash is still there.
             word = word.startsWith("-") ? word.substring(1) : word;
             word = word.endsWith("-") ? word.substring(word.length()-1) : word;
 
-            // Loop through all words and remove stopwrods, characters, and special corpora dependant words.
-            for (String sWord: StopWords.STOPWORDS){
-                if(word.equals(sWord)){
-                    foundStopWord = true;
-                }
+            // Check the stop words and characters list for the word instance.
+            boolean foundStopWord = StopWords.STOPWORDS.contains(word);
+            if(!foundStopWord){
+                foundStopWord = StopWords.STOPCHARS.contains(word);
             }
-            for (String sWord: StopWords.STOPCHARS){
-                if(word.equals(sWord)){
-                    foundStopWord = true;
-                }
+            if(!foundStopWord){
+                foundStopWord = StopWords.REMOVEWORDS.contains(word);
             }
-            for (String sWord: StopWords.REMOVEWORDS){
-                if(word.equals(sWord)){
-                    foundStopWord = true;
-                }
+            // Check if word is a number with format [-]3343[.343]
+            if(!foundStopWord){
+                foundStopWord = word.matches("-?\\d+(\\.\\d+)?");
             }
-
-            // Fix annoying lemma
-            word = word.replace("datum", "data");
-
-            //Remove numbers in the format [-]3343[.343]
-            if(word.matches("-?\\d+(\\.\\d+)?")){
-                foundStopWord = true;
+            // Replace missed lemmas, eg latin singular words
+            if(!foundStopWord && ReplaceWords.REPLACEWORDS.containsKey(word)){
+                word = ReplaceWords.REPLACEWORDS.get(word);
             }
 
+            // If the word passed all these check, we can add it to the list of lemmas
             if(!foundStopWord) newWords.add(word);
         }
         return newWords;
