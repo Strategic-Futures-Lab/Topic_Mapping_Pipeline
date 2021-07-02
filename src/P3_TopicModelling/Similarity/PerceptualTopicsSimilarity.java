@@ -7,13 +7,21 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
 
+/**
+ * Class computing the perceptual similarity between topics, ie, based on top words overlap.
+ * 
+ * @author A. Gharavi, P. Le Bras
+ * @version 1
+ * @deprecated Incorporated in {@link TopicsSimilarity}
+ */
+@Deprecated
 public class PerceptualTopicsSimilarity {
 
     /*
-    * Similarity matrix based on the perceptual measure based on topics topwords and weights
-    * */
+     * Similarity matrix based on the perceptual measure based on topics topwords and weights
+     * */
     public static double[][] GetSimilarityMatrixPerceptual(int sizeX, List<List<TopicIOWrapper.JSONTopicWeight>> topicModelX,
-                                                 int sizeY, List<List<TopicIOWrapper.JSONTopicWeight>> topicModelY, String metric){
+                                                           int sizeY, List<List<TopicIOWrapper.JSONTopicWeight>> topicModelY, String metric){
 
         LogPrint.printNewStep("Calculating similarity matrix " + metric + " " +sizeX+"x"+sizeY, 0);
         DecimalFormat df = new DecimalFormat("#.####");
@@ -23,23 +31,23 @@ public class PerceptualTopicsSimilarity {
 
         //get the topic labels and weights
         for(int yTopic = 0; yTopic < sizeY; yTopic++){
-                   for(int xTopic = 0; xTopic < sizeX; xTopic++){
-                       try{
-                           switch (metric){
-                               case "Perceptual":
-                                   matrix[xTopic][yTopic]=  1- sumOfDotProductsWithPenalty(getNormalizedVector(topicModelY.get(yTopic)),
-                                           getNormalizedVector(topicModelX.get(xTopic)))/sizeX;
-                                   break;
-                               case "L1Norm":
-                                   matrix[xTopic][yTopic]=  l1Norm(getNormalizedVector(topicModelY.get(yTopic)),
-                                           getNormalizedVector(topicModelX.get(xTopic)));
-                                   break;
-                           }
-                       }catch (Exception e){
-                          LogPrint.printNoteError("Error while calculating the topic to topic Perceptual distance\n");
-                          System.out.println(e.getStackTrace());
-                          System.exit(1);
-                       }
+            for(int xTopic = 0; xTopic < sizeX; xTopic++){
+                try{
+                    switch (metric){
+                        case "Perceptual":
+                            matrix[xTopic][yTopic]=  1- sumOfDotProductsWithPenalty(getNormalizedVector(topicModelY.get(yTopic)),
+                                    getNormalizedVector(topicModelX.get(xTopic)))/sizeX;
+                            break;
+                        case "L1Norm":
+                            matrix[xTopic][yTopic]=  l1Norm(getNormalizedVector(topicModelY.get(yTopic)),
+                                    getNormalizedVector(topicModelX.get(xTopic)));
+                            break;
+                    }
+                }catch (Exception e){
+                    LogPrint.printNoteError("Error while calculating the topic to topic Perceptual distance\n");
+                    System.out.println(e.getStackTrace());
+                    System.exit(1);
+                }
 
             }
         }
@@ -113,7 +121,7 @@ public class PerceptualTopicsSimilarity {
             sum += wA.weight;
 
         for (TopicIOWrapper.JSONTopicWeight wA: vectorA)
-           wA.weight = wA.weight/sum;
+            wA.weight = wA.weight/sum;
 
         return vectorA;
     }

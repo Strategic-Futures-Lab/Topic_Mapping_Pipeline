@@ -1,7 +1,7 @@
 package P3_TopicModelling;
 
+import P0_Project.ModelSpecs;
 import P0_Project.TopicModelModuleSpecs;
-import P3_TopicModelling.Similarity.PerceptualTopicsSimilarity;
 import P3_TopicModelling.Similarity.TopicsSimilarity;
 import PX_Data.DocIOWrapper;
 import PX_Data.TopicIOWrapper;
@@ -17,15 +17,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class reading a lemma JSON file, generating a hierarchical topic model from these documents and saving several model files.
+ * <br>
+ * On top of the main and sub models files, the files saved include:<br>
+ * - (optional) The sub topic to main topic similarity matrix CSV file;<br>
+ * - (optional) The sub topic to main topic assignment data CSV file.
+ *
+ * @author P. Le Bras, A. Gharavi
+ * @version 2
+ */
 public class HierarchicalTopicModelling {
 
-    private LemmaReader Lemmas;
+    /** Main topic modelling instance. */
     private TopicModelling MainTopicModel;
+    /** Sub topic modelling instance. */
     private TopicModelling SubTopicModel;
+    /** Similarity matrix between sub and main topics. */
     private double[][] SimilarityMatrix;
 
-    private TopicModelModuleSpecs specs;
+    /** Filename of the inout lemma JSON file. */
+    private String lemmasFile;
+    /** Parameters of the main topic model. */
+    private ModelSpecs mainModelSpecs;
+    /** Number of topics in the main model. */
+    private int nMainTopics;
+    /** Parameters of the sub topic model. */
+    private ModelSpecs subModelSpecs;
+    /** Number of topics in the sub model. */
+    private int nSubTopics;
+    /** Assignment metric. */
+    private String assignType;
+    /** Maximum number of sub topics assigned to a main topic. */
+    private int maxAssign;
+    /** Boolean flag for writing similarities between main and sub topics on file. */
+    private boolean outputSimilarity;
+    /** Filename of CSV file containing the similarities between main and sub topics. */
+    private String similarityOutput;
+    /** Boolean flag for writing the assignment data on file. */
+    private boolean outputAssignment;
+    /** Filename of CSV file containing the assignment data. */
+    private String assignmentOutput;
 
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param specs Specifications.
+     * @return String indicating the time taken to read the lemmas JSON file, model topics and associated data,
+     * assign sub topics to main topics and produce the output files.
+     */
     public static String HierarchicalModel(TopicModelModuleSpecs specs){
 
         LogPrint.printModuleStart("Hierarchical topic modelling");
@@ -33,8 +72,8 @@ public class HierarchicalTopicModelling {
         long startTime = System.currentTimeMillis();
 
         HierarchicalTopicModelling startClass = new HierarchicalTopicModelling();
-        startClass.specs = specs;
-        startClass.RunModels();
+        startClass.ProcessArguments(specs);
+        startClass.RunModels(specs);
         startClass.GetAndSetModelSimilarity();
         startClass.AssignTopicHierarchy();
         startClass.MergeDocuments();
@@ -47,41 +86,72 @@ public class HierarchicalTopicModelling {
         return "Hierarchical topic modelling: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
-    private void RunModels(){
+    /**
+     * Method processing the specification parameters.
+     * @param specs Specifications.
+     */
+    private void ProcessArguments(TopicModelModuleSpecs specs){
+        LogPrint.printNewStep("Processing arguments", 0);
+        mainModelSpecs = specs.mainModel;
+        nMainTopics = mainModelSpecs.topics;
+        subModelSpecs = specs.subModel;
+        nSubTopics = subModelSpecs.topics;
+        lemmasFile = specs.lemmas;
+        assignType = specs.assignmentType;
+        maxAssign = specs.maxAssign;
+        outputSimilarity = specs.outputSimilarity;
+        if(outputSimilarity){
+            similarityOutput = specs.similarityOutput;
+        }
+        outputAssignment = specs.outputAssignment;
+        if(outputAssignment){
+            assignmentOutput = specs.assignmentOutput;
+        }
+        LogPrint.printCompleteStep();
+        LogPrint.printNote("Modelling "+nMainTopics+" main topics and "+nSubTopics+" sub topics");
+        LogPrint.printNote("Assigning sub topics to main topic using "+assignType+" metric");
+        LogPrint.printNote("Each sub topic will be assign a maximum of "+maxAssign+" main topics");
+        if(outputSimilarity){
+            LogPrint.printNote("Saving main topic to sub topic similarity");
+        }
+        if(outputAssignment){
+            LogPrint.printNote("Saving sub topic to main topic assignment");
+        }
+    }
+
+    /**
+     * Method reading the lemmas and launching the main and sub models.
+     * @param specs Module specifications passed on to the model instances.
+     */
+    private void RunModels(TopicModelModuleSpecs specs){
         LogPrint.printSubModuleStart("Lemma reader");
-        Lemmas = new LemmaReader(specs.lemmas);
+        LemmaReader lemmas = new LemmaReader(lemmasFile);
         LogPrint.printSubModuleStart("Main model");
-        MainTopicModel = TopicModelling.Model(specs, specs.mainModel, Lemmas);
+        MainTopicModel = TopicModelling.Model(specs, mainModelSpecs, lemmas);
         LogPrint.printSubModuleStart("Sub model");
-        SubTopicModel = TopicModelling.Model(specs, specs.subModel, Lemmas);
+        SubTopicModel = TopicModelling.Model(specs, subModelSpecs, lemmas);
         LogPrint.printSubModuleEnd();
     }
 
+    /**
+     * Method calculating the similarities between sub and main topics.
+     */
     private void GetAndSetModelSimilarity(){
-        if(specs.assignmentType.equals("Perceptual")){
-            SimilarityMatrix = PerceptualTopicsSimilarity.GetSimilarityMatrixPerceptual(
-                    specs.subModel.topics,
-                    SubTopicModel.getTopicLabelsAndWeights(),
-                    specs.mainModel.topics,
-                    MainTopicModel.getTopicLabelsAndWeights(),
-                    specs.assignmentType
-            );
-
-        }else if(specs.assignmentType.equals("Document")){
-            SimilarityMatrix = TopicsSimilarity.GetSimilarityMatrix(specs.subModel.topics, SubTopicModel.getTopicDistributions(),
-                    specs.mainModel.topics, MainTopicModel.getTopicDistributions());
+        if(assignType.equals("Document")){
+            SimilarityMatrix = TopicsSimilarity.DocumentCosineSimilarity(SubTopicModel.getModelledDocuments(),
+                    MainTopicModel.getModelledDocuments());
+        } else {
+            // Default similarity measure "Perceptual"
+            SimilarityMatrix = TopicsSimilarity.PerceptualSimilarity(SubTopicModel.getModelledTopics(),
+                    MainTopicModel.getModelledTopics());
         }
-
-
-
-        if(specs.outputSimilarity){
-            SaveSimilarityMatrix();
-        }
+        if(outputSimilarity) SaveSimilarityMatrix();
     }
 
+    /**
+     * Method using topic similarities to assign sub topics to main topics.
+     */
     private void AssignTopicHierarchy() {
-        int maxAssignMain = specs.maxAssignMain;
-        int maxAssignSub = specs.maxAssignSub;
         ConcurrentHashMap<String, TopicIOWrapper> mainTopics = MainTopicModel.getTopics();
         ConcurrentHashMap<String, TopicIOWrapper> subTopics = SubTopicModel.getTopics();
 
@@ -91,25 +161,21 @@ public class HierarchicalTopicModelling {
         for (int sT = 0; sT < SimilarityMatrix.length; sT++) {
             double[] currentRow = SimilarityMatrix[sT];
 
-            // for direct assignment
             TopicIOWrapper subTopic = subTopics.get(String.valueOf((sT)));
-
             HashMap<Integer, Double> assigns = new HashMap<>();
 
             List<Integer> usedIdx = new ArrayList<>();
-            // while under the maxAssignSub threshold
-            for(int i = 0; i < maxAssignSub; i++){
+            // while under the maxAssign threshold
+            for(int i = 0; i < maxAssign; i++){
                 // find the next highest similarity between this sub topic and the main topics
                 int currentMaxIdx = 0;
-                double currentMax=0.00;
+                double currentMax = 0.0;
                 for(int mT = 0; mT < currentRow.length; mT++){
                     if(currentRow[mT] > currentMax && !usedIdx.contains(mT)){
                         currentMax = currentRow[mT];
                         currentMaxIdx = mT;
                     }
                 }
-
-
                 // remove the main topic found from list of potential assignment for this sub topic
                 usedIdx.add(currentMaxIdx);
                 // if no difference check: assign directly
@@ -119,22 +185,22 @@ public class HierarchicalTopicModelling {
                 TopicIOWrapper mainTopic = mainTopics.get(String.valueOf(currentMaxIdx));
                 // assign the main topic to the sub topic
                 subTopic.addMainTopicId(mainTopic.getId(), currentMax);
-                // if still under the maxAssignMain threshold
-                if(i<maxAssignMain){
-                    // assign the sub topic to the main topic
-                    mainTopic.addSubTopicId(subTopic.getId(), currentMax);
-                }
+                // assign the sub topic to the main topic
+                mainTopic.addSubTopicId(subTopic.getId(), currentMax);
             }
             // save this sub topic's assignments
             assignment.put(sT,assigns);
         }
         LogPrint.printCompleteStep();
 
-        if(specs.outputAssignment){
+        if(outputAssignment){
             SaveAssignment(assignment);
         }
     }
 
+    /**
+     * Method merging document data from the sub model into the main model, and writing the document data on file.
+     */
     private void MergeDocuments(){
         ConcurrentHashMap<String, DocIOWrapper> mainDocs = MainTopicModel.getDocuments();
         ConcurrentHashMap<String, DocIOWrapper> subDocs = SubTopicModel.getDocuments();
@@ -142,13 +208,16 @@ public class HierarchicalTopicModelling {
             String docKey = docEntry.getKey();
             docEntry.getValue().setSubTopicDistribution(subDocs.get(docKey).getMainTopicDistribution());
         }
-        MainTopicModel.SaveDocuments(specs.mainModel.topics, specs.subModel.topics);
+        MainTopicModel.SaveDocuments(nMainTopics, nSubTopics);
     }
 
+    /**
+     * Method writing the models' similarities on file.
+     */
     private void SaveSimilarityMatrix(){
         LogPrint.printNewStep("Saving model similarities", 0);
 
-        File file = new File(specs.similarityOutput);
+        File file = new File(similarityOutput);
         file.getParentFile().mkdirs();
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
@@ -157,7 +226,7 @@ public class HierarchicalTopicModelling {
             String[] mainLabels = MainTopicModel.getTopicsLabels();
             String[] subLabels = SubTopicModel.getTopicsLabels();
             appender.appendField("");
-            for (int mT = 0; mT < specs.mainModel.topics; mT++) {
+            for (int mT = 0; mT < nMainTopics; mT++) {
                 appender.appendField(mainLabels[mT]);
             }
             appender.endLine();
@@ -173,14 +242,16 @@ public class HierarchicalTopicModelling {
             LogPrint.printNoteError("Error while saving similarity matrix\n");
             e.printStackTrace();
         }
-
-        // System.out.println("Model Similarity Saved!");
     }
 
+    /**
+     * Method writing the assignment data on file.
+     * @param assignment Assignment date to save.
+     */
     private void SaveAssignment(HashMap<Integer, HashMap<Integer, Double>> assignment){
         LogPrint.printNewStep("Saving hierarchy assignments", 0);
 
-        File file = new File(specs.assignmentOutput);
+        File file = new File(assignmentOutput);
         file.getParentFile().mkdirs();
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
@@ -208,16 +279,13 @@ public class HierarchicalTopicModelling {
             LogPrint.printNoteError("Error while saving hierarchy assignments\n");
             e.printStackTrace();
         }
-
-        // System.out.println("Hierarchy Assignemnts Saved!");
     }
 
+    /**
+     * Method writing the topics data on file.
+     */
     private void SaveTopics(){
-        // System.out.println("Saving Main Topics ...");
         MainTopicModel.SaveTopics();
-        // System.out.println("Main Topics Saved!");
-        // System.out.println("Saving Sub Topics ...");
         SubTopicModel.SaveTopics();
-        // System.out.println("Sub Topics Saved!");
     }
 }

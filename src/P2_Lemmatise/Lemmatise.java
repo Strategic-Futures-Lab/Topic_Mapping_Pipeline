@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * Class reading a corpus JSON file, processing its document to lemmatise their texts and save them into a lemma JSON file.
+ * Class reading a corpus JSON file, processing its document to lemmatise their texts and saving them into a lemma JSON file.
  *
  * @author T. Methven, P. Le Bras
  * @version 2
@@ -150,10 +150,10 @@ public class Lemmatise {
         //1. You need to parallelise the entry set, and pass that to the method
         //2. You should use a ConcurrentHashMap rather than a usual HashMap. Normal HashMap will work (wrapped in a synchronizedMap) but will likely be slower.
         if(RUN_IN_PARALLEL)
-            Documents.entrySet().parallelStream().forEach(this::LemmatiseDocument);
+            Documents.entrySet().parallelStream().forEach(this::lemmatiseDocument);
         //Previous, non-parallel version
         else
-            Documents.entrySet().forEach(this::LemmatiseDocument);
+            Documents.entrySet().forEach(this::lemmatiseDocument);
 
         LogPrint.printNewStep("Lemmatisation", 0);
         LogPrint.printCompleteStep();
@@ -163,7 +163,7 @@ public class Lemmatise {
      * Method lemmatising the document from the corpus.
      * @param docEntry Document to lemmatise.
      */
-    private void LemmatiseDocument(Map.Entry<String, DocIOWrapper> docEntry){
+    private void lemmatiseDocument(Map.Entry<String, DocIOWrapper> docEntry){
 
         if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0) {
             long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
@@ -218,7 +218,8 @@ public class Lemmatise {
     }
 
     /**
-     *
+     * Method removing lemmas from the corpus if their total count falls under the given threshold.
+     * It essentially cleans the corpus of lemmas with a low number of occurrences.
      */
     private void CleanLemmas(){
         // Removing lemmas with count in vocabulary less than removeLowCounts.

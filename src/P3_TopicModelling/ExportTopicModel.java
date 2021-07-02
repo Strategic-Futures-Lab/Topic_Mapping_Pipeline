@@ -16,31 +16,65 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class reading topic and document JSON files to export into several data files.
+ * <br>
+ * Possible files include:
+ * - Main model JSON file, listing main topics with their top words and top documents (with data fields);
+ * - (optional) Sub model JSON file, listing main topics with their top words and top documents (with data fields);
+ * - (optional) Document CSV file(s), listing all documents, with their main and/or sub topic distributions.
+ */
 public class ExportTopicModel {
 
+    /** Filename of the input main topic JSON file. */
     private String mainTopicsFile;
+    /** Filename of the output main topic JSON file. */
     private String mainOutput;
+    /** Boolean flag for exporting the main topic distributions on a CSV file. */
     private boolean exportMainTopicsCSV = false;
+    /** Filename of the output main topic distributions CSV file. */
     private String mainOutputCSV;
+    /** Boolean flag for exporting the sub topics a JSON file. */
     private boolean exportSubTopics = false;
+    /** Filename of the input sub topic JSON file. */
     private String subTopicsFile;
+    /** Filename of the output sub topic JSON file. */
     private String subOutput;
+    /** Boolean flag for exporting the sub topic distributions on a CSV file. */
     private boolean exportSubTopicsCSV = false;
+    /** Filename of the output sub topic distributions CSV file. */
     private String subOutputCSV;
+    /** Boolean flag for exporting both main and sub topic distributions on a CSV file. */
     private boolean exportMergedTopicsCSV = false;
+    /** Filename of the CSV output of both main and sub topic distributions. */
     private String outputCSV;
+    /** Filename of the input documents JSON file. */
     private String documentsFile;
+    /** Document fields to append for each documents in the output files. */
     private List<String> docFields;
+    /** Number of top words to use to identify topics in the CSV outputs. */
     private int numWordId;
 
+    /** List of documents. */
     private ConcurrentHashMap<String, DocIOWrapper> documents;
+    /** Documents metadata. */
     private JSONObject documentsMetadata;
+    /** Flag for models containing inferred documents. */
     private boolean hasInferredDocs;
+    /** List of main topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
+    /** Main topics metadata. */
     private JSONObject mainTopicsMetadata;
+    /** List of sub topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
+    /** Sub topics metadata. */
     private JSONObject subTopicsMetadata;
 
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param exportSpecs Specifications.
+     * @return String indicating the time taken to read the model JSON files and process the output files.
+     */
     public static String ExportTopicModel(TopicModelExportModuleSpecs exportSpecs){
 
         LogPrint.printModuleStart("Topic Model Export");
@@ -62,6 +96,10 @@ public class ExportTopicModel {
 
     }
 
+    /**
+     * Method processing the specification parameters.
+     * @param exportSpecs Specifications.
+     */
     private void ProcessArguments(TopicModelExportModuleSpecs exportSpecs){
         LogPrint.printNewStep("Processing arguments", 0);
         mainTopicsFile = exportSpecs.mainTopics;
@@ -88,12 +126,16 @@ public class ExportTopicModel {
         numWordId = exportSpecs.numWordId;
         LogPrint.printCompleteStep();
         // Logging options
-        if(exportMainTopicsCSV) LogPrint.printNote("exporting main topic model to CSV");
-        if(exportSubTopics) LogPrint.printNote("exporting sub topics");
-        if(exportSubTopicsCSV) LogPrint.printNote("exporting sub topics to CSV");
-        if(exportMainTopicsCSV || exportSubTopicsCSV) LogPrint.printNote("identifying topics with "+numWordId+" labels");
+        if(exportMainTopicsCSV) LogPrint.printNote("Exporting main topic model to CSV");
+        if(exportSubTopics) LogPrint.printNote("Exporting sub topics");
+        if(exportSubTopicsCSV) LogPrint.printNote("Exporting sub topics to CSV");
+        if(exportMergedTopicsCSV) LogPrint.printNote("Exporting main and sub topics merged in one CSV file");
+        if(exportMainTopicsCSV || exportSubTopicsCSV || exportMergedTopicsCSV) LogPrint.printNote("Identifying topics with "+numWordId+" labels");
     }
 
+    /**
+     * Method loading all input data files.
+     */
     private void LoadFiles(){
         LogPrint.printNewStep("Loading data", 0);
         JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
@@ -104,9 +146,8 @@ public class ExportTopicModel {
             DocIOWrapper doc = new DocIOWrapper(docEntry);
             documents.put(doc.getId(), doc);
         }
-        hasInferredDocs = documents.entrySet().stream()
-                .map(d -> d.getValue())
-                .anyMatch(d -> d.isInferred());
+        hasInferredDocs = documents.values().stream()
+                .anyMatch(DocIOWrapper::isInferred);
         input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
         mainTopicsMetadata = (JSONObject) input.get("metadata");
         mainTopics = new ConcurrentHashMap<>();
@@ -123,9 +164,11 @@ public class ExportTopicModel {
                 subTopics.put(topic.getId(), topic);
             }
         }
-        // LogPrint.printClose(" Done.");
     }
 
+    /**
+     * Method checking the presence of document data field in the list of documents.
+     */
     private void CheckDocFields(){
         LogPrint.printNewStep("Checking document fields", 0);
         HashMap<String, Integer> missing = new HashMap<>();
@@ -148,6 +191,9 @@ public class ExportTopicModel {
         }
     }
 
+    /**
+     * Method adding document data to the top documents in each topics.
+     */
     private void BuildModelData(){
         LogPrint.printNewStep("Building model", 0);
         for(Map.Entry<String, TopicIOWrapper> t: mainTopics.entrySet()){
@@ -175,6 +221,10 @@ public class ExportTopicModel {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method writing the model(s) on JSON file(s).
+     * Each model is a list of topics, each topic has top words and top documents with data fields.
+     */
     private void SaveModel(){
         LogPrint.printNewStep("Saving model", 0);
         JSONObject root = new JSONObject();
@@ -204,6 +254,9 @@ public class ExportTopicModel {
         SaveCSV();
     }
 
+    /**
+     * Method launching the writing process for CSV exports.
+     */
     private void SaveCSV(){
         if(exportMainTopicsCSV) {
             saveCSV(mainOutputCSV, mainTopics, true);
@@ -216,6 +269,12 @@ public class ExportTopicModel {
         }
     }
 
+    /**
+     * Method writing a topic distributions, for every document, on a CSV file.
+     * @param filename Filename of the CSV file to export to.
+     * @param topics List of topics to include.
+     * @param isMain Whether the list of topics is from the main model (true) or sub model (false).
+     */
     private void saveCSV(String filename, ConcurrentHashMap<String, TopicIOWrapper> topics, boolean isMain){
         LogPrint.printNewStep("Saving "+filename, 1);
         String[] topicsLabels = new String[topics.size()];
@@ -251,6 +310,12 @@ public class ExportTopicModel {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method creating the header for a CSV file.
+     * @param appender CSV appender instance to add headers to.
+     * @param topicLabels List of topic identifiers, using their top words.
+     * @throws IOException If an error occurs with the CSV appender.
+     */
     private void createHeader(CsvAppender appender, String[] topicLabels) throws IOException{
         appender.appendField("_docId");
         for(String f: docFields){
@@ -265,6 +330,9 @@ public class ExportTopicModel {
         appender.endLine();
     }
 
+    /**
+     * Method writing both main and sub topic distributions, for every document, on a CSV file.
+     */
     private void saveMergedTopicsCSV(){
         LogPrint.printNewStep("Saving "+outputCSV, 1);
         int size = exportSubTopics ? mainTopics.size()+subTopics.size() : mainTopics.size();

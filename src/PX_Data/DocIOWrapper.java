@@ -240,6 +240,7 @@ public class DocIOWrapper {
     public void setLemmas(List<String> inputLemmas){
         numLemmas = inputLemmas.size();
         lemmas = inputLemmas;
+        makeLemmaString();
     }
 
     /**

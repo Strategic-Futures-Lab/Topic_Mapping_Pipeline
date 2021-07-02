@@ -1,5 +1,13 @@
 package P3_TopicModelling.TopicModelCore;
 
+/**
+ * Class storing, for a single word, its value, topic assignment and weight.
+ *
+ * @author S. Padilla, T. Methven
+ * @version 1
+ * @deprecated No longer used.
+ */
+@Deprecated
 public class WordData implements java.io.Serializable {
 
     private static final long serialVersionUID = 8325577336916113274L;

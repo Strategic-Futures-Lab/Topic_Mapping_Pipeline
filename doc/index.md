@@ -75,7 +75,7 @@
 
 [Website](https://stanfordnlp.github.io/CoreNLP/)
 
-[GNU General Public License, v3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3))
+License: [GNU General Public License, v3](https://opensource.org/licenses/GPL-3.0)
 
 Cite: 
 > Christopher D. Manning, Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014.
@@ -95,7 +95,7 @@ Cite:
 
 [Website](http://mallet.cs.umass.edu/)
 
-[CPL 1.0](https://tldrlegal.com/license/common-public-license-1.0-(cpl-1.0))
+License: [CPL 1.0](https://opensource.org/licenses/cpl1.0.php)
 
 Cite:
 > Andrew Kachites McCallum. 2002.
@@ -113,25 +113,25 @@ Cite:
 
 [Website](http://www.jbox2d.org/)
 
-License: [BSD 2-Clause License](https://tldrlegal.com/license/bsd-2-clause-license-(freebsd))
+License: [BSD 2-Clause License](https://opensource.org/licenses/BSD-2-Clause)
 
 ### FastCSV
 
 [GitHub](https://github.com/osiegmar/FastCSV)
 
-License: [MIT](https://tldrlegal.com/license/mit-license)
+License: [MIT](https://opensource.org/licenses/MIT)
 
 ### JSON-Simple
 
 [GitHub](https://github.com/fangyidong/json-simple)
 
-License: [Apache 2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
+License: [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 ### PDFBox
 
 [Website](https://pdfbox.apache.org/)
 
-License: [Apache 2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
+License: [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 <!--
 No longer using technically.

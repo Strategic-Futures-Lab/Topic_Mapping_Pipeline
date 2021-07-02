@@ -56,6 +56,7 @@ The specifiations for `mainModel` and `subModel` follow the same structure:
       "words": 10,
       "docs": 30,
       "iterations": 500,
+      "iterationsMax": 10,
       "topicOuput": "path",
       "serialise": "path",
       // Advanced options
@@ -74,10 +75,12 @@ The specifiations for `mainModel` and `subModel` follow the same structure:
 
 Where:
 - `topics` is the number of topics to sample;
-- `words` is the number of top labels to keep in the topic data, it is optional and defaults to 20;
-- `docs` is the number of top documents to keep in the topic data, it is optional and defaults to 20;
-- `iterations` is the number of iterations the Gibbs Sampling algorithm needs to perform, it is optional and defaults
-to 1000;
+- `words` is the number of top labels to keep in the topic data, it is optional and defaults to `20`;
+- `docs` is the number of top documents to keep in the topic data, it is optional and defaults to `20`;
+- `iterations` is the number of iterations the Gibbs Sampling algorithm needs to perform, it is optional and defaults 
+  to `1000`;
+- `iterationsMax` is the number of iteration the maximisation algorithm (after sampling) will perform, it is optional
+  and defaults to `0` (no maximisation);
 - `topicOuput` is the path to the topic JSON file (excluding directory);
 - `serialise` is the path to the serialised model object (excluding directory), which will be used to
 [infer topics](InferenceModule.md), using this parameter is optional, and the model won't be serialised if this
@@ -87,19 +90,19 @@ There are also advanced specifications:
 - `topicSimOuput` is the path to the CSV file saving the topic-to-topic similarity matrix (excluding directory), using
 this parameter is optional, and the data won't be saved if this parameter is not specified;
 - `numWordId` is the number of labels to use to identify a topic in a similarity matrix output, or hierarchical
-assignment output, it is optional and defaults to 3;
+assignment output, it is optional and defaults to `3`;
 - `llOupout` is the path to the JSON file recording the evolution of the model's log-likelihood throughout the modelling
 process, this parameter is optional, and the data won't be saved if it is not specified;
 - `topicLogOutput` is the path to the JSON file recording the evolution of topics throughout the modelling process,
 this parameter is optional, and the data won't be saved if it is not specified;
 - `alphaSum` lets you set the sum of the topics' alpha values (document to topics distribution Dirichlet prior), this 
-parameter is optional and defaults to 1.0;
+parameter is optional and defaults to `1.0`;
 - `symmetricAlpha` lets you set the symmetry of the alpha values during their optimisation stage, this parameter is
-optional and defaults to false;
+optional and defaults to `false`;
 - `beta` lets you set the words' beta values (topic to words distribution Dirichlet prior), this parameter is optional
-and defaults tp 0.01;
-- `seed` lets you select one of 100 random seed for the model, it must therefore have a value between 0 and 99
-(included), this parameter is optional and defaults to 0.
+and defaults to `0.01`;
+- `seed` lets you select one of 100 random seed for the model, it must therefore have a value between `0` and `99`
+(included), this parameter is optional and defaults to `0`.
 
 The specification for `hierarchy` should follow this structure:
 ```json5
@@ -109,8 +112,6 @@ The specification for `hierarchy` should follow this structure:
       "modelSimOutput": "path",
       "assignmentType" :  "Perceptual",
       "maxAssign": 1,
-      "maxAssignMain": 1,
-      "maxAssignSub": 3,
       "assignmentOutput": "path"
     },
   ...}
@@ -120,10 +121,11 @@ The specification for `hierarchy` should follow this structure:
 Where:
 - `modelSimOutput` is the path to the CSV file saving the main-to-sub topic similarity matrix (excluding directory),
 using this parameter is optional, and the data won't be saved if this parameter is not specified;
-- `maxAssign` is the number of main topics assigned to a sub topic, it is optional and defaults to 1;
-- `assignementType` defult is the "Perceptual" meaning the sub/super topic assignemnets are calcualted based on the perceptual (top words) similarity of topics. 
-                    if it is set to "Document" the assignement will be calcualted based on the Cosine similarity of the document vectors.  
-- `assignmentOutput` is the path to the CSV file saving the sub to main topic assignement data (excluding directory),
+- `maxAssign` is the maximum number of time a sub topic will get assigned to main topics, it is optional and defaults to `1`;
+- `assignmentType` is the type of similarity measure to use for the assignment between main and sub topics:
+  - `"Perceptual"` will use the overlap between topics' labels, it is the default value;
+  - `"Document"` will use the topics' distributions in documents;
+- `assignmentOutput` is the path to the CSV file saving the assignment data (excluding directory),
 using this parameter is optional, and the data won't be saved if this parameter is not specified.
 
 ## Output

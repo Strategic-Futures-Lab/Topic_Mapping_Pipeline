@@ -2,13 +2,13 @@
   "run": {
     "input": false,
     "lemmatise": false,
-    "model": false,
+    "model": true,
     "inferDocuments": false,
     "exportTopicModel": false,
     "indexLabels": false,
     "distributeTopics": false,
     "clusterTopics": false,
-    "mapTopics": true
+    "mapTopics": false
   },
   "metaParameters": {
     "projectDir": "files/",

@@ -9,9 +9,9 @@ package PY_Helper;
 public class Pair<L,R> {
 
     /** Left object. */
-    private final L left;
+    private L left;
     /** Right object. */
-    private final R right;
+    private R right;
 
     /**
      * Constructor.
@@ -34,6 +34,18 @@ public class Pair<L,R> {
      * @return The right object.
      */
     public R getRight() { return right; }
+
+    /**
+     * Setter for the left object.
+     * @param left New value for the left object.
+     */
+    public void setLeft(L left) { this.left = left; }
+
+    /**
+     * Setter for the right object.
+     * @param right New value for the right object.
+     */
+    public void setRight(R right) { this.right = right; }
 
     /**
      * Method returning a hash code for the pair.

@@ -1,13 +1,12 @@
 package P3_TopicModelling;
 
 import P0_Project.DocumentInferModuleSpecs;
+import P3_TopicModelling.TopicModelCore.ModelledTopic;
 import P3_TopicModelling.TopicModelCore.TopicModel;
 import PX_Data.DocIOWrapper;
 import PX_Data.JSONIOWrapper;
 import PX_Data.TopicIOWrapper;
 import PY_Helper.LogPrint;
-import cc.mallet.types.Alphabet;
-import cc.mallet.types.IDSorter;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
@@ -22,52 +21,106 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Class reading a lemma JSON file and existing (main and/or sub) topic model data, inferring the new documents topic distributions
+ * and saving/updating several data files.
+ * <br>
+ * The files saved include:<br>
+ * - (optional) Updated Topics JSON files (include the inferred documents in their top document list if appropriate);
+ * - (optional) Updated Document JSON file (include the inferred documents);
+ * - (optional) Inferred documents CSV file.
+ *
+ * @author P. Le Bras
+ * @version 2
+ */
 public class InferDocuments {
 
+    /** Filename for the serialised main model. */
     private String mainModelFile;
-    private boolean inferFromSubModel;
-    private String subModelFile;
-
-    private boolean exportCSV;
-    private String csvOutput;
-    private List<String> docFields;
-    private int numWordId;
-    private boolean mergeMainTopics;
-    private String mainTopicsFile;
-    private String mainTopicsOutput;
-    private boolean mergeSubTopics;
-    private String subTopicsFile;
-    private String subTopicsOutput;
-    private boolean mergeDocuments;
-    private String documentsFile;
-    private String documentsOutput;
-
-    private JSONObject InferMetadata;
-    private ConcurrentHashMap<String, DocIOWrapper> DocumentsToInfer;
-
-    private JSONObject ModelDocumentsMetadata;
-    private ConcurrentHashMap<String, DocIOWrapper> ModelDocuments;
-
-    private JSONObject ModelMainTopicsMetadata;
-    private ConcurrentHashMap<String, TopicIOWrapper> ModelMainTopics;
-    private JSONArray ModelMainTopicsSimilarities;
-    private JSONObject ModelSubTopicsMetadata;
-    private ConcurrentHashMap<String, TopicIOWrapper> ModelSubTopics;
-    private JSONArray ModelSubTopicsSimilarities;
-
-    private int docsProcessed = 0;
-    private int totalDocs = 0;
-    private long inferStartTime;
-    private final static int UPDATE_FREQUENCY = 100;
-
-    private int iterations;
-
+    /** Instance of the main topic model. */
     private TopicModel mainModel;
+    /** Boolean flag for inferring documents with the sub model. */
+    private boolean inferFromSubModel;
+    /** Filename for the serialised sub model. */
+    private String subModelFile;
+    /** Instance of the sub topic model. */
     private TopicModel subModel;
 
+    /** Boolean flag for exporting the documents' inferences into a CSV file. */
+    private boolean exportCSV;
+    /** Filename of the CSV file where to save the documents' inferences. */
+    private String csvOutput;
+    /** List of data fields to include in the documents' inferences CSV file. */
+    private List<String> docFields;
+    /** Number of words to use when generating topic identifiers in the documents' inferences CSV file. */
+    private int numWordId;
+
+    /** Boolean flag for merging the inferred documents into the existing main topics. */
+    private boolean mergeMainTopics;
+    /** Filename of the JSON file with the existing main topics. */
+    private String mainTopicsFile;
+    /** Filename of the JSON file where to saved the merged main topics data. */
+    private String mainTopicsOutput;
+    /** Boolean flag for merging the inferred documents into the existing sub topics. */
+    private boolean mergeSubTopics;
+    /** Filename of the JSON file with the existing sub topics. */
+    private String subTopicsFile;
+    /** Filename of the JSON file where to saved the merged sub topics data. */
+    private String subTopicsOutput;
+    /** Boolean flag for merging the inferred documents with the existing model's documents. */
+    private boolean mergeDocuments;
+    /** Filename of the JSON file with the existing model's documents. */
+    private String documentsFile;
+    /** Filename of the JSON file where to saved the merged documents data. */
+    private String documentsOutput;
+
+    // private JSONObject InferMetadata;
+    /** Filename of the lemma JSON file containing the documents to infer. */
+    private String lemmaFile;
+    /** List of documents to infer. */
+    private ConcurrentHashMap<String, DocIOWrapper> DocumentsToInfer;
+
+    /** JSON object containing metadata about the existing model's documents. */
+    private JSONObject ModelDocumentsMetadata;
+    /** List of documents which have already been modelled. */
+    private ConcurrentHashMap<String, DocIOWrapper> ModelDocuments;
+
+    /** JSON object containing metadata about the existing model's main topics. */
+    private JSONObject ModelMainTopicsMetadata;
+    /** List of main topics. */
+    private ConcurrentHashMap<String, TopicIOWrapper> ModelMainTopics;
+    /** JSON array of the main topics' similarities. */
+    private JSONArray ModelMainTopicsSimilarities;
+    /** JSON object containing metadata about the existing model's sub topics. */
+    private JSONObject ModelSubTopicsMetadata;
+    /** List of sub topics. */
+    private ConcurrentHashMap<String, TopicIOWrapper> ModelSubTopics;
+    /** JSON array of the sub topics' similarities. */
+    private JSONArray ModelSubTopicsSimilarities;
+
+    /** Number of documents processed by the inferencer. */
+    private int docsProcessed = 0;
+    /** Total number of documents to infer. */
+    private int totalDocs = 0;
+    /** Start time for of the inference process. */
+    private long inferStartTime;
+    /** Frequency, in number of documents, at which the module logs the inference progress. */
+    private final static int UPDATE_FREQUENCY = 100;
+
+    /** Number of iterations the inference process has to run. */
+    private int iterations;
+
+    /** List of main topics top words to use as identifier. */
     private HashMap<Integer, String> mainTopicWords;
+    /** List of sub topics top words to use as identifier. */
     private HashMap<Integer, String> subTopicWords;
 
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param specs Specifications.
+     * @return String indicating the time taken to read the lemma JSON file, infer the documents' topics from existing model(s)
+     * and process the output files.
+     */
     public static String InferDocuments(DocumentInferModuleSpecs specs){
 
         LogPrint.printModuleStart("Document Inference");
@@ -75,8 +128,7 @@ public class InferDocuments {
         long startTime = System.currentTimeMillis();
 
         InferDocuments startClass = new InferDocuments();
-        LemmaReader reader = new LemmaReader(specs.lemmas);
-        startClass.ProcessArguments(specs, reader);
+        startClass.ProcessArguments(specs);
         startClass.LoadData();
         startClass.InferDocuments();
         startClass.SaveData();
@@ -88,8 +140,14 @@ public class InferDocuments {
         return "Document Inference: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
-    private void ProcessArguments(DocumentInferModuleSpecs specs, LemmaReader reader){
+    /**
+     * Method processing the specification parameters.
+     * @param specs Specifications.
+     */
+    private void ProcessArguments(DocumentInferModuleSpecs specs){
         LogPrint.printNewStep("Processing arguments", 0);
+
+        lemmaFile = specs.lemmas;
 
         documentsFile = specs.documents;
         mainModelFile = specs.mainModel;
@@ -117,9 +175,6 @@ public class InferDocuments {
             documentsOutput = specs.documentsOutput;
         }
 
-        InferMetadata = reader.getMetadata();
-        DocumentsToInfer = reader.getDocuments();
-
         iterations = specs.iterations;
 
         LogPrint.printCompleteStep();
@@ -132,13 +187,30 @@ public class InferDocuments {
 
     }
 
+    /**
+     * Method launching all necessary data loading methods.
+     */
     private void LoadData(){
+        loadDocumentsToInfer();
         loadModels();
         loadDataFiles();
+        // after all is loaded, adjust the ids of docs to infer
+        adjustDocIds();
     }
 
+    /**
+     * Method loading the documents to infer.
+     */
+    private void loadDocumentsToInfer(){
+        LemmaReader reader = new LemmaReader(lemmaFile);
+        DocumentsToInfer = reader.getDocuments();
+    }
+
+    /**
+     * Method loading the existing model's data files: documents and topics (if necessary).
+     */
     private void loadDataFiles(){
-        LogPrint.printNewStep("Loading data", 0);
+        LogPrint.printNewStep("Loading model data", 0);
         // loading previous documents
         JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
         ModelDocumentsMetadata = (JSONObject) input.get("metadata");
@@ -148,7 +220,6 @@ public class InferDocuments {
             DocIOWrapper doc = new DocIOWrapper(docEntry);
             ModelDocuments.put(doc.getId(), doc);
         }
-        adjustDocIds();
         // loading previous models, only if merging later
         if(mergeMainTopics){
             input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
@@ -172,6 +243,9 @@ public class InferDocuments {
         }
     }
 
+    /**
+     * Method adjusting the ids of documents to infer, based on the existing model's documents.
+     */
     private void adjustDocIds(){
         int inferIdCount = -1;
         int indexCount = -1;
@@ -209,8 +283,11 @@ public class InferDocuments {
 
     }
 
+    /**
+     * Method loading the serialised topic model instances.
+     */
     private void loadModels(){
-        LogPrint.printNewStep("Loading main model", 0);
+        LogPrint.printNewStep("Loading serialised main model", 0);
         mainModel = new TopicModel();
         try{
             mainModel = (TopicModel) (new ObjectInputStream(new FileInputStream(mainModelFile))).readObject();
@@ -221,7 +298,7 @@ public class InferDocuments {
             System.exit(1);
         }
         if(inferFromSubModel){
-            LogPrint.printNewStep("Loading sub model", 0);
+            LogPrint.printNewStep("Loading serialised sub model", 0);
             subModel = new TopicModel();
             try{
                 subModel = (TopicModel) (new ObjectInputStream(new FileInputStream(subModelFile))).readObject();
@@ -235,6 +312,9 @@ public class InferDocuments {
         getTopicWords();
     }
 
+    /**
+     * Method extracting and saving the top words from each topics in the existing main and sub models.
+     */
     private void getTopicWords(){
         LogPrint.printNewStep("Getting topic labels", 0);
         mainTopicWords = getTopicWords(mainModel);
@@ -244,26 +324,23 @@ public class InferDocuments {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method extracting and saving the top words from each topics in the given model.
+     * @param tModel Model to extract topic words from.
+     * @return The list of each topic top words.
+     */
     private HashMap<Integer, String> getTopicWords(TopicModel tModel){
         HashMap<Integer, String> topicWords = new HashMap<>();
-        ArrayList<TreeSet<IDSorter>> sortedWords = tModel.model.getSortedWords();
-        Alphabet alphabet = tModel.model.getAlphabet();
-        for(int topic = 0; topic < sortedWords.size(); topic++){
-            List<String> words = new ArrayList<>();
-            int count = 0;
-            for(IDSorter word: sortedWords.get(topic)){
-                if(count >= numWordId) break;
-                if(word.getWeight() > 0){
-                    words.add((String) alphabet.lookupObject(word.getID()));
-                }
-                count++;
-            }
-            topicWords.put(topic, String.join("-", words));
-
+        List<ModelledTopic> modelTopics = tModel.modelledTopics;
+        for(int t = 0; t < modelTopics.size(); t++){
+            topicWords.put(t, String.join("-", modelTopics.get(t).getTopWords(numWordId)));
         }
         return topicWords;
     }
 
+    /**
+     * Method launching the inference process for each documents to infer.
+     */
     private void InferDocuments(){
         LogPrint.printNewStep("Inferring documents", 0);
 
@@ -276,6 +353,10 @@ public class InferDocuments {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method inferring a given document.
+     * @param document Document entry to infer.
+     */
     private void inferDocument(Map.Entry<String, DocIOWrapper> document){
 
         if(docsProcessed % UPDATE_FREQUENCY == 0 && docsProcessed != 0) {
@@ -304,16 +385,22 @@ public class InferDocuments {
         docsProcessed++;
     }
 
+    /**
+     * Method launching the processes writing data on file.
+     */
     private void SaveData(){
         LogPrint.printNewStep("Saving data", 0);
         // saving only the inferred docs in csv
         if(exportCSV) saveCSV();
         //
         if(mergeDocuments) saveMergedDocuments();
-        if(mergeMainTopics) saveMergedTopics(ModelMainTopics, ModelMainTopicsMetadata, ModelMainTopicsSimilarities, mainTopicsOutput, true);
-        if(mergeSubTopics) saveMergedTopics(ModelSubTopics, ModelSubTopicsMetadata, ModelSubTopicsSimilarities, subTopicsOutput, false);
+        if(mergeMainTopics) saveMergedTopics(true);
+        if(mergeSubTopics) saveMergedTopics(false);
     }
 
+    /**
+     * Method writing the inference data on a CSV file.
+     */
     private void saveCSV(){
         LogPrint.printNewStep("Saving "+ csvOutput, 1);
         int subTopicsSize = inferFromSubModel ? subTopicWords.size() : 0;
@@ -360,6 +447,12 @@ public class InferDocuments {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method generating the headers for the inference data CSV file.
+     * @param appender CSV appender instance to add headers to.
+     * @param topicLabels List of topic identifiers, using their top words.
+     * @throws IOException If an error occurs with the CSV appender.
+     */
     private void createHeader(CsvAppender appender, String[] topicLabels) throws IOException {
         appender.appendField("_docId");
         for(String f: docFields){
@@ -374,6 +467,9 @@ public class InferDocuments {
         appender.endLine();
     }
 
+    /**
+     * Method writing all documents (the originally modelled and the inferred) in one single document JSON file.
+     */
     private void saveMergedDocuments(){
         JSONObject root = new JSONObject();
         JSONArray documents = new JSONArray();
@@ -393,6 +489,11 @@ public class InferDocuments {
         JSONIOWrapper.SaveJSON(root, documentsOutput, 1);
     }
 
+    /**
+     * Method returning the number of documents marked as removed (eg, too short for modelling) from a list of documents.
+     * @param docs List of documents to check.
+     * @return Number of documents marked as removed.
+     */
     private int getNDocsRemoved(ConcurrentHashMap<String, DocIOWrapper> docs){
         return docs.entrySet().stream()
                 .map(d -> d.getValue())
@@ -401,6 +502,11 @@ public class InferDocuments {
                 .size();
     }
 
+    /**
+     * Method returning the number of documents marked as inferred in a list of documents.
+     * @param docs List of documents to check.
+     * @return Number of documents marked as inferred.
+     */
     private int getNDocsInferred(ConcurrentHashMap<String, DocIOWrapper> docs){
         return docs.entrySet().stream()
                 .map(d -> d.getValue())
@@ -409,7 +515,15 @@ public class InferDocuments {
                 .size();
     }
 
-    private void saveMergedTopics(ConcurrentHashMap<String, TopicIOWrapper> topics, JSONObject metadata, JSONArray similarities, String output, boolean isMain) {
+    /**
+     * Method writing a given list of topics on file, appending the inferred documents to it if necessary.
+     * @param isMain Whether the topics to write on file are the main topics (true) or sub topics (false).
+     */
+    private void saveMergedTopics(boolean isMain) {
+        ConcurrentHashMap<String, TopicIOWrapper> topics = isMain ? ModelMainTopics : ModelSubTopics;
+        JSONObject metadata = isMain ? ModelMainTopicsMetadata : ModelSubTopicsMetadata;
+        JSONArray similarities = isMain ? ModelMainTopicsSimilarities : ModelSubTopicsSimilarities;
+        String output = isMain ? mainTopicsOutput : subTopicsOutput;
         mergeInferredDocsWithTopics(topics, isMain);
         JSONObject root = new JSONObject();
         JSONArray JsonTopics = new JSONArray();
@@ -429,6 +543,11 @@ public class InferDocuments {
         JSONIOWrapper.SaveJSON(root, output, 1);
     }
 
+    /**
+     * Method appending the inferred documents to the list of top documents in each topic of the list provided.
+     * @param topics List of topics to append the document to.
+     * @param isMain Whether the list of topics in the main one or not, to find the topic distribution in the documents.
+     */
     private void mergeInferredDocsWithTopics(ConcurrentHashMap<String, TopicIOWrapper> topics, boolean isMain){
         for(Map.Entry<String, TopicIOWrapper> t: topics.entrySet()){
             TopicIOWrapper topic = t.getValue();
@@ -448,6 +567,13 @@ public class InferDocuments {
         }
     }
 
+    /**
+     * Method getting an integer field from a JSON object.
+     * @param jsonObject JSON object to extract integer from.
+     * @param name Field name where the integer is.
+     * @param def Default integer value in case nothing is found.
+     * @return The integer value.
+     */
     private int getIntJson(JSONObject jsonObject, String name, int def){
         return Math.toIntExact((long) jsonObject.getOrDefault(name, (long) def));
     }

@@ -7,14 +7,16 @@ import org.json.simple.JSONObject;
  */
 public class ModelSpecs {
 
-    /** Number of topics to generate */
+    /** Number of topics to generate. */
     public int topics;
-    /** Maximum number of words to save in topic data, optional, defaults to 20 */
+    /** Maximum number of words to save in topic data, optional, defaults to 20. */
     public int words = 20;
-    /** Maximum number of document to save in topic data, optional, defaults to 20 */
+    /** Maximum number of document to save in topic data, optional, defaults to 20. */
     public int docs = 20;
-    /** Number of iteration for Gibbs Sampling, optional, defaults to 1000 */
+    /** Number of iteration for Sampling, optional, defaults to 1000. */
     public int iterations = 1000;
+    /** Number of iteration for Maximisation, optional, defaults to 0. */
+    public int iterationsMax = 0;
     /** Name of topic model when serialising (used if documents inferred from this model later), optional, defaults to "" (no serialisation) */
     public String serialiseFile = "";
     /** Flag for serialising model, defaults to false if serialiseName = "" */
@@ -34,6 +36,11 @@ public class ModelSpecs {
     public String llOutput = "";
     /** Flag for writing Log-Likelihood records, defaults to false if llOutput = "" */
     public boolean outputLL = false;
+    /** Filename for the JSON topic log file, not including directory, optional, defaults to "" */
+    public String topicLogOutput = "";
+    /** Flag for writing the topic log file, defaults to false if topicLogOutput = "" */
+    public boolean outputTopicLog = false;
+
     /** Index of random seed to use, optional, defaults to 0, must be set between 0-99 */
     public int seedIndex = 0;
     /** Sum of alpha (doc to topic distrib dirichlet prior), optional, defaults to 1.0 */
@@ -44,10 +51,6 @@ public class ModelSpecs {
     public boolean symmetricAlpha = false;
     /** Number of iterations between parameter optimisation */
     public int optimInterval = 50;
-    /** Filename for the JSON topic log file, not including directory, optional, defaults to "" */
-    public String topicLogOutput = "";
-    /** Flag for writing the topic log file, defaults to false if topicLogOutput = "" */
-    public boolean outputTopicLog = false;
 
     /**
      * Constructor: reads the specification from a JSON object passed from TopicModelModuleSpecs
@@ -59,6 +62,7 @@ public class ModelSpecs {
         words = Math.toIntExact((long) specs.getOrDefault("words", (long) 20));
         docs = Math.toIntExact((long) specs.getOrDefault("docs", (long) 20));
         iterations = Math.toIntExact((long) specs.getOrDefault("iterations", (long) 1000));
+        iterationsMax = Math.toIntExact((long) specs.getOrDefault("iterationsMax", (long) 0));
         serialiseFile = (String) specs.getOrDefault("serialise", "");
         if(!serialiseFile.equals("")){
             serialise = true;
@@ -76,8 +80,8 @@ public class ModelSpecs {
             outputLL = true;
             llOutput = dataDir + llOutput;
         }
-        optimInterval = Math.toIntExact((long) specs.getOrDefault("optimInterval", (long) 50));
         seedIndex = Math.toIntExact((long) specs.getOrDefault("seed", (long) 0));
+        optimInterval = Math.toIntExact((long) specs.getOrDefault("optimInterval", (long) 50));
         alphaSum = (double) specs.getOrDefault("alphaSum", 1.0);
         beta = (double) specs.getOrDefault("beta", 0.01);
         symmetricAlpha = (boolean) specs.getOrDefault("symmetricAlpha", false);

@@ -1,6 +1,15 @@
 package P3_TopicModelling.TopicModelCore;
 
+/**
+ * Class storing, for one document, its topic distributions.
+ *
+ * @author S. Padilla, T. Methven
+ * @version 1
+ * @deprecated Replaced by {@link ModelledDocument}
+ */
+@Deprecated
 public class TopicData implements java.io.Serializable{
+
     private static final long serialVersionUID = 1300965786833187509L;
 
     public int id;

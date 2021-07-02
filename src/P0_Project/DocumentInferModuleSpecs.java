@@ -14,13 +14,13 @@ public class DocumentInferModuleSpecs {
     public String documents = "";
     /** Number of iterations for the inferencer to go through, optional, defaults to 100 */
     public int iterations = 100;
-    /** Directory where model are located, optional, defautls to "" */
+    /** Directory where serialised models are located, optional, defaults to "" */
     public String modelDir = "";
     /** Name of serialised main model */
     public String mainModel;
     /** Name of serialised sub model, optional, defaults to "" */
     public String subModel = "";
-    /** Flag for inferring from sub model, defaults to false if subModelName = "" */
+    /** Flag for inferring from sub model, defaults to false if subModel = "" */
     public boolean inferFromSubModel = false;
 
     /** Name for main topic file, only required if mainTopicsOutput != "" */
@@ -64,11 +64,11 @@ public class DocumentInferModuleSpecs {
         lemmas = metaSpecs.getDataDir() + (String) specs.get("lemmas");
         iterations = Math.toIntExact((long) specs.getOrDefault("iterations", (long) 100));
         modelDir = metaSpecs.getSourceDir() + (String) specs.getOrDefault("modelDir", "");
-        if(!modelDir.endsWith("/")){
+        if(!modelDir.endsWith("/")&&modelDir.length()>0){
             modelDir = modelDir+"/";
         }
         documents = modelDir + (String) specs.get("documents");
-        mainModel = modelDir + (String) specs.get("mainModel");
+        mainModel = modelDir + (String) specs.getOrDefault("mainModel", (String) specs.get("model"));
         subModel = (String) specs.getOrDefault("subModel", "");
         inferFromSubModel = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subModel.length() > 0;
         if(inferFromSubModel){
@@ -89,7 +89,7 @@ public class DocumentInferModuleSpecs {
         if(mergeDocuments){
             documentsOutput = outputDir + documentsOutput;
         }
-        mainTopicsOutput = (String) specs.getOrDefault("mainTopicsOutput", "");
+        mainTopicsOutput = (String) specs.getOrDefault("mainTopicsOutput", (String) specs.getOrDefault("topicsOutput", ""));
         mergeMainTopics = mainTopicsOutput.length() > 0;
         if(mergeMainTopics){
             mainTopicsOutput = outputDir + mainTopicsOutput;

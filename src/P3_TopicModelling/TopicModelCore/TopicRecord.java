@@ -8,14 +8,34 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class storing the list of logs, from MALLET's topic modelling process, pertaining to the model's topics.
+ *
+ * @author P. Le Bras
+ * @version 1
+ */
 public class TopicRecord {
 
+    /**
+     * Class representing a single topic log.
+     */
     public static class TopicEntry {
+        /** Topic identifier. */
         public int id;
+        /** Iteration number when the log was made. */
         public int iteration;
+        /** Topic's alpha value logged. */
         public double alpha;
+        /** Topic's top words logged. */
         public String words;
 
+        /**
+         * Constructor.
+         * @param id Topic id.
+         * @param i Iteration number.
+         * @param a Alpha value.
+         * @param w Top words.
+         */
         public TopicEntry(int id, int i, double a, String w){
             DecimalFormat df = new DecimalFormat("#.####");
             df.setRoundingMode(RoundingMode.UP);
@@ -25,6 +45,10 @@ public class TopicRecord {
             this.words = w;
         }
 
+        /**
+         * Method formatting the log into JSON to write on file.
+         * @return The log in JSON format.
+         */
         public JSONObject toJSON(){
             JSONObject root = new JSONObject();
             root.put("topic", id);
@@ -35,10 +59,20 @@ public class TopicRecord {
         }
     }
 
+    /** List of log entries across topics and throughout the modelling process. */
     public ArrayList<TopicEntry> topicEntries;
+    /** Number of topics modelled. */
     public int nTopics;
+    /** Total number of iterations the model went through. */
     public int iterations;
 
+    /**
+     * Constructor.
+     * @param records List of topic log messages from MALLET.
+     * @param nTopics Number of topics modelled.
+     * @param iterations Total number of iterations the model went through.
+     * @param printInterval Interval at which the topics were logged by MALLET.
+     */
     public TopicRecord(List<String> records, int nTopics, int iterations, int printInterval){
         this.nTopics = nTopics;
         this.iterations = iterations;
@@ -59,6 +93,10 @@ public class TopicRecord {
         }
     }
 
+    /**
+     * Method formatting the records in JSON to write on file.
+     * @return The JSON formatted records.
+     */
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
         root.put("nTopics", nTopics);
