@@ -12,26 +12,47 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Class building an index of labels from topic model files, for each unique label, lists the topic ids where its a top
+ * word and the document ids where it can be found, and saving it on a label index JSON file.
+ *
+ * @author P. Le Bras
+ * @version 1
+ */
 public class LabelIndexing {
 
+    /** Boolean flag for index labels from documents. */
     private boolean indexDocuments;
+    /** Filename of the document JSON file to index from. */
     private String documentsFile;
+    /** Boolean flag for using all documents (true) or just the top documents from topics (false). */
     private boolean useAllDocuments = false;
+    /** Boolean from for using all labels (true) or just the top labels from topics (false). */
     private boolean useAllLabels = false;
+    /** Filename of the main topic JSON file to index from. */
     private String mainTopicsFile;
+    /** Boolean flag for index labels from sub topics. */
     private boolean indexSubTopics;
+    /** Filename of the sub topic JSON file to index from. */
     private String subTopicsFile;
+    /** Filename of the output index JSON file. */
     private String outputFile;
 
-    // private JSONObject mainTopicsMetadata;
-    // private JSONObject subTopicsMetadata;
-
+    /** List of documents. */
     private ConcurrentHashMap<String, DocIOWrapper> documents;
+    /** List of main topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
+    /** List of sub topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
 
+    /** Index map. */
     private ConcurrentHashMap<String, LabelIndexEntry> Index;
 
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param indexSpecs Specifications.
+     * @return String indicating the time taken to read the model's JSON file(s), index labels and write the JSON index file.
+     */
     public static String Index(LabelIndexModuleSpecs indexSpecs){
 
         LogPrint.printModuleStart("Label Indexing");
@@ -52,6 +73,10 @@ public class LabelIndexing {
         return "Label indexing: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
+    /**
+     * Method processing the specification parameters.
+     * @param indexSpecs Specification object.
+     */
     private void ProcessArguments(LabelIndexModuleSpecs indexSpecs){
         LogPrint.printNewStep("Processing arguments", 0);
         indexDocuments = indexSpecs.indexDocuments;
@@ -70,6 +95,9 @@ public class LabelIndexing {
         if(indexSubTopics) LogPrint.printNote("Indexing sub topics");
     }
 
+    /**
+     * Method loading data from the model's JSON file(s).
+     */
     private void LoadData(){
         LogPrint.printNewStep("Loading data", 0);
         JSONObject input;
@@ -100,6 +128,9 @@ public class LabelIndexing {
         }
     }
 
+    /**
+     * Method launching the indexing processes.
+     */
     private void IndexLabels(){
         LogPrint.printNewStep("Indexing labels", 0);
         Index = new ConcurrentHashMap<>();
@@ -112,18 +143,21 @@ public class LabelIndexing {
         }
     }
 
+    /**
+     * Method indexing labels from a list of documents.
+     * @param docs List of documents to index labels from.
+     */
     private void indexLabelsFromDocs(ConcurrentHashMap<String, DocIOWrapper> docs){
         LogPrint.printNewStep("Indexing from documents", 1);
         for(Map.Entry<String, DocIOWrapper> doc: docs.entrySet()){
             String docId = doc.getKey();
             for(String lemma: doc.getValue().getLemmas()){
-                // P Le Bras, 25/06/2020:
                 // first part of if statement adds existing labels from topics
-                // second part also adds labels from document not in topics
+                // second part also adds document labels not in topics
                 if(Index.containsKey(lemma)){
                     Index.get(lemma).documents.add(docId);
                 } else if(useAllLabels) {
-                    LabelIndexEntry entry = new LabelIndexEntry();
+                    LabelIndexEntry entry = new LabelIndexEntry(lemma);
                     entry.documents.add(docId);
                     Index.put(lemma, entry);
                 }
@@ -132,6 +166,11 @@ public class LabelIndexing {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method indexing labels from a list of topics.
+     * @param topics List of topics to index labels from.
+     * @param isMain Boolean flag if the list of topics is main one or the sub one.
+     */
     private void indexLabelsFromTopics(ConcurrentHashMap<String, TopicIOWrapper> topics, boolean isMain){
         String msg = isMain ? "Indexing from main topics" : "Indexing from sub topics";
         LogPrint.printNewStep(msg, 1);
@@ -146,7 +185,7 @@ public class LabelIndexing {
                         Index.get(label).subTopics.put(topicId, new HashSet<>(topic.getValue().getMainTopicIds()));
                     }
                 } else {
-                    LabelIndexEntry entry = new LabelIndexEntry();
+                    LabelIndexEntry entry = new LabelIndexEntry(label);
                     if(isMain) entry.mainTopics.add(topicId);
                     else {
                         entry.subTopics.put(topicId, new HashSet<>(topic.getValue().getMainTopicIds()));
@@ -158,6 +197,10 @@ public class LabelIndexing {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method removing indexed document if they are not in the top documents list of topics.
+     * Only applies if useAllDocuments is false.
+     */
     private void FilterDocs(){
         if(indexDocuments && !useAllDocuments) {
             // Lets you filter out documents not referenced in topics from the indexed labels
@@ -200,37 +243,15 @@ public class LabelIndexing {
         }
     }
 
+    /**
+     * Method writing the label index on file.
+     */
     private void SaveIndex(){
         JSONObject root = new JSONObject();
         for(Map.Entry<String, LabelIndexEntry> indexRow: Index.entrySet()){
             String label = indexRow.getKey();
             LabelIndexEntry indexEntry = indexRow.getValue();
-            JSONObject ids = new JSONObject();
-            JSONArray mainTopicIds = new JSONArray();
-            for(String id : indexEntry.mainTopics){
-                mainTopicIds.add(id);
-            }
-            ids.put("mainTopics", mainTopicIds);
-            if(indexSubTopics){
-                JSONArray subTopicIds = new JSONArray();
-                for(Map.Entry<String, Set<String>> subIds : indexEntry.subTopics.entrySet()){
-                    JSONArray subTopicId = new JSONArray();
-                    JSONArray subTopicMainIds = new JSONArray();
-                    subTopicMainIds.addAll(subIds.getValue());
-                    subTopicId.add(subIds.getKey());
-                    subTopicId.add(subTopicMainIds);
-                    subTopicIds.add(subTopicId);
-                }
-                ids.put("subTopics", subTopicIds);
-            }
-            if(indexDocuments){
-                JSONArray docIds = new JSONArray();
-                for(String id : indexEntry.documents){
-                    docIds.add(id);
-                }
-                ids.put("documents", docIds);
-            }
-            root.put(label, ids);
+            root.put(label, indexEntry.toJSON(indexSubTopics, indexDocuments));
         }
         JSONIOWrapper.SaveJSON(root, outputFile, 0);
     }

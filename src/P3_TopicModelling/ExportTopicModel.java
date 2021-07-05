@@ -23,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * - Main model JSON file, listing main topics with their top words and top documents (with data fields);
  * - (optional) Sub model JSON file, listing main topics with their top words and top documents (with data fields);
  * - (optional) Document CSV file(s), listing all documents, with their main and/or sub topic distributions.
+ *
+ * @author T. Methven, P. Le Bras
+ * @version 2
  */
 public class ExportTopicModel {
 
