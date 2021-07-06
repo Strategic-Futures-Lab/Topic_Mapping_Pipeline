@@ -7,6 +7,7 @@ import P3_TopicModelling.TopicModelCore.*;
 import PX_Data.*;
 import PY_Helper.LogPrint;
 import PY_Helper.Pair;
+import PY_Helper.SparseVector;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
@@ -339,10 +340,11 @@ public class TopicModelling {
         LogPrint.printNewStep("Adding topic distributions to documents", 0);
         for(Map.Entry<String, DocIOWrapper> entry: Documents.entrySet()){
             if(tModel.stringIDtoNumID.containsKey(entry.getKey())){
-                int modelPosition = tModel.stringIDtoNumID.get(entry.getKey());
-                entry.getValue().setMainTopicDistribution(tModel.modelledDocuments.get(modelPosition).topicDistribution);
+                ModelledDocument doc = tModel.modelledDocuments.get(tModel.stringIDtoNumID.get(entry.getKey()));
+                entry.getValue().setMainTopicDistribution(doc.topicDistribution);
                 // update the lemmas used in the model
-                entry.getValue().setLemmas(Arrays.asList(tModel.modelledDocuments.get(modelPosition).modelLemmas));
+                entry.getValue().setLemmas(Arrays.asList(doc.modelLemmas));
+                System.out.println("test");
             }
         }
         LogPrint.printCompleteStep();

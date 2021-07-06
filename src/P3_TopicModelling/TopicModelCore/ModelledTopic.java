@@ -1,6 +1,7 @@
 package P3_TopicModelling.TopicModelCore;
 
 import PY_Helper.Pair;
+import PY_Helper.SparseVector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,4 +128,16 @@ public class ModelledTopic implements java.io.Serializable{
         return documentPairs;
     }
 
+    /**
+     * Method generating a SparseVector of the labels distribution.
+     * @param size Size of the vocabulary.
+     * @return SparseVector of the labels distribution.
+     */
+    public SparseVector getLabelVector(int size){
+        SparseVector labelVec = new SparseVector(size);
+        for(int i = 0; i < nLabels; i++){
+            labelVec.put(labelsIDs[i], labelsWeights[i]);
+        }
+        return labelVec;
+    }
 }

@@ -67,6 +67,8 @@ public class TopicModel implements Serializable {
     public List<ModelledDocument> modelledDocuments = new ArrayList<>();
     /** List of modelled topic, with ID and lemmas sorted by weight. */
     public List<ModelledTopic> modelledTopics = new ArrayList<>();
+    /** Total number of unique words in the vocabulary. */
+    public int vocabularySize;
 
     /** Un-serialised record of log-likelihood throughout the modelling process. */
     public transient LogLikelihoodRecord logLikelihoodRecord;
@@ -229,6 +231,7 @@ public class TopicModel implements Serializable {
 
         // The model's vocabulary
         Alphabet vocabulary = model.alphabet;
+        vocabularySize = vocabulary.size();
 
         // Initialise the modelled documents data
         modelledDocuments = new ArrayList<>(model.data.size());
@@ -255,8 +258,10 @@ public class TopicModel implements Serializable {
             }
             // Get the document's topic distribution
             double[] modelDocTopicDistribution = model.getTopicProbabilities(doc);
+            // Set the lemmas in the modelled document
+            modelledDoc.setLemmas(modelDocLemmas, modelDocFeatures);
             // Set this topic assignment data in the modelled document
-            modelledDoc.setTopicAssignment(modelDocLemmas, modelDocTopicSequence, modelDocTopicCount, modelDocTopicDistribution);
+            modelledDoc.setTopicAssignment(modelDocTopicSequence, modelDocTopicCount, modelDocTopicDistribution);
             // Add to the list of modelled documents
             modelledDocuments.add(modelledDoc);
         }
