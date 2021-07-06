@@ -12,30 +12,55 @@ import org.json.simple.JSONObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class reading model JSON files and estimating the distribution(s) of topics across documents, or across particular
+ * document's field. The distribution(s) values can also be weighted by documents' numerical fields. The distribution(s)
+ * are then either incorporated in topics JSON file(s) or written in separated dedicated JSON files.
+ *
+ * @author P. Le Bras
+ * @version 1
+ */
 public class TopicDistribution {
 
+    /** Filename of the documents JSON file. */
     private String documentsFile;
+    /** Filename of the main topics JSON file. */
     private String mainTopicsFile;
+    /** Filename of the output main topics JSON file, that will contain some
+     * or all of the distribution data. */
     private String mainOutput;
+    /** Filename of the sub topics JSON file. */
     private String subTopicsFile;
+    /** Boolean flag for estimating distribution(s) over sub topics. */
     private boolean distributeSubTopics;
+    /** Filename of the output sub topics JSON file, that will contain some
+     * or all of the distribution data. */
     private String subOutput;
 
+    /** List of documents. */
     private ConcurrentHashMap<String, DocIOWrapper> documents;
+    /** List of main topics. */
     private ConcurrentHashMap<Integer, TopicIOWrapper> mainTopics;
+    /** Main topics metadata JSON object. */
     private JSONObject mainTopicsMetadata;
+    /** Main topics similarities JSON array. */
     private JSONArray mainTopicsSimilarities;
+    /** List of sub topics. */
     private ConcurrentHashMap<Integer, TopicIOWrapper> subTopics;
+    /** Sub topics metadata JSON object. */
     private JSONObject subTopicsMetadata;
+    /** Sub topics similarities JSON array. */
     private JSONArray subTopicsSimilarities;
 
+    /** List of distributions. */
     private List<Distribution> distributions;
 
-    // private HashMap<String, HashSet<String>> uniqueFields;
-
-    // private ConcurrentHashMap<Integer, TopicDistrib> mainTopicDistrib;
-    // private ConcurrentHashMap<Integer, TopicDistrib> subTopicDistrib;
-
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param distribSpecs Specifications.
+     * @return String indicating the time taken to read the model JSON files, estimate the topic distributions
+     * and write distributions back on files.
+     */
     public static String Distribute(TopicDistribModuleSpecs distribSpecs){
 
         LogPrint.printModuleStart("Topic distribution");
@@ -44,7 +69,7 @@ public class TopicDistribution {
 
         TopicDistribution startClass = new TopicDistribution();
         startClass.ProcessArguments(distribSpecs);
-        startClass.LoadDocuments();
+        startClass.LoadModelData();
         startClass.ValidateDocumentData();
         startClass.GetUniqueFields();
         startClass.InitialiseDistributions();
@@ -59,6 +84,10 @@ public class TopicDistribution {
 
     }
 
+    /**
+     * Method processing the specification parameters and instantiating the distributions.
+     * @param distribSpecs Specification object.
+     */
     private void ProcessArguments(TopicDistribModuleSpecs distribSpecs){
         LogPrint.printNewStep("Processing arguments", 0);
         documentsFile = distribSpecs.documents;
@@ -78,10 +107,14 @@ public class TopicDistribution {
         LogPrint.printNote(distributions.size()+" distributions:");
         for(Distribution d: distributions){
             LogPrint.printNote(d.getDescription(), 1);
+            d.loadDomainData(1);
         }
     }
 
-    private void LoadDocuments(){
+    /**
+     * Method loading data from the model JSON files.
+     */
+    private void LoadModelData(){
         LogPrint.printNewStep("Loading data", 0);
         JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
         JSONArray docs = (JSONArray) input.get("documents");
@@ -108,9 +141,13 @@ public class TopicDistribution {
                 subTopics.put(topic.getIndex(), topic);
             }
         }
-        // System.out.println("Documents Loaded!");
     }
 
+    /**
+     * Method checking the data in each document to validate the distribution(s) specifications.
+     * If one document misses a given distribution's field or value, then this distribution will be ignored.
+     * If no distributions are left, then the programs stops.
+     */
     private void ValidateDocumentData(){
         LogPrint.printNewStep("Checking document data", 0);
         Set<String> ignoreFields = new HashSet<>();
@@ -147,10 +184,6 @@ public class TopicDistribution {
         }
         ignoreFields.forEach(f -> distributions.removeIf(d -> d.getFieldName().equals(f)));
         ignoreValues.forEach(v -> distributions.removeIf(d -> d.getValueName().equals(v)));
-        if(distributions.size() < 1){
-            LogPrint.printNoteError("Error: no distributions left\n");
-            System.exit(1);
-        }
         LogPrint.printCompleteStep();
         if(ignoreFields.size() > 0){
             LogPrint.printNote(ignoreFields.size()+" fields will be ignored");
@@ -161,8 +194,15 @@ public class TopicDistribution {
         for(String i: invalids){
             LogPrint.printNote(i, 1);
         }
+        if(distributions.size() < 1){
+            LogPrint.printNoteError("Error: no distributions left\n");
+            System.exit(1);
+        }
     }
 
+    /**
+     * Method setting the distribution(s) domains by getting the unique field entries in the documents.
+     */
     private void GetUniqueFields(){
         LogPrint.printNewStep("Finding unique field entries", 0);
         for(Map.Entry<String, DocIOWrapper> documentEntry: documents.entrySet()){
@@ -175,6 +215,9 @@ public class TopicDistribution {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method initialising the distribution(s).
+     */
     private void InitialiseDistributions(){
         LogPrint.printNewStep("Initialising distributions", 0);
         for(Distribution distrib: distributions){
@@ -187,6 +230,9 @@ public class TopicDistribution {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method incrementing, document by document, the distribution(s) entries.
+     */
     private void CalculateDistributions(){
         LogPrint.printNewStep("Calculating distributions", 0);
         for(DocIOWrapper doc: documents.values()){
@@ -199,22 +245,24 @@ public class TopicDistribution {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method launching the writing process on files:
+     * Each distribution either gets written on a separate file, or adds itself to the topics;
+     * Then the topics are written on their output file.
+     */
     private void SaveDistributions(){
         LogPrint.printNewStep("Saving distributions", 0);
-        // boolean saveTopicFiles = false;
         for(Distribution distrib: distributions){
-            // saveTopicFiles = distrib.saveInTopics();
             if(distributeSubTopics) distrib.saveDistributions(mainTopics, subTopics);
             else distrib.saveDistributions(mainTopics);
         }
-        // if(saveTopicFiles){
-            saveTopics();
-        // }
-        // System.out.println("Distributions Saved!");
+        saveTopics();
     }
 
+    /**
+     * Method writing the topics on file.
+     */
     private void saveTopics(){
-        // System.out.println("Saving Topics...");
         JSONObject root = new JSONObject();
         root.put("metadata", mainTopicsMetadata);
         root.put("similarities", mainTopicsSimilarities);
@@ -235,6 +283,5 @@ public class TopicDistribution {
             root.put("topics", topics);
             JSONIOWrapper.SaveJSON(root, subOutput, 1);
         }
-        // System.out.println("Topics Saved!");
     }
 }

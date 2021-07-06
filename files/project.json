@@ -2,11 +2,11 @@
   "run": {
     "input": false,
     "lemmatise": false,
-    "model": true,
+    "model": false,
     "inferDocuments": false,
     "exportTopicModel": false,
     "indexLabels": false,
-    "distributeTopics": false,
+    "distributeTopics": true,
     "clusterTopics": false,
     "mapTopics": false
   },
@@ -101,7 +101,10 @@
     "distributions": [{},{
       "fieldName": "university",
       "valueField": "money",
-      "output": "distributionUni.json"
+      "output": "distributionUni.json",
+      "domainData": "distribData.csv",
+      "domainDataId": "UniId",
+      "domainDataFields": {"name":"UniName","url":"URL"}
     },{
       "fieldName": "date",
       "output": "distributionDate.json"
