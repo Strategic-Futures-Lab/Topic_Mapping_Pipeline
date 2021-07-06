@@ -93,7 +93,11 @@ The distribution JSON file has the following structure:
       "distribution": [ { "id": "fieldValue1", "weight": 10.0}, ... ]
     },
   ...],
-  "subTopics":  [ ... ]
+  "subTopics":  [ ... ],
+  "domainData": {
+    "fieldValue1": {  "dataKey": "dataValue", ... },
+    ...
+  }
 }
 ```
 
@@ -107,6 +111,9 @@ The `mainTopics` list contains an entry for each of the topics in the `mainTopic
 `topPerTopic` entries if not set to `-1`);
 
 The `subTopics` list is only saved if sub topics were provided, its structure is similar to `mainTopics`.
+
+The `domainData` list is only saved if an additional domain data CSV file was provided. It records, for each unique
+value of `fieldName`, its associated data, as per `domainDataFields` specifications.
 
 If saved in the topic JSON files, each topic entry gets two additional lists: 
  ```json5
