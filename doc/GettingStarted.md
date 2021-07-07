@@ -1,4 +1,11 @@
-# Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+# Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+
+---
+
+[Index](index.md) | [Next >](SystemOverview.md)
+
+---
+
 # Getting Started
 
 The pipeline is written in Java. There are no compiled `.jar` library yet, you must therefore either run it through
@@ -23,6 +30,7 @@ If you wish to use this version, you will need to install [NodeJS](https://nodej
 [Index](index.md) | [Next >](SystemOverview.md)
 
 ---
+
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].
 

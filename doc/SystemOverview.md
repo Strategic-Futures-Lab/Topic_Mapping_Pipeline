@@ -1,4 +1,11 @@
-# Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+# Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+
+---
+
+[< Previous](GettingStarted.md) | [Index](index.md) | [Next >](MetaParameters.md)
+
+---
+
 # System Overview
 
 ## General Pipeline Flow
@@ -43,7 +50,7 @@ documents and generating topic model and topic map data from it:
 
 ![Modelling Process](img/model_pipeline.png)
 
-Second, the document inference process, reading both documents and updating existing topic model and topic map data:
+Second, the document inference process, reading new documents and updating existing topic model and topic map data:
  
 ![Modelling Process](img/inference_pipeline.png)
 

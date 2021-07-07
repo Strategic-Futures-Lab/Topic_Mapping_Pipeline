@@ -1,10 +1,10 @@
 # Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
-<div style="display:flex;justify-content: space-between; border-top:solid 1px #444; border-bottom:solid 1px #444">
-<a href="SystemOverview.md">< Previous</a>
-<a href="index.md">Index</a> 
-<a href="InputModule.md">Next ></a>
-</div>
+---
+
+[< Previous](SystemOverview.md) | [Index](index.md) | [Next >](InputModule.md)
+
+---
 
 # Meta-Parameters
 
@@ -90,6 +90,7 @@ these module specifications in one place. It is optional, and will overwrite the
 [< Previous](SystemOverview.md) | [Index](index.md) | [Next >](InputModule.md)
 
 ---
+
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].
 
