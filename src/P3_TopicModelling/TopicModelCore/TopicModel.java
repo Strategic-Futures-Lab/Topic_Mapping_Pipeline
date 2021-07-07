@@ -2,6 +2,7 @@ package P3_TopicModelling.TopicModelCore;
 
 import PX_Data.TopicIOWrapper;
 import PY_Helper.LogPrint;
+import PY_Helper.SparseVector;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.SerialPipes;
@@ -16,6 +17,7 @@ import cc.mallet.types.*;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Class running a Topic Model using MALLET.
@@ -315,6 +317,14 @@ public class TopicModel implements Serializable {
 
             // Add to the list of modelled topics
             modelledTopics.add(modelledTopic);
+        }
+
+        // Getting the topics-label distributions as sparse vectors
+        List<SparseVector> topicVectors = modelledTopics.stream()
+                .map(t->t.getLabelVector(vocabularySize))
+                .collect(Collectors.toList());
+        for(ModelledDocument doc: modelledDocuments){
+            doc.setWordDistancesFromTopics(topicVectors);
         }
     }
 

@@ -2,6 +2,9 @@ package P3_TopicModelling.TopicModelCore;
 
 import PY_Helper.SparseVector;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class representing a document which has been modelled, ie, has topic assignments sampled.
  * Replaces {@link TopicData}.
@@ -33,6 +36,11 @@ public class ModelledDocument implements java.io.Serializable{
     public int nTopics;
     /** Number of lemmas (in the model). */
     public int nLemmas;
+
+    /** Full word-distribution distances from topics. */
+    public double[] fullTopicDistances;
+    /** Component word-distribution distances from topics. */
+    public double[] compTopicDistances;
 
     /**
      * Constructor.
@@ -79,5 +87,38 @@ public class ModelledDocument implements java.io.Serializable{
             lemmaVec.put(lemmasIDs[i], lemmaVec.get(lemmasIDs[i])+1.0);
         }
         return lemmaVec;
+    }
+
+    /**
+     * Method getting a SparseVector of a component lemmas distributions, ie, only counting lemmas
+     * assigned to a given topic.
+     * @param size Size of the vocabulary.
+     * @param topic Topic to get component from.
+     * @return SparseVector of the component lemmas distribution.
+     */
+    public SparseVector getComponentLemmaVector(int size, int topic){
+        SparseVector lemmaVec = new SparseVector(size);
+        for(int i = 0; i < topicSequence.length; i++){
+            if(topicSequence[i] == topic){
+                lemmaVec.put(lemmasIDs[i], lemmaVec.get(lemmasIDs[i])+1.0);
+            }
+        }
+        return lemmaVec;
+    }
+
+    /**
+     * Method calculating the document's distances from topics using word vectors.
+     * @param topicVectors Topic label vectors to get distances from.
+     */
+    public void setWordDistancesFromTopics(List<SparseVector> topicVectors){
+        SparseVector fullDocVector = getLemmaVector(topicVectors.get(0).size());
+        fullTopicDistances = new double[nTopics];
+        compTopicDistances = new double[nTopics];
+        for(int t = 0; t < nTopics; t++){
+            SparseVector topicVec = topicVectors.get(t);
+            fullTopicDistances[t] = SparseVector.HellingerDistance(topicVec, fullDocVector);
+            SparseVector compDocVector = getComponentLemmaVector(topicVec.size(), t);
+            compTopicDistances[t] = SparseVector.HellingerDistance(topicVec, compDocVector);
+        }
     }
 }

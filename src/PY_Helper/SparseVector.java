@@ -147,4 +147,30 @@ public class SparseVector {
         }
         return Math.sqrt(sum);
     }
+
+    /**
+     * Method returning the square-root of this SparseVector.
+     * @return New vector with square-rooted values.
+     */
+    public SparseVector sqrt(){
+        SparseVector a = new SparseVector(N);
+        for(Map.Entry<Integer, Double> entry: st.entrySet()){
+            a.put(entry.getKey(), Math.sqrt(entry.getValue()));
+        }
+        return a;
+    }
+
+    /**
+     * Static method calculating the Hellinger distance between two sparse vectors.
+     * @param a First vector.
+     * @param b Second vector.
+     * @return The Hellinger distance between a and b.
+     */
+    public static double HellingerDistance(SparseVector a, SparseVector b){
+        SparseVector a_r = a.sqrt();
+        SparseVector b_r = b.sqrt();
+        SparseVector d = a_r.diff(b_r);
+        double n = d.norm();
+        return n/Math.sqrt(2);
+    }
 }

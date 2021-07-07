@@ -20,6 +20,7 @@ import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Class reading a lemma JSON file, generating topics from these documents and saving several model files.
@@ -344,6 +345,7 @@ public class TopicModelling {
                 entry.getValue().setMainTopicDistribution(doc.topicDistribution);
                 // update the lemmas used in the model
                 entry.getValue().setLemmas(Arrays.asList(doc.modelLemmas));
+                // TODO: check validity of word-distrib distances and add to DocIOWrapper
                 System.out.println("test");
             }
         }
