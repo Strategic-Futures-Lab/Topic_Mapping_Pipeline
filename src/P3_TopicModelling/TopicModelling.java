@@ -7,7 +7,6 @@ import P3_TopicModelling.TopicModelCore.*;
 import PX_Data.*;
 import PY_Helper.LogPrint;
 import PY_Helper.Pair;
-import PY_Helper.SparseVector;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
@@ -20,7 +19,6 @@ import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Class reading a lemma JSON file, generating topics from these documents and saving several model files.

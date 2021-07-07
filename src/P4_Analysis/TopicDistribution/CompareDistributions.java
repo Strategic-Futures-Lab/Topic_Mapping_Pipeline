@@ -22,35 +22,74 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class reading two sets of topic JSON files and comparing their distribution values. A set may consist of a single list
+ * of topics, or two lists of main and sub topics. One set comes from a previous version of the topics and the other
+ * set with updated topics (after inferring documents). Each set must have the same distribution entries.
+ * The comparisons data are then exported onto the new topic JSON files, and may also be exported onto CSV files for
+ * direct evaluation.
+ *
+ * @author P. Le Bras
+ * @version 1
+ */
 public class CompareDistributions {
 
+    /** Filename of the new main topic JSON file. */
     private String mainTopicsFile;
+    /** Filename fof the previous main topic JSON file. */
     private String previousMainTopicsFile;
+    /** Boolean flag for comparing distributions from sub topics. */
     private boolean compareSubTopics;
+    /** Filename of the new sub topic JSON file. */
     private String subTopicsFile;
+    /** Filename fof the previous sub topic JSON file. */
     private String previousSubTopicsFile;
+    /** List of distributions to compare. */
     private String[] distributionNames;
+    /** Number of topic top labels to use to identify topics. */
     private int numWordId;
+    /** Boolean flag for writing the main topic distribution comparison on file. */
     private boolean outputMain;
+    /** Filename of the CSV file where to write the main topic distribution comparison. */
     private String mainOutput;
+    /** Boolean flag for writing the sub topic distribution comparison on file. */
     private boolean outputSub;
+    /** Filename of the CSV file where to write the sub topic distribution comparison. */
     private String subOutput;
+    /** Boolean flag for writing both main and sub topic distribution comparisons on file. */
     private boolean outputAll;
+    /** Filename of the CSV file where to write both main and sub topic distribution comparisons. */
     private String output;
 
+    /** List of current main topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> mainTopics;
+    /** Current main topics metadata. */
     private JSONObject mainMetadata;
+    /** Current main topics similarities. */
     private JSONArray mainSimilarities;
+    /** List of previous main topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> previousMainTopics;
+    /** List of current sub topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> subTopics;
+    /** Current sub topics metadata. */
     private JSONObject subMetadata;
+    /** Current sub topics similarities. */
     private JSONArray subSimilarities;
+    /** List of previous sub topics. */
     private ConcurrentHashMap<String, TopicIOWrapper> previousSubTopics;
 
     // comparison map: topicWords: distribName: comparison values
+    /** List of distribution comparison for main topics, per topic, per distribution. */
     private ConcurrentHashMap<String,ConcurrentHashMap<String, DistribComparison>> mainTopicsComparison;
+    /** List of distribution comparison for sub topics, per topic, per distribution. */
     private ConcurrentHashMap<String,ConcurrentHashMap<String, DistribComparison>> subTopicsComparison;
 
+    /**
+     * Main method, reads the specification and launches the sub-methods in order.
+     * @param specs Specifications.
+     * @return String indicating the time taken to read the topic JSON files, compare distributions, and write
+     * the comparison results on new topic JSON files.
+     */
     public static String Compare(CompareDistributionsModuleSpecs specs){
 
         LogPrint.printModuleStart("Compare Distributions");
@@ -71,6 +110,10 @@ public class CompareDistributions {
         return "Comparing Distributions: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s";
     }
 
+    /**
+     * Method processing the specification parameters.
+     * @param specs Specification object.
+     */
     private void ProcessArguments(CompareDistributionsModuleSpecs specs){
         LogPrint.printNewStep("Processing arguments", 0);
         mainTopicsFile = specs.mainTopics;
@@ -104,6 +147,9 @@ public class CompareDistributions {
         LogPrint.printNote("Distributions to compare: "+String.join(", ", distributionNames));
     }
 
+    /**
+     * Method loading the topic JSON files.
+     */
     private void LoadData(){
         LogPrint.printNewStep("Loading data", 0);
         JSONObject input = JSONIOWrapper.LoadJSON(mainTopicsFile, 1);
@@ -122,6 +168,11 @@ public class CompareDistributions {
         }
     }
 
+    /**
+     * Method extracting a list of topics from an input JSON object.
+     * @param input Input JSON object.
+     * @return The list of the topics.
+     */
     private ConcurrentHashMap<String, TopicIOWrapper> loadTopicData(JSONObject input){
         ConcurrentHashMap<String, TopicIOWrapper> topics = new ConcurrentHashMap<>();
         for(JSONObject topicEntry: (Iterable<JSONObject>) input.get("topics")){
@@ -131,6 +182,9 @@ public class CompareDistributions {
         return topics;
     }
 
+    /**
+     * Method launching the comparison process.
+     */
     private void CompareDistributions(){
         LogPrint.printNewStep("Comparing distributions", 0);
         mainTopicsComparison = compareDistribution(mainTopics, previousMainTopics);
@@ -138,6 +192,12 @@ public class CompareDistributions {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method comparing distribution values from two sets of topics.
+     * @param currentTopics First set of topics, with new distribution values.
+     * @param previousTopics Second set of topics, with the previous distribution values.
+     * @return The list of distribution comparison, per topic, per distribution.
+     */
     private ConcurrentHashMap<String, ConcurrentHashMap<String, DistribComparison>> compareDistribution(
             ConcurrentHashMap<String, TopicIOWrapper> currentTopics,
             ConcurrentHashMap<String, TopicIOWrapper> previousTopics){
@@ -173,6 +233,9 @@ public class CompareDistributions {
         return topicComparison;
     }
 
+    /**
+     * Method launching the processes writing the comparison distribution on file..
+     */
     private void SaveComparisons(){
         if(outputAll || outputMain || outputSub) LogPrint.printNewStep("Saving comparison files:", 0);
         if(outputMain) saveComparison(mainOutput, mainTopicsComparison);
@@ -183,6 +246,11 @@ public class CompareDistributions {
         }
     }
 
+    /**
+     * Method writing a distribution comparison on a CSV file.
+     * @param filename Filename of the CSV file to write.
+     * @param topicComparison Comparison to write.
+     */
     private void saveComparison(String filename, ConcurrentHashMap<String, ConcurrentHashMap<String, DistribComparison>> topicComparison){
         LogPrint.printNewStep("Saving "+filename, 1);
         DecimalFormat df = new DecimalFormat("#.######");
@@ -212,6 +280,11 @@ public class CompareDistributions {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method generating headers for a CSV file.
+     * @param appender CSV appender instance where to add the headers.
+     * @throws IOException If an error occurs with the CSV appender.
+     */
     private void createHeader(CsvAppender appender) throws IOException {
         appender.appendField("topic");
         for(String distrib: distributionNames){
@@ -224,6 +297,12 @@ public class CompareDistributions {
         appender.endLine();
     }
 
+    /**
+     * Method merging two distribution comparison, eg main topics and sub topics, into one.
+     * @param mainComparison First distribution comparison.
+     * @param subComparison Second distribution comparison.
+     * @return The merged list of distribution comparison.
+     */
     private ConcurrentHashMap<String, ConcurrentHashMap<String, DistribComparison>> mergeComparisons(
             ConcurrentHashMap<String, ConcurrentHashMap<String, DistribComparison>> mainComparison,
             ConcurrentHashMap<String, ConcurrentHashMap<String, DistribComparison>> subComparison
@@ -234,6 +313,9 @@ public class CompareDistributions {
         return mainComparison;
     }
 
+    /**
+     * Method overwriting the current topic JSON file with the distribution comparison data.
+     */
     private void OverwriteTopics(){
         LogPrint.printNewStep("Overwriting topic distribution files:", 0);
         JSONObject root = new JSONObject();

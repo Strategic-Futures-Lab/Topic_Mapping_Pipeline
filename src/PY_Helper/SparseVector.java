@@ -3,6 +3,13 @@ package PY_Helper;
 import java.util.TreeMap;
 import java.util.Map;
 
+/**
+ * Class implementing a sparse vector data structure: while the vector has a fixed theoretical size, in practice,
+ * only non-zero elements are saved.
+ *
+ * @author P. Le Bras
+ * @version 1
+ */
 public class SparseVector {
 
     /** TreeMap containing all the non-zero data. */
