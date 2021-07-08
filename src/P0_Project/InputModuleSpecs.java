@@ -20,17 +20,21 @@ public class InputModuleSpecs{
     /** Fields to keep as docData, only works if data from CSV or GTR.
      * Eg: ("t", "Title") will lookup "Title" in source and save it has "t" in the docData. */
     public HashMap<String, String> fields;
-    /** Fields to lookup in external source (eg server API), only works if data from GTR.
+    /** Fields to lookup in external source (eg server API), only works if data from GTR,
+     * optional, defaults to empty list.
      * Eg: ("t", "Title") will lookup "Title" (as implemented in the input module) and save it has "t" in the docData. */
     public HashMap<String, String> GTR_fields;
-    /** Field name containing the GtR project id, only works if data from GtR, defaults to 'ProjectId'.
+    /** Field name containing the GtR project id, only works if data from GtR,
+     * optional, defaults to 'ProjectId'.
      * Will be automatically added to the docData. */
     public String GTR_PID = "ProjectId";
     /** Filename for the JSON corpus file generated. */
     public String output;
-    /** Number of words limit before splitting a document, only works for PDF or TXT input. */
+    /** Number of words limit before splitting a document, only works for PDF or TXT input,
+     * optional, defaults to -1. */
     public int wordsPerDoc;
-    /** Flag for splitting TXT input with every empty line. */
+    /** Flag for splitting TXT input with every empty line,
+     * optional, defaults to false. */
     public boolean TXT_splitEmptyLines = false;
 
     /**
@@ -48,7 +52,7 @@ public class InputModuleSpecs{
             fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));
         }
         if(module.equals("GTR")) {
-            GTR_fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("GtR_fields"));
+            GTR_fields = JSONIOWrapper.getStringMap((JSONObject) specs.getOrDefault("GtR_fields", new JSONObject()));
             GTR_PID = (String) specs.getOrDefault("GtR_id", "ProjectId");
         }
         if(module.equals("TXT")) {

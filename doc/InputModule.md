@@ -1,4 +1,9 @@
-# Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+# Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+
+[< Previous](MetaParameters.md) | [Index](index.md) | [Next >](LemmatiseModule.md)
+
+---
+
 # Input Modules
 
 The purpose of Input modules is to format the input text data into a standard ***Corpus JSON file***, that will be read
@@ -8,7 +13,7 @@ The Input modules are all contained within the `P1_Input` package.
 
 ## List of Input Modules
 
-There is currently 4 input module available:
+There are currently 4 input modules available:
 - ***CSV Input*** (`CSVInput.java` class) which reads document data structured in a CSV file;
 - ***PDF Input*** (`PDFInput.java` class) which parses a collection of pdf files in a directory; 
 - ***GTR Input*** (`GTRInput.java` class) is specific to the Gateway to Research (GtR) API, it reads document data
@@ -37,28 +42,34 @@ The parameters for the Input module in the project file should have the followin
 ...}
 ``` 
 
-Where:
-- `module` points to the module to use:
-  - `"CSV"` for the CSV Input;
-  - `"PDF"` for the PDF Input;
-  - `"GTR"` for the GTR Input;
-  - `"TXT"` for the TXT Input;
-- `source` is the path to the input file or directory (depending on the module used):
-  - CSV or GTR: path to a `.csv` file;
-  - PDF: path to a directory containing `.pdf` files;
-  - TXT: path to single `.txt` file or a directory containing `.txt` files;
-- `output` is the path to the output corpus JSON file.
-  
+| Name | Description | Optional | Default |
+| --- | --- | --- | --- |
+| `module` | Module to use: `"CSV"`, `"PDF"`, `"GTR"` or `"TXT"` | No | |
+| `source` | Path to the input file or directory * | No | |
+| `output` | Path to the output corpus JSON file ** | No | |
+- \* This path is relative to the [source directory](MetaParameters.md):
+  - the CSV and GTR modules accept a `.csv` file;
+  - the PDF module accept a directory input containing `.pdf` files;
+  - the TXT module accepts either a single `.txt` file or a directory containing `.txt` files.
+- \** This path is relative to the [data directory](MetaParameters.md).
+
+Additional parameters are available depending on the module used.
+
 For CSV and GTR inputs:
-- `fields` details the document attributes to read from the CSV formatted data input, for example:
-  - the input `.csv` file has the columns `A,B,C,D,E`, and `fields` has the value `{"b":"B","d":"D"}`, then each
-    document saved in the corpus file will have `"docData":{"b":...,"d":...}` with the values from columns `B` and `D` respectively;
+
+| Name | Description | Optional | Default |
+| --- | --- | --- | --- |
+| `fields` | Document attributes to read from the `.csv` file, e.g., input file has columns `A,B,C` and `fields` is set to `{"a":"A","c":"C"}`, then documents will have `"docData":{"a":...,"c":...}` with the values from columns `A` and `C` respectively | No | |
 
 For the GTR input only:
-- `GtR_id` indicates which column, in the input `.csv` file, contains the GtR project ids to use for fetching data on GtR's website;
-- `GtR_fields` follows the same structure as `fields` (keys are the fields you can query, see below, and values are
-  how they should be saved in the corpus) but instead details which fields to fetch from GtR's website, the
-  supported fields are:
+
+| Name | Description | Optional | Default |
+| --- | --- | --- | --- |
+| `GtR_id` | Column name, in the input `.csv` file, containing the GtR project ids to use for fetching data on GtR's website | Yes | `"ProjectId"` |
+| `GtR_fields` | List of fields to fetch from GtR's website * | Yes | `{}` (empty object) |
+  
+- \* Follows the same structure as `fields` above: keys are fields to query, values are how they should be saved on file.
+  Supported fields are:
   - `"Abstract"` reads the project's abstract;
   - `"TechAbstract"` (rare) reads the project technical abstract;
   - `"Impact"` reads the project's impact;
@@ -70,12 +81,16 @@ For the GTR input only:
   - `"EndDate"` reads the project end date.
 
 For PDF and TXT inputs:
-- `wordsPerDoc` sets the maximum size (in number of words) the document corpus should have. This allows for the
-  chunking of large files. It defaults to `-1` meaning that no chunking is done.
+
+| Name | Description | Optional | Default |
+| --- | --- | --- | --- |
+| `wordsPerDoc` | Maximum size (in number of words) the document corpus should have, allowing for the chunking of large files | Yes | `-1` (no maximum, does not split texts) |
 
 For the TXT input only:
-- `txt_splitEmptyLines` is a boolean flag for considering empty lines in the `.txt` file(s) as document separators,
-  i.e., one file could contain several documents separated empty lines. 
+
+| Name | Description | Optional | Default |
+| --- | --- | --- | --- |
+|`txt_splitEmptyLines` | Flag for considering empty lines in the `.txt` file(s) as document separators, i.e., one file could contain several documents separated by empty lines | Yes | `false` (one document per file) | 
 
 ## Output
 
@@ -101,11 +116,40 @@ modules). Then the file has a `corpus` list, with one object per document with t
 - `docIndex` the document index;
 - `docData` the document data, as key-value pairs, note that every value will be saved in a String format.
 
+The content of `docData` varies with the input module used.
+
+With the CSV module:
+- only the fields explicitly filled in `fields`.
+
+With the GTR module:
+- fields explicitly filled in `fields`;
+- a `PID` field with the project identifier values found with `GtR_id`;
+- API fields filled in `GtR_fields`.
+
+With the PDF module:
+- a `text` field with the parsed document content;
+- a `dataset` field with the direct parent directory name for each `.pdf` file;
+- a `filename` field with the file name for each `.pdf` file;
+- in case the files' contents were split:
+  - a `splitNumber` field indicating the position of the text portion in the whole document;
+  - a `wordRange` field indicating the start and end word indices of the text portion;
+  - a `pageRange` field indicating the start and end page numbers of the text portion;
+  - `filename` becomes the `.pdf` file name + the split number;
+  - a `originalFilename` field gets the `.pdf` file name only.
+  
+With the TXT module, similar to the PDF module:
+- a `text` field with the parsed document content;
+- a `dataset` field with the direct parent directory name for each `.txt` file;
+- a `filename` field with the file name for each `.txt` file;
+- in case the files' contents were split:
+  - a `splitNumber` field indicating the position of the text portion in the whole document;
+  - `filename` becomes the `.txt` file name + the split number;
+  - a `originalFilename` field gets the `.txt` file name only.
+
 ---
 
 [< Previous](MetaParameters.md) | [Index](index.md) | [Next >](LemmatiseModule.md)
 
----
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].
 
