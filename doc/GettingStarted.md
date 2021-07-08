@@ -1,7 +1,5 @@
 # Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
----
-
 [Index](index.md) | [Next >](SystemOverview.md)
 
 ---
@@ -28,8 +26,6 @@ If you wish to use this version, you will need to install [NodeJS](https://nodej
 ---
 
 [Index](index.md) | [Next >](SystemOverview.md)
-
----
 
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].

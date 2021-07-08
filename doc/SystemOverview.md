@@ -1,7 +1,5 @@
 # Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
----
-
 [< Previous](GettingStarted.md) | [Index](index.md) | [Next >](MetaParameters.md)
 
 ---
@@ -100,7 +98,6 @@ necessary).
 
 [< Previous](GettingStarted.md) | [Index](index.md) | [Next >](MetaParameters.md)
 
----
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].
 

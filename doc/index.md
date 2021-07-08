@@ -1,4 +1,4 @@
-# Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+# Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
 ## Documentation Index
 - [Getting Started](GettingStarted.md)
@@ -40,14 +40,14 @@
 > Finding scientific topics. In *Proceedings of the National academy of Sciences*, vol. 101, suppl. 1, pp. 5228–5235.
 ```bibtex
 @Article{Griffiths2004,
-  title={Finding scientific topics},
-  author={Griffiths, Thomas L and Steyvers, Mark},
-  journal={Proceedings of the National academy of Sciences},
-  volume={101},
-  number={suppl 1},
-  pages={5228--5235},
-  year={2004},
-  publisher={National Acad Sciences}
+  title     = {Finding scientific topics},
+  author    = {Griffiths, Thomas L and Steyvers, Mark},
+  journal   = {Proceedings of the National academy of Sciences},
+  volume    = {101},
+  number    = {suppl 1},
+  pages     = {5228--5235},
+  year      = {2004},
+  publisher = {National Acad Sciences}
 }
 ```
 
@@ -69,13 +69,13 @@
 }
 ```
 
-## Third-Party Licenses Information
+## Third-Party Software
 
 ### Stanford CoreNLP
 
-[Website](https://stanfordnlp.github.io/CoreNLP/)
+Website: [stanfordnlp.github.io/CoreNLP](https://stanfordnlp.github.io/CoreNLP/)
 
-License: [GNU General Public License, v3](https://opensource.org/licenses/GPL-3.0)
+License: [GNU General Public License v3 (GPL-3)](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3))
 
 Cite: 
 > Christopher D. Manning, Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014.
@@ -93,9 +93,9 @@ Cite:
 
 ### Mallet
 
-[Website](http://mallet.cs.umass.edu/)
+Website: [mallet.cs.umass.edu](http://mallet.cs.umass.edu/)
 
-License: [CPL 1.0](https://opensource.org/licenses/cpl1.0.php)
+License: [Common Public License 1.0 (CPL-1.0)](https://tldrlegal.com/license/common-public-license-1.0-(cpl-1.0))
 
 Cite:
 > Andrew Kachites McCallum. 2002.
@@ -111,27 +111,27 @@ Cite:
 
 ### JBox2D
 
-[Website](http://www.jbox2d.org/)
+Website: [www.jbox2d.org](http://www.jbox2d.org/)
 
-License: [BSD 2-Clause License](https://opensource.org/licenses/BSD-2-Clause)
+License: [BSD 2-Clause License (FreeBSD/Simplified)](https://tldrlegal.com/license/bsd-2-clause-license-(freebsd))
 
 ### FastCSV
 
-[GitHub](https://github.com/osiegmar/FastCSV)
+GitHub: [github.com/osiegmar/FastCSV](https://github.com/osiegmar/FastCSV)
 
-License: [MIT](https://opensource.org/licenses/MIT)
+License: [MIT License (Expat)](https://tldrlegal.com/license/mit-license)
 
 ### JSON-Simple
 
-[GitHub](https://github.com/fangyidong/json-simple)
+GitHub: [github.com/fangyidong/json-simple](https://github.com/fangyidong/json-simple)
 
-License: [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+License: [Apache License 2.0 (Apache-2.0)](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
 
 ### PDFBox
 
-[Website](https://pdfbox.apache.org/)
+Website: [pdfbox.apache.org](https://pdfbox.apache.org/)
 
-License: [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+License: [Apache License 2.0 (Apache-2.0)](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
 
 <!--
 No longer using technically.

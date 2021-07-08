@@ -1,7 +1,5 @@
 # Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
----
-
 [< Previous](SystemOverview.md) | [Index](index.md) | [Next >](InputModule.md)
 
 ---
@@ -88,8 +86,6 @@ these module specifications in one place. It is optional, and will overwrite the
 ---
 
 [< Previous](SystemOverview.md) | [Index](index.md) | [Next >](InputModule.md)
-
----
 
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].
