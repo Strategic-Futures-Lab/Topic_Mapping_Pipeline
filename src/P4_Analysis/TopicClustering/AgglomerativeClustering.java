@@ -1,48 +1,116 @@
 package P4_Analysis.TopicClustering;
 
 import PY_Helper.LogPrint;
+import org.json.simple.JSONObject;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class providing methods to get the agglomerative clusters, in the form of a linkage table, of items given
+ * their distance matrix.
+ *
+ * @author T. Methven, P. Le Bras
+ * @version 2
+ */
 public class AgglomerativeClustering {
+
+    /** List of possible linkage types: Average (UPGMA), Minimum and Maximum. */
     public enum LINKAGE_TYPE {AVERAGE, MIN, MAX};
 
-    public static class ClusterRow {
+    /**
+     * Class implementing a node from a linkage table.
+     */
+    public static class LinkageNode {
+        /** Index of child node 1. */
         public int Node1;
+        /** Index of child node 2. */
         public int Node2;
+        /** Distance between the two children nodes. */
         public double Distance;
 
-        public ClusterRow(int Node1, int Node2, double Distance) {
+        /**
+         * Constructor.
+         * @param Node1 Index of first child node.
+         * @param Node2 index of second child node.
+         * @param Distance Distance between the two nodes.
+         */
+        public LinkageNode(int Node1, int Node2, double Distance) {
             this.Node1 = Node1;
             this.Node2 = Node2;
             DecimalFormat df = new DecimalFormat("#.####");
             df.setRoundingMode(RoundingMode.UP);
             this.Distance = Double.parseDouble(df.format(Distance));
-            // this.Distance = Distance;
+        }
+
+        /**
+         * Method returning the node in JSON format.
+         * @return JSON formatted node.
+         */
+        public JSONObject toJSON(){
+            JSONObject res = new JSONObject();
+            res.put("node1", Node1);
+            res.put("node2", Node2);
+            res.put("distance", Distance);
+            return res;
         }
     }
 
-    public static class ColumnDetails {
+    /**
+     * Class implementing a cluster of leaf nodes from a linkage table.
+     */
+    public static class NodeCluster {
+        /** Node/cluster index in the linkage table. */
         public int NodeNumber;
+        /** List of indices of leaf nodes in this cluster. */
         public List<Integer> ContainsNodes = new ArrayList<>();
 
-        public ColumnDetails(int NodeNumber) {
+        /**
+         * Constructor.
+         * @param NodeNumber Node index.
+         */
+        public NodeCluster(int NodeNumber) {
             this.NodeNumber = NodeNumber;
         }
 
-        public ColumnDetails(int NodeNumber, int initialNode) {
+        /**
+         * Constructor for a leaf cluster, contains only one leaf node from the linkage table.
+         * @param NodeNumber Node index.
+         * @param initialNode Initial leaf node index.
+         */
+        public NodeCluster(int NodeNumber, int initialNode) {
             this.NodeNumber = NodeNumber;
             AddContainingNode(initialNode);
         }
 
+        /**
+         * Method adding a leaf node index to this cluster.
+         * @param node Leaf node index to add.
+         */
         public void AddContainingNode(int node) {
             ContainsNodes.add(node);
         }
+
+        /**
+         * Method adding a list of leaf node indices to this cluster.
+         * @param nodes List of nodes to add.
+         */
+        public void AddContainingNodes(List<Integer> nodes){
+            ContainsNodes.addAll(nodes);
+        }
     }
 
+    /**
+     * Method removing topics from the distance matrix, eg, generic topics, to have them excluded from
+     * the linkage table, and by extension, map layout.
+     * @param dissimilarityMatrix Original distance matrix.
+     * @param genericTopics List of topic ids to exclude.
+     * @return The new distance matrix.
+     * @deprecated Not used with the bubble map layout.
+     */
+    @Deprecated
     public static double[][] RemoveTopicsFromMatrix(double[][] dissimilarityMatrix, List<Integer> genericTopics) {
         //Convert array to list of lists
         List<List<Double>> dissimList = new ArrayList<>();
@@ -78,29 +146,35 @@ public class AgglomerativeClustering {
         return newDissimMatrix;
     }
 
-    public static List<ClusterRow> PerformClustering(double[][] dissimilarityMatrix, LINKAGE_TYPE clusterType) {
-        // System.out.println("Performing Clustering and Creating Linkage Table ...");
-
-        CheckSimilarityMatrixValidity(dissimilarityMatrix);
+    /**
+     * Method creating a linkage table, ie, hierarchical cluster, from a distance/dissimilarity matrix.
+     * @param dissimilarityMatrix Matrix to build linkage table from.
+     * @param clusterType Type of merging method.
+     * @return The linkage table of matrix items.
+     */
+    public static List<LinkageNode> PerformClustering(double[][] dissimilarityMatrix, LINKAGE_TYPE clusterType) {
+        // Checking that the matrix is valid
+        CheckMatrixValidity(dissimilarityMatrix);
 
         LogPrint.printNewStep("Clustering and creating linkage table", 2);
 
-        //Output in the Matlab-style linkage table
-        List<ClusterRow> linkageTable = new ArrayList<>();
+        // Instantiating our linkage table, Matlab-style, ie, list of linkage nodes
+        List<LinkageNode> linkageTable = new ArrayList<>();
 
-        //Keep track of the nodes which are in each column, as we'll need these for later. It contains the number of the
-        //node for the linkage table, and what leaf nodes it contains.
-        List<ColumnDetails> columnLabels = new ArrayList<>();
-
+        // To keep track of the node clusters.
+        // Each cluster has their node index in the linkage table + the list of leaf node indices.
+        // Initially there's only one cluster per leaf node, but these merge as we explore and "collapse" the
+        // distance matrix.
+        List<NodeCluster> clusters = new ArrayList<>();
         for(int i = 0; i < dissimilarityMatrix.length; i++) {
-            columnLabels.add(new ColumnDetails(i, i));
+            clusters.add(new NodeCluster(i, i));
         }
 
-        //New data structure to keep track of the collapsing similarity matrix we need for UPMGA
-        double[][] UPMGAMatrix = new double[dissimilarityMatrix.length][dissimilarityMatrix.length];
+        // Make a copy of our distance matrix, this copy will be the one collapsing as merge clusters.
+        double[][] matrix = new double[dissimilarityMatrix.length][dissimilarityMatrix.length];
         for(int y = 0; y < dissimilarityMatrix.length; y++) {
             for(int x = 0; x < dissimilarityMatrix.length; x++) {
-                UPMGAMatrix[x][y] = dissimilarityMatrix[x][y];
+                matrix[x][y] = dissimilarityMatrix[x][y];
             }
         }
 
@@ -109,79 +183,89 @@ public class AgglomerativeClustering {
         int nodeVal = dissimilarityMatrix.length;
         int escape = 0;
 
-        //Iterate through this process until we have reduced the similarity matrix to a single distance
-        while(UPMGAMatrix.length > 1 && escape < 1000) {
-            //Find the current shortest distance in the collapsed array...
+        // Iterate until we have reduced the matrix reduced to a single node/cluster
+        while(matrix.length > 1 && escape < 1000) {
+            // Find the current shortest distance in the collapsed array...
             shortestDistance = Double.MAX_VALUE;
-            for(int x = 0; x < UPMGAMatrix.length; x++) {
-                for(int y = x + 1; y < UPMGAMatrix.length; y++) {
-                    if(UPMGAMatrix[x][y] < shortestDistance) {
-                        shortestDistance = UPMGAMatrix[x][y];
+            for(int x = 0; x < matrix.length; x++) {
+                for(int y = x + 1; y < matrix.length; y++) {
+                    if(matrix[x][y] < shortestDistance) {
+                        shortestDistance = matrix[x][y];
                         xLoc = x;
                         yLoc = y;
                     }
                 }
             }
 
-            //Add a record in the linkage table for this join!
-            linkageTable.add(new ClusterRow(columnLabels.get(xLoc).NodeNumber, columnLabels.get(yLoc).NodeNumber, shortestDistance));
+            // Add a record in the linkage table for this join
+            linkageTable.add(new LinkageNode(clusters.get(xLoc).NodeNumber, clusters.get(yLoc).NodeNumber, shortestDistance));
 
-            //Update the label array. First, we change the label where the first item found was to be the new, higher
-            //nod value, then we merge the items contained within the two positions.
-            columnLabels.get(xLoc).NodeNumber = nodeVal++;
-            columnLabels.get(xLoc).ContainsNodes.addAll(columnLabels.get(yLoc).ContainsNodes);
+            // Update the list of clusters.
+            // First, we change the label of the first item to the new, higher, node value.
+            clusters.get(xLoc).NodeNumber = nodeVal++;
+            // Second, we merge the leaf nodes from the second item to the first.
+            clusters.get(xLoc).AddContainingNodes(clusters.get(yLoc).ContainsNodes);
+            // Finally, we remove the second item (it has been merged into the first)
+            clusters.remove(yLoc);
 
-            //Finally, remove the second item found as it has been merged into the first!
-            columnLabels.remove(yLoc);
-
+            // Collapse the temporary distance matrix.
             int tempX = 0, tempY = 0;
-            double[][] NewUPMGAMatrix = new double[UPMGAMatrix.length - 1][UPMGAMatrix.length - 1];
-            for(int x = 0; x < NewUPMGAMatrix.length; x++) {
-                for(int y = x + 1; y < NewUPMGAMatrix.length; y++) {
+            // make a new, smaller, matrix
+            double[][] newMatrix = new double[matrix.length - 1][matrix.length - 1];
+            // fill it
+            for(int x = 0; x < newMatrix.length; x++) {
+                for(int y = x + 1; y < newMatrix.length; y++) {
                     if(y == xLoc) {
+                        // Where the previous x column was, update the distances
                         if(clusterType == LINKAGE_TYPE.AVERAGE)
-                            NewUPMGAMatrix[x][y] = GetUPMGAValue(dissimilarityMatrix, columnLabels, xLoc, x);
+                            newMatrix[x][y] = GetUPMGAValue(dissimilarityMatrix, clusters, xLoc, x);
                         else if(clusterType == LINKAGE_TYPE.MAX)
-                            NewUPMGAMatrix[x][y] = GetMaxValue(dissimilarityMatrix, columnLabels, xLoc, x);
+                            newMatrix[x][y] = GetMaxValue(dissimilarityMatrix, clusters, xLoc, x);
                         else if(clusterType == LINKAGE_TYPE.MIN)
-                            NewUPMGAMatrix[x][y] = GetMinValue(dissimilarityMatrix, columnLabels, xLoc, x);
+                            newMatrix[x][y] = GetMinValue(dissimilarityMatrix, clusters, xLoc, x);
                     } else if(x == xLoc) {
+                        // Where the previous x row was, update the distances
                         if(clusterType == LINKAGE_TYPE.AVERAGE)
-                            NewUPMGAMatrix[x][y] = GetUPMGAValue(dissimilarityMatrix, columnLabels, xLoc, y);
+                            newMatrix[x][y] = GetUPMGAValue(dissimilarityMatrix, clusters, xLoc, y);
                         else if(clusterType == LINKAGE_TYPE.MAX)
-                            NewUPMGAMatrix[x][y] = GetMaxValue(dissimilarityMatrix, columnLabels, xLoc, y);
+                            newMatrix[x][y] = GetMaxValue(dissimilarityMatrix, clusters, xLoc, y);
                         else if(clusterType == LINKAGE_TYPE.MIN)
-                            NewUPMGAMatrix[x][y] = GetMinValue(dissimilarityMatrix, columnLabels, xLoc, y);
+                            newMatrix[x][y] = GetMinValue(dissimilarityMatrix, clusters, xLoc, y);
                     } else {
-                        tempX = x;
-                        tempY = y;
-                        if(x >= yLoc)
-                            tempX++;
-                        if(y >= yLoc)
-                            tempY++;
-
-                        NewUPMGAMatrix[x][y] = UPMGAMatrix[tempX][tempY];
+                        tempX = x; tempY = y;
+                        // skip the previous y column and row
+                        if(x >= yLoc) tempX++;
+                        if(y >= yLoc) tempY++;
+                        // and copy the previous distances
+                        newMatrix[x][y] = matrix[tempX][tempY];
                     }
                 }
             }
-
-            UPMGAMatrix = NewUPMGAMatrix;
+            // make it our new distance matrix
+            matrix = newMatrix;
             escape++;
         }
 
-        // System.out.println("Clustering and Linkage Table Creation Complete!");
         LogPrint.printCompleteStep();
         return linkageTable;
     }
 
-    private static double GetUPMGAValue(double[][] similarityMatrix, List<ColumnDetails> columnLabels, int minLoc, int mergeLoc) {
+    /**
+     * Method getting the unweighted mean distance between two clusters of leaf nodes.
+     * @param dissimilarityMatrix Distance matrix between leaf nodes.
+     * @param clusters Sets of leaf nodes clusters.
+     * @param cluster1 Index of first cluster.
+     * @param cluster2 Index of second cluster.
+     * @return The unweighted mean distance (UPMGA) between the two clusters.
+     */
+    private static double GetUPMGAValue(double[][] dissimilarityMatrix, List<NodeCluster> clusters, int cluster1, int cluster2) {
         double totalValue = 0;
         int count = 0;
 
-        for(int labelValue1 = 0; labelValue1 < columnLabels.get(minLoc).ContainsNodes.size(); labelValue1++) {
-            for(int labelValue2 = 0; labelValue2 < columnLabels.get(mergeLoc).ContainsNodes.size(); labelValue2++) {
-                totalValue += similarityMatrix[columnLabels.get(mergeLoc).ContainsNodes.get(labelValue2)]
-                        [columnLabels.get(minLoc).ContainsNodes.get(labelValue1)];
+        for(int labelValue1 = 0; labelValue1 < clusters.get(cluster1).ContainsNodes.size(); labelValue1++) {
+            for(int labelValue2 = 0; labelValue2 < clusters.get(cluster2).ContainsNodes.size(); labelValue2++) {
+                totalValue += dissimilarityMatrix[clusters.get(cluster2).ContainsNodes.get(labelValue2)]
+                        [clusters.get(cluster1).ContainsNodes.get(labelValue1)];
                 count++;
             }
         }
@@ -189,13 +273,21 @@ public class AgglomerativeClustering {
         return totalValue / (double)count;
     }
 
-    private static double GetMaxValue(double[][] similarityMatrix, List<ColumnDetails> columnLabels, int minLoc, int mergeLoc) {
+    /**
+     * Method getting the maximum distance between two clusters of leaf nodes.
+     * @param dissimilarityMatrix Distance matrix between leaf nodes.
+     * @param clusters Sets of leaf nodes clusters.
+     * @param cluster1 Index of first cluster.
+     * @param cluster2 Index of second cluster.
+     * @return The maximum distance between the two clusters.
+     */
+    private static double GetMaxValue(double[][] dissimilarityMatrix, List<NodeCluster> clusters, int cluster1, int cluster2) {
         double tempValue = 0, maxValue = 0;
 
-        for(int labelValue1 = 0; labelValue1 < columnLabels.get(minLoc).ContainsNodes.size(); labelValue1++) {
-            for(int labelValue2 = 0; labelValue2 < columnLabels.get(mergeLoc).ContainsNodes.size(); labelValue2++) {
-                tempValue = similarityMatrix[columnLabels.get(mergeLoc).ContainsNodes.get(labelValue2)]
-                        [columnLabels.get(minLoc).ContainsNodes.get(labelValue1)];
+        for(int labelValue1 = 0; labelValue1 < clusters.get(cluster1).ContainsNodes.size(); labelValue1++) {
+            for(int labelValue2 = 0; labelValue2 < clusters.get(cluster2).ContainsNodes.size(); labelValue2++) {
+                tempValue = dissimilarityMatrix[clusters.get(cluster2).ContainsNodes.get(labelValue2)]
+                        [clusters.get(cluster1).ContainsNodes.get(labelValue1)];
 
                 if(tempValue > maxValue)
                     maxValue = tempValue;
@@ -205,13 +297,21 @@ public class AgglomerativeClustering {
         return maxValue;
     }
 
-    private static double GetMinValue(double[][] similarityMatrix, List<ColumnDetails> columnLabels, int minLoc, int mergeLoc) {
+    /**
+     * Method getting the minimum distance between two clusters of leaf nodes.
+     * @param dissimilarityMatrix Distance matrix between leaf nodes.
+     * @param clusters Sets of leaf nodes clusters.
+     * @param cluster1 Index of first cluster.
+     * @param cluster2 Index of second cluster.
+     * @return The minimum distance between the two clusters.
+     */
+    private static double GetMinValue(double[][] dissimilarityMatrix, List<NodeCluster> clusters, int cluster1, int cluster2) {
         double tempValue = 0, minValue = Double.MAX_VALUE;
 
-        for(int labelValue1 = 0; labelValue1 < columnLabels.get(minLoc).ContainsNodes.size(); labelValue1++) {
-            for(int labelValue2 = 0; labelValue2 < columnLabels.get(mergeLoc).ContainsNodes.size(); labelValue2++) {
-                tempValue = similarityMatrix[columnLabels.get(mergeLoc).ContainsNodes.get(labelValue2)]
-                        [columnLabels.get(minLoc).ContainsNodes.get(labelValue1)];
+        for(int labelValue1 = 0; labelValue1 < clusters.get(cluster1).ContainsNodes.size(); labelValue1++) {
+            for(int labelValue2 = 0; labelValue2 < clusters.get(cluster2).ContainsNodes.size(); labelValue2++) {
+                tempValue = dissimilarityMatrix[clusters.get(cluster2).ContainsNodes.get(labelValue2)]
+                        [clusters.get(cluster1).ContainsNodes.get(labelValue1)];
 
                 if(tempValue < minValue)
                     minValue = tempValue;
@@ -221,19 +321,25 @@ public class AgglomerativeClustering {
         return minValue;
     }
 
-    private static void CheckSimilarityMatrixValidity(double[][] similarityMatrix) {
-        // System.out.println("Checking similarity matrix for validity...");
+    /**
+     * Method ensuring that a given matrix is valid.
+     * In particular, check for correct values and for symmetry.
+     * @param matrix Matrix to check.
+     */
+    private static void CheckMatrixValidity(double[][] matrix) {
         LogPrint.printNewStep("Checking similarity matrix validity", 2);
-        for(int y = 0; y < similarityMatrix.length; y++) {
-            for(int x = 0; x < similarityMatrix.length; x++) {
-                if(similarityMatrix[x][y] != similarityMatrix[y][x]) {
+        for(int y = 0; y < matrix.length; y++) {
+            for(int x = 0; x < matrix.length; x++) {
+                if(matrix[x][y] != matrix[y][x]) {
                     LogPrint.printNoteError("Error in similarity matrix, not symmetrical at location x: "+x+"; y: "+y);
-                    // System.out.println("\n**********\nERROR IN SIMILARITY MATRIX!\n**********\nSimilarity matrix is not symmetrical as [x][y] != [y][x] at location x: " + x + " | y: " + y);
+                    System.exit(1);
+                }
+                if(matrix[x][y] > 1 || matrix[x][y] < 0) {
+                    LogPrint.printNoteError("Error in similarity matrix, not normal at location x: "+x+"; y: "+y);
                     System.exit(1);
                 }
             }
         }
         LogPrint.printCompleteStep();
-        // System.out.println("Similarity matrix is valid!");
     }
 }

@@ -18,8 +18,8 @@ public class TopicClusterModuleSpecs {
     public int clusters;
     /** Filename to sub topic data (from Topic Model module), optional, defaults to "" */
     public String subTopics;
-    /** Flag for grouping and clustering sub topics, defaults to false if subTopics = "" */
-    public boolean clusterSubTopics = false;
+    /** Flag for grouping and "clustering" sub topics, defaults to false if subTopics = "" */
+    public boolean groupingSubTopics = false;
     /** Filename for the JSON sub topic file generated, only required if subTopics not empty */
     public String subOutput;
 
@@ -33,8 +33,8 @@ public class TopicClusterModuleSpecs {
         linkageMethod = (String) specs.getOrDefault("linkageMethod", "avg"); // max | min | avg
         clusters = Math.toIntExact((long) specs.getOrDefault("clusters", (long) 1));
         subTopics = (String) specs.getOrDefault("subTopics", "");
-        clusterSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
-        if(clusterSubTopics){
+        groupingSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
+        if(groupingSubTopics){
             subTopics = metaSpecs.getDataDir() + subTopics;
             subOutput = metaSpecs.getDataDir() + (String) specs.get("subOutput");
         }

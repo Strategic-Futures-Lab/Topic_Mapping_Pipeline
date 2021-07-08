@@ -13,8 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * Class building an index of labels from topic model files, for each unique label, lists the topic ids where its a top
- * word and the document ids where it can be found, and saving it on a label index JSON file.
+ * Class building an index of labels.
+ * Reads data from topic model files (documents and topics).
+ * Each unique label gets a list the topic ids where its a top word and the document ids where it can be found.
+ * Data is saved it on a label index JSON file.
  *
  * @author P. Le Bras
  * @version 1
