@@ -1,6 +1,5 @@
 package P3_TopicModelling.TopicModelCore;
 
-import PX_Data.TopicIOWrapper;
 import PY_Helper.LogPrint;
 import PY_Helper.SparseVector;
 import cc.mallet.pipe.CharSequence2TokenSequence;
@@ -321,7 +320,7 @@ public class TopicModel implements Serializable {
 
         // Getting the topics-label distributions as sparse vectors
         List<SparseVector> topicVectors = modelledTopics.stream()
-                .map(t->t.getLabelVector(vocabularySize))
+                .map(t->t.getLabelDistribVector(vocabularySize))
                 .collect(Collectors.toList());
         for(ModelledDocument doc: modelledDocuments){
             doc.setWordDistancesFromTopics(topicVectors);
@@ -351,8 +350,9 @@ public class TopicModel implements Serializable {
             newProbabilities = inferencer.getSampledDistribution(newInstance.get(0), iterations, 1, 5);    // 100000, 1, 5
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.err.println(e.getCause());
+            LogPrint.printNoteError("Error while inferring document: " + e.getMessage());
+            // System.err.println(e.getMessage());
+            // System.err.println(e.getCause());
             return new double[0];
         }
 

@@ -133,11 +133,11 @@ public class ModelledTopic implements java.io.Serializable{
      * @param size Size of the vocabulary.
      * @return SparseVector of the labels distribution.
      */
-    public SparseVector getLabelVector(int size){
+    public SparseVector getLabelDistribVector(int size){
         SparseVector labelVec = new SparseVector(size);
         for(int i = 0; i < nLabels; i++){
             labelVec.put(labelsIDs[i], labelsWeights[i]);
         }
-        return labelVec;
+        return labelVec.normalise();
     }
 }

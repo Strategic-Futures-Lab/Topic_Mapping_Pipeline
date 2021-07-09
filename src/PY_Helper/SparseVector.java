@@ -12,6 +12,8 @@ import java.util.Map;
  */
 public class SparseVector {
 
+    private static final double espilon = 0.0001;
+
     /** TreeMap containing all the non-zero data. */
     private TreeMap<Integer, Double> st;
     /** Theoretical size of the vector. */
@@ -140,7 +142,17 @@ public class SparseVector {
         if(a.N != b.N) {
             throw new RuntimeException("Error : Vector lengths are not same");
         }
-        return a.sum(b.mult(-1));
+        // return a.sum(b.mult(-1));
+        SparseVector c = new SparseVector(N);
+        // copy all from a
+        for(Map.Entry<Integer, Double> entry: a.st.entrySet()) {
+            c.put(entry.getKey(), a.get(entry.getKey()));
+        }
+        // add all from b on top
+        for(Map.Entry<Integer, Double> entry: b.st.entrySet()) {
+            c.put(entry.getKey(), c.get(entry.getKey()) - b.get(entry.getKey()));
+        }
+        return c;
     }
 
     /**
@@ -168,16 +180,50 @@ public class SparseVector {
     }
 
     /**
+     * Method returning the sum of all vector components.
+     * @return Sum of of vector components.
+     */
+    public double total(){
+        double tot=0;
+        for(Map.Entry<Integer, Double> entry: st.entrySet()){
+            tot += entry.getValue();
+        }
+        return tot;
+    }
+
+    /**
+     * Method returning the vector normalised (ie, total = 1).
+     * @return Normalised vector.
+     */
+    public SparseVector normalise(){
+        SparseVector a = new SparseVector(N);
+        double n = total();
+        for(Map.Entry<Integer, Double> entry: st.entrySet()){
+            a.put(entry.getKey(), entry.getValue()/n);
+        }
+        return a;
+    }
+
+    /**
      * Static method calculating the Hellinger distance between two sparse vectors.
      * @param a First vector.
      * @param b Second vector.
      * @return The Hellinger distance between a and b.
      */
     public static double HellingerDistance(SparseVector a, SparseVector b){
+        // Checking that vector a and b have been normalised
+        if(a.total() > 1+espilon || a.total() < 1-espilon){
+            throw new RuntimeException("Error : Vector is not normalised");
+        }
+        if(b.total() > 1+espilon || b.total() < 1-espilon){
+            throw new RuntimeException("Error : Vector is not normalised");
+        }
+        // Get the square root of both vectors
         SparseVector a_r = a.sqrt();
         SparseVector b_r = b.sqrt();
+        // Calculate the difference
         SparseVector d = a_r.diff(b_r);
-        double n = d.norm();
-        return n/Math.sqrt(2);
+        // Return the difference norm divided by sprt(2)
+        return d.norm()/Math.sqrt(2);
     }
 }
