@@ -52,9 +52,9 @@ public class Lemmatise {
     /** List of custom stop phrases to exclude from document texts. */
     private List<String> stopPhrases;
     /** Minimum number of lemmas a document must have. */
-    private int minLemmas;
+    private int minDocLemmas;
     /** Minimum amount of time a lemma must be used (across all documents) to be kept. */
-    private int removeLowCounts;
+    private int minLemmaCount;
     /** Number of documents that will be removed from the topic modelling for being too short. */
     private int totalDocRemoved = 0;
 
@@ -96,10 +96,10 @@ public class Lemmatise {
         docFields = Arrays.asList(lemmaSpecs.docFields);
         stopWords = Arrays.asList(lemmaSpecs.stopWords);
         stopPhrases = Arrays.asList(lemmaSpecs.stopPhrases);
-        minLemmas = lemmaSpecs.minLemmas;
-        removeLowCounts = lemmaSpecs.removeLowCounts;
+        minDocLemmas = lemmaSpecs.minDocLemmas;
+        minLemmaCount = lemmaSpecs.minLemmaCount;
         LogPrint.printCompleteStep();
-        if(removeLowCounts > 0) LogPrint.printNote("Removing lemmas with count less than "+(removeLowCounts+1));
+        if(minLemmaCount > 0) LogPrint.printNote("Removing lemmas with count less than "+(minLemmaCount +1));
     }
 
     /**
@@ -209,7 +209,7 @@ public class Lemmatise {
         doc.setLemmas(inputLemmas);
 
         // checking length of lemmas
-        if(inputLemmas.size() < minLemmas){
+        if(inputLemmas.size() < minDocLemmas){
             doc.setTooShort(true);
             totalDocRemoved++;
         }
@@ -223,7 +223,7 @@ public class Lemmatise {
      */
     private void CleanLemmas(){
         // Removing lemmas with count in vocabulary less than removeLowCounts.
-        if(removeLowCounts > 0) {
+        if(minLemmaCount > 0) {
             LogPrint.printNewStep("Cleaning low count lemmas", 0);
             HashMap<String, Integer> lemmaCounts = new HashMap<>();
             for (Map.Entry<String, DocIOWrapper> doc : Documents.entrySet()) {
@@ -237,18 +237,18 @@ public class Lemmatise {
                 }
             }
             lowCounts = lemmaCounts.entrySet().stream()
-                    .filter(e -> e.getValue() <= removeLowCounts)
+                    .filter(e -> e.getValue() <= minLemmaCount)
                     .map(e -> e.getKey())
                     .collect(Collectors.toList());
 
             Documents.entrySet().parallelStream().forEach(e -> e.getValue().removeLemmas(lowCounts));
             LogPrint.printCompleteStep();
-            LogPrint.printNote("Found and removed " + lowCounts.size() + " lemmas with count less than " + (removeLowCounts + 1));
+            LogPrint.printNote("Found and removed " + lowCounts.size() + " lemmas with count less than " + (minLemmaCount + 1));
         }
         // Re-checking that documents have the required number of lemmas.
         Documents.entrySet().parallelStream().forEach(e->{
             DocIOWrapper doc = e.getValue();
-            if(doc.getLemmas().size() < minLemmas && !doc.isRemoved()){
+            if(doc.getLemmas().size() < minDocLemmas && !doc.isRemoved()){
                 doc.setTooShort(true);
                 totalDocRemoved++;
             }
@@ -263,7 +263,7 @@ public class Lemmatise {
         JSONObject root = new JSONObject();
         JSONArray lemmas = new JSONArray();
         metadata.put("nDocsTooShort", totalDocRemoved);
-        metadata.put("minDocSize", minLemmas);
+        metadata.put("minDocSize", minDocLemmas);
         JSONArray stopWordsArray = new JSONArray();
         for(String w: stopWords){
             stopWordsArray.add(w);
@@ -274,9 +274,9 @@ public class Lemmatise {
             stopPhrasesArray.add(p);
         }
         metadata.put("stopPhrases", stopPhrasesArray);
-        if(removeLowCounts > 0) {
+        if(minLemmaCount > 0) {
             metadata.put("nLemmasRemoved", lowCounts.size());
-            metadata.put("minLemmaCount", removeLowCounts);
+            metadata.put("minLemmaCount", minLemmaCount);
         }
         root.put("metadata", metadata);
         DocIOWrapper.PrintLemmas();
