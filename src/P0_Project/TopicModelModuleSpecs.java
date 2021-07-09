@@ -3,7 +3,10 @@ package P0_Project;
 import org.json.simple.JSONObject;
 
 /**
- * Class for Topic Model module project specification
+ * Class reading and validating parameters for the Topic Model modules ({@link P3_TopicModelling}).
+ *
+ * @author P. Le Bras
+ * @version 2
  */
 public class TopicModelModuleSpecs {
 
@@ -42,8 +45,9 @@ public class TopicModelModuleSpecs {
     public String assignmentType;
 
     /**
-     * Constructor: reads the specification from the "model" entry in the project file
-     * @param specs JSON object attached to "model"
+     * Constructor: parses and validates the given JSON object to set parameters.
+     * @param specs JSON object attached to "model" in project file.
+     * @param metaSpecs Meta-parameter specifications.
      */
     public TopicModelModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         lemmas = metaSpecs.getDataDir() + (String) specs.get("lemmas");
@@ -55,7 +59,7 @@ public class TopicModelModuleSpecs {
             dataDir = dataDir + "/";
         }
         documentOutput = dataDir + specs.get("documentOutput");
-        mainModel = new ModelSpecs((JSONObject) specs.get("mainModel"), dataDir);
+        mainModel = new ModelSpecs((JSONObject) specs.getOrDefault("model", specs.get("mainModel")), dataDir);
         if(modelType.equals("hierarchical")){
             subModel = new ModelSpecs((JSONObject) specs.get("subModel"), dataDir);
             JSONObject hierarchySpecs = (JSONObject) specs.get("hierarchy");

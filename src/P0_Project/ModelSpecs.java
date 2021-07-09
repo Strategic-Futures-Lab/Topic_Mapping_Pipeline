@@ -3,7 +3,10 @@ package P0_Project;
 import org.json.simple.JSONObject;
 
 /**
- * Class for a Topic Model specification
+ * Class reading an validating parameters for one topic model.
+ *
+ * @author P. Le Bras, A. Vidal.
+ * @version 2
  */
 public class ModelSpecs {
 
@@ -17,7 +20,8 @@ public class ModelSpecs {
     public int iterations = 1000;
     /** Number of iteration for Maximisation, optional, defaults to 0. */
     public int iterationsMax = 0;
-    /** Name of topic model when serialising (used if documents inferred from this model later), optional, defaults to "" (no serialisation) */
+    /** Name of topic model when serialising (used if documents inferred from this model later),
+     * optional, defaults to "" (no serialisation) */
     public String serialiseFile = "";
     /** Flag for serialising model, defaults to false if serialiseName = "" */
     public boolean serialise = false;
