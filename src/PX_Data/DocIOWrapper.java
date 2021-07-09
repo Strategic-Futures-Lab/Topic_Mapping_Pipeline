@@ -52,13 +52,13 @@ public class DocIOWrapper {
     /** The distribution of sub topics in the document. */
     private double[] subTopicDistribution;
     /** Word distribution difference with main topics and the full document. */
-    private double[] mainTopicFullWordDistance;
+    private double[] mainTopicFullWordDistances;
     /** Word distribution difference with sub topics and the full document. */
-    private double[] subTopicFullWordDistance;
+    private double[] subTopicFullWordDistances;
     /** Word distribution difference with main topics and the related document components. */
-    private double[] mainTopicCompWordDistance;
+    private double[] mainTopicCompWordDistances;
     /** Word distribution difference with sub topics and the related document components. */
-    private double[] subTopicCompWordDistance;
+    private double[] subTopicCompWordDistances;
     // used or set by document inference module
     /** Flag set by the {@link P3_TopicModelling.InferDocuments} module, marking the document as inferred, ie not
      * counting in the elaboration of topics. */
@@ -96,20 +96,20 @@ public class DocIOWrapper {
                 if(distrib != null){
                     this.subTopicDistribution = JSONIOWrapper.getDoubleArray(distrib);
                 }
-                distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicFullWordDistance", null);
+                distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicFullWordDistances", null);
                 if(distrib != null){
-                    this.mainTopicFullWordDistance = JSONIOWrapper.getDoubleArray(distrib);
-                    distrib = (JSONArray) jsonDoc.getOrDefault("subTopicFullWordDistance", null);
+                    this.mainTopicFullWordDistances = JSONIOWrapper.getDoubleArray(distrib);
+                    distrib = (JSONArray) jsonDoc.getOrDefault("subTopicFullWordDistances", null);
                     if(distrib != null){
-                        this.subTopicFullWordDistance = JSONIOWrapper.getDoubleArray(distrib);
+                        this.subTopicFullWordDistances = JSONIOWrapper.getDoubleArray(distrib);
                     }
                 }
-                distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicCompWordDistance", null);
+                distrib = (JSONArray) jsonDoc.getOrDefault("mainTopicCompWordDistances", null);
                 if(distrib != null){
-                    this.mainTopicCompWordDistance = JSONIOWrapper.getDoubleArray(distrib);
-                    distrib = (JSONArray) jsonDoc.getOrDefault("subTopicCompWordDistance", null);
+                    this.mainTopicCompWordDistances = JSONIOWrapper.getDoubleArray(distrib);
+                    distrib = (JSONArray) jsonDoc.getOrDefault("subTopicCompWordDistances", null);
                     if(distrib != null){
-                        this.subTopicCompWordDistance = JSONIOWrapper.getDoubleArray(distrib);
+                        this.subTopicCompWordDistances = JSONIOWrapper.getDoubleArray(distrib);
                     }
                 }
             }
@@ -135,16 +135,16 @@ public class DocIOWrapper {
             if(doc.subTopicDistribution != null){
                 this.subTopicDistribution = doc.subTopicDistribution;
             }
-            if(doc.mainTopicFullWordDistance != null){
-                this.mainTopicFullWordDistance = doc.mainTopicFullWordDistance;
-                if(doc.subTopicFullWordDistance != null){
-                    this.subTopicFullWordDistance = doc.subTopicFullWordDistance;
+            if(doc.mainTopicFullWordDistances != null){
+                this.mainTopicFullWordDistances = doc.mainTopicFullWordDistances;
+                if(doc.subTopicFullWordDistances != null){
+                    this.subTopicFullWordDistances = doc.subTopicFullWordDistances;
                 }
             }
-            if(doc.mainTopicCompWordDistance != null){
-                this.mainTopicCompWordDistance = doc.mainTopicCompWordDistance;
-                if(doc.subTopicCompWordDistance != null){
-                    this.subTopicCompWordDistance = doc.subTopicCompWordDistance;
+            if(doc.mainTopicCompWordDistances != null){
+                this.mainTopicCompWordDistances = doc.mainTopicCompWordDistances;
+                if(doc.subTopicCompWordDistances != null){
+                    this.subTopicCompWordDistances = doc.subTopicCompWordDistances;
                 }
             }
         }
@@ -409,91 +409,107 @@ public class DocIOWrapper {
      * Setter for the word distribution difference between main topics and the full document.
      * @param distribution The word distribution difference to set.
      */
-    public void setMainTopicFullWordDistance(double[] distribution){
+    public void setMainTopicFullWordDistances(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
-        mainTopicFullWordDistance = new double[distribution.length];
+        mainTopicFullWordDistances = new double[distribution.length];
         for(int i = 0; i < distribution.length; i++){
-            mainTopicFullWordDistance[i] = Double.parseDouble(df.format(distribution[i]));
+            mainTopicFullWordDistances[i] = Double.parseDouble(df.format(distribution[i]));
         }
     }
+
+    /**
+     * Method checking that word distances have been set between main topics and the full document.
+     * @return Whether the word distance are set (true) or not (false).
+     */
+    public boolean hasMainTopicFullWordDistances(){ return mainTopicFullWordDistances != null; }
 
     /**
      * Getter for the word distribution difference between main topics and the full document.
      * @return The word distribution difference.
      */
-    public double[] getMainTopicFullWordDistance(){
-        return mainTopicFullWordDistance;
-    }
+    public double[] getMainTopicFullWordDistances(){ return mainTopicFullWordDistances; }
 
     /**
      * Setter for the word distribution difference between sub topics and the full document.
      * @param distribution The word distribution difference to set.
      */
-    public void setSubTopicFullWordDistance(double[] distribution){
+    public void setSubTopicFullWordDistances(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
         if(distribution != null){
-            subTopicFullWordDistance = new double[distribution.length];
+            subTopicFullWordDistances = new double[distribution.length];
             for(int i = 0; i < distribution.length; i++){
-                subTopicFullWordDistance[i] = Double.parseDouble(df.format(distribution[i]));
+                subTopicFullWordDistances[i] = Double.parseDouble(df.format(distribution[i]));
             }
         }
 
     }
+
+    /**
+     * Method checking that word distances have been set between sub topics and the full document.
+     * @return Whether the word distance are set (true) or not (false).
+     */
+    public boolean hasSubTopicFullWordDistances(){ return subTopicFullWordDistances != null; }
 
     /**
      * Getter for the word distribution difference between sub topics and the full document.
      * @return The word distribution difference.
      */
-    public double[] getSubTopicFullWordDistance(){
-        return subTopicFullWordDistance;
-    }
+    public double[] getSubTopicFullWordDistances(){ return subTopicFullWordDistances; }
 
     /**
      * Setter for the word distribution difference between main topics and the related document components.
      * @param distribution The word distribution difference to set.
      */
-    public void setMainTopicCompWordDistance(double[] distribution){
+    public void setMainTopicCompWordDistances(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
-        mainTopicCompWordDistance = new double[distribution.length];
+        mainTopicCompWordDistances = new double[distribution.length];
         for(int i = 0; i < distribution.length; i++){
-            mainTopicCompWordDistance[i] = Double.parseDouble(df.format(distribution[i]));
+            mainTopicCompWordDistances[i] = Double.parseDouble(df.format(distribution[i]));
         }
     }
+
+    /**
+     * Method checking that word distances have been set between main topics and the related document components.
+     * @return Whether the word distance are set (true) or not (false).
+     */
+    public boolean hasMainTopicCompWordDistances(){ return mainTopicCompWordDistances != null; }
 
     /**
      * Getter for the word distribution difference between main topics and the related document components.
      * @return The word distribution difference.
      */
-    public double[] getMainTopicCompWordDistance(){
-        return mainTopicCompWordDistance;
-    }
+    public double[] getMainTopicCompWordDistances(){ return mainTopicCompWordDistances; }
 
     /**
      * Setter for the word distribution difference between sub topics and the related document components.
      * @param distribution The word distribution difference to set.
      */
-    public void setSubTopicCompWordDistance(double[] distribution){
+    public void setSubTopicCompWordDistances(double[] distribution){
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.UP);
         if(distribution != null){
-            subTopicCompWordDistance = new double[distribution.length];
+            subTopicCompWordDistances = new double[distribution.length];
             for(int i = 0; i < distribution.length; i++){
-                subTopicCompWordDistance[i] = Double.parseDouble(df.format(distribution[i]));
+                subTopicCompWordDistances[i] = Double.parseDouble(df.format(distribution[i]));
             }
         }
 
     }
 
     /**
+     * Method checking that word distances have been set between sub topics and the related document components.
+     * @return Whether the word distance are set (true) or not (false).
+     */
+    public boolean hasSubTopicCompWordDistances(){ return subTopicCompWordDistances != null; }
+
+    /**
      * Getter for the word distribution difference between sub topics and the related document components.
      * @return The word distribution difference.
      */
-    public double[] getSubTopicCompWordDistance(){
-        return subTopicCompWordDistance;
-    }
+    public double[] getSubTopicCompWordDistances(){ return subTopicCompWordDistances; }
 
     /**
      * Setter for inferred flag.
@@ -549,21 +565,21 @@ public class DocIOWrapper {
                 topicDistrib = getDistribJSON(subTopicDistribution);
                 root.put("subTopicDistribution", topicDistrib);
             }
-            if(mainTopicFullWordDistance != null){
-                topicDistrib = getDistribJSON(mainTopicFullWordDistance);
-                root.put("mainTopicFullWordDistance", topicDistrib);
+            if(mainTopicFullWordDistances != null){
+                topicDistrib = getDistribJSON(mainTopicFullWordDistances);
+                root.put("mainTopicFullWordDistances", topicDistrib);
             }
-            if(subTopicFullWordDistance != null){
-                topicDistrib = getDistribJSON(subTopicFullWordDistance);
-                root.put("subTopicFullWordDistance", topicDistrib);
+            if(subTopicFullWordDistances != null){
+                topicDistrib = getDistribJSON(subTopicFullWordDistances);
+                root.put("subTopicFullWordDistances", topicDistrib);
             }
-            if(mainTopicCompWordDistance != null){
-                topicDistrib = getDistribJSON(mainTopicCompWordDistance);
-                root.put("mainTopicCompWordDistance", topicDistrib);
+            if(mainTopicCompWordDistances != null){
+                topicDistrib = getDistribJSON(mainTopicCompWordDistances);
+                root.put("mainTopicCompWordDistances", topicDistrib);
             }
-            if(subTopicCompWordDistance != null){
-                topicDistrib = getDistribJSON(subTopicCompWordDistance);
-                root.put("subTopicCompWordDistance", topicDistrib);
+            if(subTopicCompWordDistances != null){
+                topicDistrib = getDistribJSON(subTopicCompWordDistances);
+                root.put("subTopicCompWordDistances", topicDistrib);
             }
         }
         return root;

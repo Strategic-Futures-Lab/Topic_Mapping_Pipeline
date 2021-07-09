@@ -25,21 +25,30 @@ public class ModelSpecs {
     public String topicOutput;
 
     // ADVANCED PARAMETERS, I.E. NON-ESSENTIAL FOR OTHER MODULES
-    /** Filename for the CSV similarity file, not including directory:
-     * similarity between topics, optional, defaults to "" */
+    /** Filename for the CSV topic-similarity file, not including directory,
+     * optional, defaults to "" */
     public String similarityOutput = "";
-    /** Flag for writing similarity between topics, defaults to false if similarityOuput = "" */
+    /** Flag for writing similarity between topics,
+     * defaults to false if similarityOuput = "" */
     public boolean outputSimilarity = false;
-    /** Number of words to identify a topic in similarity or assignment outputs, optional, defaults to 3 */
+    /** Number of words to identify a topic in similarity or assignment outputs,
+     * optional, defaults to 3 */
     public int numWordId = 3;
-    /** Filename for the JSON Log-Likelihood file, not including directory, optional, defaults to "" */
+    /** Filename for the JSON Log-Likelihood file, not including directory,
+     * optional, defaults to "" */
     public String llOutput = "";
-    /** Flag for writing Log-Likelihood records, defaults to false if llOutput = "" */
+    /** Flag for writing Log-Likelihood records,
+     * defaults to false if llOutput = "" */
     public boolean outputLL = false;
-    /** Filename for the JSON topic log file, not including directory, optional, defaults to "" */
+    /** Filename for the JSON topic log file, not including directory,
+     * optional, defaults to "" */
     public String topicLogOutput = "";
-    /** Flag for writing the topic log file, defaults to false if topicLogOutput = "" */
+    /** Flag for writing the topic log file,
+     * defaults to false if topicLogOutput = "" */
     public boolean outputTopicLog = false;
+    /** Flag for calculating the word distribution differences between documents and topics,
+     * optional, defaults to false */
+    public boolean getWordDistances = false;
 
     /** Index of random seed to use, optional, defaults to 0, must be set between 0-99 */
     public int seedIndex = 0;
@@ -68,7 +77,7 @@ public class ModelSpecs {
             serialise = true;
             serialiseFile = dataDir + serialiseFile;
         }
-        topicOutput = dataDir + (String) specs.get("topicOutput");
+        topicOutput = dataDir + specs.get("topicOutput");
         similarityOutput = (String) specs.getOrDefault("topicSimOutput", "");
         if(!similarityOutput.equals("")){
             outputSimilarity = true;
@@ -80,6 +89,7 @@ public class ModelSpecs {
             outputLL = true;
             llOutput = dataDir + llOutput;
         }
+        getWordDistances = (boolean) specs.getOrDefault("wordDistances", false);
         seedIndex = Math.toIntExact((long) specs.getOrDefault("seed", (long) 0));
         optimInterval = Math.toIntExact((long) specs.getOrDefault("optimInterval", (long) 50));
         alphaSum = (double) specs.getOrDefault("alphaSum", 1.0);

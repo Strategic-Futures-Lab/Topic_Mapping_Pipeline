@@ -48,11 +48,14 @@ public class TopicModel implements Serializable {
      * High beta = topic mix of most words.
      * Low beta = topic mix of few words. */
     public double BETA = 0.01;
-    /** Boolean flag for making alpha values symmetric.
+    /** Flag for making alpha values symmetric.
      * If asymmetric, some topics more likely to appear across documents. */
     public boolean SYMMETRICALPHA = false;
     /** Number of iterations between hyperparameters optimisations. */
     public int OPTIMINTERVAL = 50;
+
+    /** Flag for calculating the word distribution differences between documents and topics. */
+    public boolean getWordDistances = false;
 
     /** List of input documents, with ID and lemmas. */
     public List<InputDocument> inputDocuments;
@@ -318,12 +321,14 @@ public class TopicModel implements Serializable {
             modelledTopics.add(modelledTopic);
         }
 
-        // Getting the topics-label distributions as sparse vectors
-        List<SparseVector> topicVectors = modelledTopics.stream()
-                .map(t->t.getLabelDistribVector(vocabularySize))
-                .collect(Collectors.toList());
-        for(ModelledDocument doc: modelledDocuments){
-            doc.setWordDistancesFromTopics(topicVectors);
+        if(getWordDistances){
+            // Getting the topics-label distributions as sparse vectors
+            List<SparseVector> topicVectors = modelledTopics.stream()
+                    .map(t->t.getLabelDistribVector(vocabularySize))
+                    .collect(Collectors.toList());
+            for(ModelledDocument doc: modelledDocuments){
+                doc.setWordDistancesFromTopics(topicVectors);
+            }
         }
     }
 

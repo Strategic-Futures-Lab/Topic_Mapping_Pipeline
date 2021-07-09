@@ -82,12 +82,14 @@ public class TopicModelling {
     private double alphaSum = 1.0;
     /** Beta hyperparameters. */
     private double beta = 0.01;
-    /** Boolean flag for using symmetrical alpha-values. */
+    /** Flag for using symmetrical alpha-values. */
     private boolean symmetricAlpha = false;
     /** Hyperparameters optimisation intervals. */
     private int optimInterval = 50;
     /** Number of maximisation iterations. */
     private int nIterationsMaximisation = 0;
+    /** Flag for calculating the word distribution differences between documents and topics. */
+    private boolean getWordDistances = false;
 
     // Output settings
 
@@ -191,6 +193,7 @@ public class TopicModelling {
         symmetricAlpha = modelSpecs.symmetricAlpha;
         optimInterval = modelSpecs.optimInterval;
         seedIndex=modelSpecs.seedIndex;
+        getWordDistances = modelSpecs.getWordDistances;
 
         topicOutput = modelSpecs.topicOutput;
 
@@ -285,6 +288,7 @@ public class TopicModelling {
         tModel.ALPHASUM = alphaSum;
         tModel.BETA = beta;
         tModel.SYMMETRICALPHA = symmetricAlpha;
+        tModel.getWordDistances = getWordDistances;
 
         tModel.Model(outputDir);
 
@@ -343,7 +347,10 @@ public class TopicModelling {
                 entry.getValue().setMainTopicDistribution(doc.topicDistribution);
                 // update the lemmas used in the model
                 entry.getValue().setLemmas(Arrays.asList(doc.modelLemmas));
-                // TODO: check validity of word-distrib distances and add to DocIOWrapper
+                if(getWordDistances){
+                    entry.getValue().setMainTopicFullWordDistances(doc.fullTopicDistances);
+                    entry.getValue().setMainTopicCompWordDistances(doc.compTopicDistances);
+                }
                 System.out.println("test");
             }
         }

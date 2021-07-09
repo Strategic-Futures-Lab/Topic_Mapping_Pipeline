@@ -207,6 +207,12 @@ public class HierarchicalTopicModelling {
         for(Map.Entry<String, DocIOWrapper> docEntry: mainDocs.entrySet()){
             String docKey = docEntry.getKey();
             docEntry.getValue().setSubTopicDistribution(subDocs.get(docKey).getMainTopicDistribution());
+            if(subDocs.get(docKey).hasMainTopicFullWordDistances()){
+                docEntry.getValue().setSubTopicFullWordDistances(subDocs.get(docKey).getMainTopicFullWordDistances());
+            }
+            if(subDocs.get(docKey).hasMainTopicCompWordDistances()){
+                docEntry.getValue().setSubTopicCompWordDistances(subDocs.get(docKey).getMainTopicCompWordDistances());
+            }
         }
         MainTopicModel.SaveDocuments(nMainTopics, nSubTopics);
     }
