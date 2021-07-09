@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 import java.util.HashMap;
 
 /**
- * Class reading an validating parameters for the Input modules ({@link P1_Input}).
+ * Class reading and validating parameters for the Input modules ({@link P1_Input}).
  *
  * @author P. Le Bras
  * @version 1
@@ -38,8 +38,9 @@ public class InputModuleSpecs{
     public boolean TXT_splitEmptyLines = false;
 
     /**
-     * Constructor: reads the specification from the "input" entry in the project file.
-     * @param specs JSON object attached to "input".
+     * Constructor: parses and validates the given JSON object to set parameters.
+     * @param specs JSON object attached to "input" in project file.
+     * @param metaSpecs Meta-parameter specifications.
      */
     public InputModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         module = (String) specs.get("module");

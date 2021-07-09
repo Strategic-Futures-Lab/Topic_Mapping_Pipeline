@@ -5,62 +5,65 @@ import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 /**
- * Project Manager Class:
- *  - reads project specs from file
- *  - distribute specs across modules
+ * Class implementing a Project Manager to read project specifications and distribute them across modules.
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class ProjectManager {
 
-    /** Project meta-parameters */
+    /** Project meta-parameters. */
     public MetaSpecs metaSpecs;
-    /** If Input module should run */
+
+    /** Flag for running the Input module. */
     public boolean runInput;
-    /** Input module specifications */
-    public InputModuleSpecs input;
-    /** If Lemmatise module should run */
+    /** Flag for running Lemmatise module. */
     public boolean runLemmatise;
-    /** Lemmatise module specifications */
-    public LemmatiseModuleSpecs lemmatise;
-    /** If Topic Model module should run */
+    /** Flag for running the Topic Model module. */
     public boolean runModel;
-    /** Topic Model module specifications */
-    public TopicModelModuleSpecs model;
-    /** If Topic Model Export should run */
+    /** Flag for running the Topic Model Export module. */
     public boolean runTopicModelExport;
-    /** Topic Model Export module specifications */
-    public TopicModelExportModuleSpecs topicModelExport;
-    /** If Document Infer module should run */
+    /** Flag for running the Document Infer module. */
     public boolean runDocumentInfer;
-    /** Document Infer module specifications */
-    public DocumentInferModuleSpecs documentInfer;
-    /** If Index Label module should run */
+    /** Flag for running the Index Label module. */
     public boolean runLabelIndex;
-    /** Label Index module specifications */
-    public LabelIndexModuleSpecs labelIndex;
-    /** If Topic Distribution module should run */
+    /** Flag for running the Topic Distribution module. */
     public boolean runTopicDistrib;
-    /** Topic Distribution module specifications */
-    public TopicDistribModuleSpecs topicDistrib;
-    /** If Compare Topic Distribution module should run */
+    /** Flag for running the Compare Topic Distribution module. */
     public boolean runCompareDistrib;
-    /** Compare Topic Distribution module specifications */
-    public CompareDistributionsModuleSpecs compareDistrib;
-    /** If Topic Cluster module should run */
+    /** Flag for running the Topic Cluster module. */
     public boolean runTopicCluster;
-    /** Topic Cluster module specifications */
-    public TopicClusterModuleSpecs topicCluster;
-    /** If Topic Mapping module should run */
+    /** Flag for running the Topic Mapping module. */
     public boolean runTopicMap;
-    /** Topic Mapping module specifications */
-    public TopicMappingModuleSpecs topicMap;
-    /** If Overwrite Map module should run */
+    /** Flag for running the Overwrite Map module. */
     public boolean runOverwriteMap;
-    /** Overwrite Map module specifications */
+
+    /** Input module specifications. */
+    public InputModuleSpecs input;
+    /** Lemmatise module specifications. */
+    public LemmatiseModuleSpecs lemmatise;
+    /** Topic Model module specifications. */
+    public TopicModelModuleSpecs model;
+    /** Topic Model Export module specifications. */
+    public TopicModelExportModuleSpecs topicModelExport;
+    /** Document Infer module specifications. */
+    public DocumentInferModuleSpecs documentInfer;
+    /** Label Index module specifications. */
+    public LabelIndexModuleSpecs labelIndex;
+    /** Topic Distribution module specifications. */
+    public TopicDistribModuleSpecs topicDistrib;
+    /** Compare Topic Distribution module specifications. */
+    public CompareDistributionsModuleSpecs compareDistrib;
+    /** Topic Cluster module specifications. */
+    public TopicClusterModuleSpecs topicCluster;
+    /** Topic Mapping module specifications. */
+    public TopicMappingModuleSpecs topicMap;
+    /** Overwrite Map module specifications. */
     public OverwriteMapModuleSpecs overwriteMap;
 
     /**
-     * Constructor, also triggers reading the project file and setting up the specs
-     * @param projectFile filename for the project file
+     * Constructor, also triggers reading the project file and setting up the specs.
+     * @param projectFile Filename for the project file.
      */
     public ProjectManager(String projectFile){
         JSONObject projectSpec = JSONIOWrapper.LoadJSON(projectFile, 0);
@@ -70,8 +73,8 @@ public class ProjectManager {
     }
 
     /**
-     * Reads the "run" entry in project file to know which module should be executed
-     * @param specs JSON object attached to "run" in project file
+     * Method reading the "run" entry in project file to know which module should be executed.
+     * @param specs JSON object attached to "run" in project file.
      */
     private void getRuns(JSONObject specs){
         LogPrint.printNewStep("Getting modules to run", 0);
@@ -89,6 +92,10 @@ public class ProjectManager {
         LogPrint.printCompleteStep();
     }
 
+    /**
+     * Method getting the meta-parameters specifications.
+     * @param specs JSON object attached to "metaParameters" in project file.
+     */
     private void getMetaSpecs(JSONObject specs){
         LogPrint.printNewStep("Getting project's meta-parameters", 0);
         metaSpecs = new MetaSpecs(specs);
@@ -96,8 +103,8 @@ public class ProjectManager {
     }
 
     /**
-     * Sets up the different module specs instances needed (only for modules to be run)
-     * @param projectSpec JSON object from the project file, specific module entries are then distributed
+     * Method setting up the different module specs instances needed (only for modules to be run).
+     * @param projectSpec JSON object from the project file, specific module entries are then distributed.
      */
     private void getSpecs(JSONObject projectSpec){
         LogPrint.printNewStep("Getting modules parameters", 0);
