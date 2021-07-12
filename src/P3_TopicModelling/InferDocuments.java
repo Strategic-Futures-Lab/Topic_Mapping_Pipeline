@@ -74,7 +74,6 @@ public class InferDocuments {
     /** Filename of the JSON file where to saved the merged documents data. */
     private String documentsOutput;
 
-    // private JSONObject InferMetadata;
     /** Filename of the lemma JSON file containing the documents to infer. */
     private String lemmaFile;
     /** List of documents to infer. */
@@ -149,7 +148,6 @@ public class InferDocuments {
 
         lemmaFile = specs.lemmas;
 
-        documentsFile = specs.documents;
         mainModelFile = specs.mainModel;
         inferFromSubModel = specs.inferFromSubModel;
         if(inferFromSubModel) subModelFile = specs.subModel;
@@ -172,6 +170,7 @@ public class InferDocuments {
         }
         mergeDocuments = specs.mergeDocuments;
         if(mergeDocuments){
+            documentsFile = specs.documents;
             documentsOutput = specs.documentsOutput;
         }
 
@@ -211,14 +210,17 @@ public class InferDocuments {
      */
     private void loadDataFiles(){
         LogPrint.printNewStep("Loading model data", 0);
-        // loading previous documents
-        JSONObject input = JSONIOWrapper.LoadJSON(documentsFile, 1);
-        ModelDocumentsMetadata = (JSONObject) input.get("metadata");
-        JSONArray docs = (JSONArray) input.get("documents");
+        JSONObject input;
+        // loading previous documents, only if merging later
         ModelDocuments = new ConcurrentHashMap<>();
-        for(JSONObject docEntry: (Iterable<JSONObject>) docs) {
-            DocIOWrapper doc = new DocIOWrapper(docEntry);
-            ModelDocuments.put(doc.getId(), doc);
+        if(mergeDocuments) {
+            input = JSONIOWrapper.LoadJSON(documentsFile, 1);
+            ModelDocumentsMetadata = (JSONObject) input.get("metadata");
+            JSONArray docs = (JSONArray) input.get("documents");
+            for (JSONObject docEntry : (Iterable<JSONObject>) docs) {
+                DocIOWrapper doc = new DocIOWrapper(docEntry);
+                ModelDocuments.put(doc.getId(), doc);
+            }
         }
         // loading previous models, only if merging later
         if(mergeMainTopics){
