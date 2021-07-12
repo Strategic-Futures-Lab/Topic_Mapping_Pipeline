@@ -70,7 +70,7 @@ Because modules after `Model` will behave differently depending on the nature of
 meta-parameter `modelType` to quickly set those behaviours. It takes two possible values: `hierarchical` and `simple`.
 It is optional, and will overwrite the module-level specification if set.
 
-## Doc Fields
+## Document Fields
 ```json5
 {...
   "metaParameters": {

@@ -6,8 +6,8 @@
 
 # Lemmatise Module
 
-The Lemmatise module is the second module of the Topic Mapping pipeline. It *cleans* the corpus and produce lemmatised
-text data for the topic modelling process. This data is saved in a ***Lemma JSON file***.
+The Lemmatise module *cleans* the corpus and produce lemmatised text data for the topic modelling process. 
+This data is saved in a ***Lemma JSON file***.
 
 The Lemmatise module is contained in the `P2_Lemmatise` package, in the `Lemmatise.java` class.
 
@@ -34,14 +34,15 @@ The parameters for Lemmatise module entry in the project file should have the fo
 | `corpus` | Path to the corpus JSON file * | No | |
 | `output` | Path to the output lemmas JSON file * | No | |
 | `textFields` | List of keys, in the `docData` of documents, to use and build the documents texts with | No | |
-| `docFields` | List of keys to keep in the `docData` of documents after lemmatisation (e.g. for further analysis/presentation) | Yes | `[]` |
-| `stopWords` | List of lemmatised words to excluded from documents' texts (after lemmatisation) ** | Yes | `[]` |
-| `stopPhrases` | List of phrases, or groups of words, to exclude from documents' texts (before lemmatisation) ** | Yes | `[]` |
+| `docFields` | List of keys to keep in the `docData` of documents after lemmatisation (e.g. for further analysis/presentation) ** | Yes | `[]` |
+| `stopWords` | List of lemmatised words to excluded from documents' texts (after lemmatisation) *** | Yes | `[]` |
+| `stopPhrases` | List of phrases, or groups of words, to exclude from documents' texts (before lemmatisation) *** | Yes | `[]` |
 | `minDocLemmas` or `minLemmas` | Minimum number of lemmas a document must have in its text to be kept for modelling | Yes | `1` |
-| `minLemmaCount` | Minimum number of times a lemma must be counted, across all documents *** | Yes | `0` |
+| `minLemmaCount` | Minimum number of times a lemma must be counted, across all documents **** | Yes | `0` |
 - \* These paths are relative to the [data directory](MetaParameters.md);
-- \** This lets you filter out terms which are too generic or over-represented in the corpus;
-- \*** This lets you filter out under-represented lemmas, note that **using this option may remove a large amount of information**.
+- \** This gets overwritten by the [document fields meta-parameter](MetaParameters.md) (if set);
+- \*** This lets you filter out terms which are too generic or over-represented in the corpus;
+- \**** This lets you filter out under-represented lemmas, note that **using this option may remove a large amount of information**.
 
 ## Output
 

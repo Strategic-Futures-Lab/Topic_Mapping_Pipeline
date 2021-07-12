@@ -34,8 +34,8 @@ The Topic Distribution module entry in the project file should have the followin
 | `output` or `mainOutput` (if the model is hierarchical) | Path to the (main) topics JSON file generated * | No | |
 | `subOutput` | Path to the sub topics JSON file generated * | Required if the model is hierarchical | |
 | `distributions` | List of specifications for the distributions to estimate, see below | No | |
-- \* These paths are relative to the [data directory](MetaParameters.md)
-- \*\* This default value implies a non-hierarchical model, but can be overwritten by the [meta-parameters](MetaParameters.md);
+- \* These paths are relative to the [data directory](MetaParameters.md);
+- \** This default value implies a non-hierarchical model, but can be overwritten by the [model type meta-parameter](MetaParameters.md) (if set).
 
 The Topic Distribution module allows for multiple distributions to be calculated simultaneously. Each distribution
 is specified using an object in the `distributions` field shown above. A distribution specification has the following
@@ -68,7 +68,7 @@ structure:
 | `domainDataFields` | List of columns, from `domainData`, to include: `{"a":"A"}` -> include column `A` under key `a` | Yes | Empty object |
 - \* This path is relative to the [data directory](MetaParameters.md). If unset or empty, the distribution data will
   be saved with the topics, in the topic JSON file(s) instead.
-- \*\* This path is relative to the [source directory](MetaParameters.md). Note that this additional domain data is
+- \** This path is relative to the [source directory](MetaParameters.md). Note that this additional domain data is
   only saved if the distribution is set to be written in a seperate distribution JSON file.
 
 The image below illustrates the results of using som of these options.

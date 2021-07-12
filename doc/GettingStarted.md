@@ -6,13 +6,10 @@
 
 # Getting Started
 
-The pipeline is written in Java. There are no compiled `.jar` library yet, you must therefore either run it through
-a Java IDE (i.e. IntelliJ IDEA, or Eclipse), or compile and run via command line.
+The pipeline is written in Java, version 11. You will therefore need to have a JRE and JDK that supports this version.
 
-The sources are in the `src` folder.
-    
-Before compiling and running sources, make sure you have downloaded the dependencies in the `lib` folder and make sure
-to add them to the project structure in your IDE:
+The sources are in the `src` folder. Before compiling and running sources, make sure you have downloaded the
+dependencies in the `lib` folder and make sure  to add them to the project structure in your IDE:
 - `fastcsv-1.0.2.jar` for reading and writing csv files;
 - `json-simple-1.1.1.jar` for reading and writing json files;
 - `pdfbox-app-2.0.9.jar` for reading pdf documents;
@@ -20,8 +17,13 @@ to add them to the project structure in your IDE:
 - `mallet.jar` and `mallet-deps.jar` for modelling topics;
 - `jbox2d-library-2.2.1.1.jar` for mapping topics.
 
-Although it has been deprecated, the previous version of the mapping module has been written in JavaScript.
-If you wish to use this version, you will need to install [NodeJS](https://nodejs.org/en/) to execute JavaScript.
+To handle version control of these large dependencies, you might need to install [Git LFS](https://git-lfs.github.com/).
+
+A compiled JAR file of the pipeline can be found in the `out/artifacts/Topic_Mapping_Pipeline_jar` folder.
+Make sure to download the main `.jar` file and the dependencies in the `lib` folder.
+
+> Although it has been deprecated, the previous version of the mapping module has been written in JavaScript.
+  If you wish to use this version, you will need to install [NodeJS](https://nodejs.org/en/) to execute JavaScript.
 
 ---
 
