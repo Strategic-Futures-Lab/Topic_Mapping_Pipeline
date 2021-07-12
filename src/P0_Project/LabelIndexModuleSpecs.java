@@ -10,7 +10,9 @@ import org.json.simple.JSONObject;
  */
 public class LabelIndexModuleSpecs {
 
-    /** Filename to document data (from Topic Model or Document Infer modules), optional, defaults to "". */
+    /** Filename of document JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}),
+     * optional, defaults to "". */
     public String documents;
     /** Flag for indexing documents, defaults to false if documents = "". */
     public boolean indexDocuments = false;
@@ -18,9 +20,12 @@ public class LabelIndexModuleSpecs {
     public boolean useAllDocuments = false;
     /** Flag for indexing labels from documents not indexed from topics, optional, defaults to false. */
     public boolean useAllLabels = false;
-    /** Filename to main topic data (from Topic Model or Document Infer modules). */
+    /** Filename of main topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String mainTopics;
-    /** Filename to sub topic data (from Topic Model or Document Infer modules), optional, defaults to "". */
+    /** Filename of sub topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}),
+     * optional, defaults to "". */
     public String subTopics;
     /** Flag for indexing sub topics, defaults to false if subTopics = "" or modelType meta-parameter = "simple". */
     public boolean indexSubTopics = false;

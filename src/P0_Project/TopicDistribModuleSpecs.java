@@ -17,13 +17,17 @@ import java.util.List;
  */
 public class TopicDistribModuleSpecs {
 
-    /** Filename of document JSON file (from Topic Model or Document Infer modules). */
+    /** Filename of document JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String documents;
-    /** Filename of main topic JSON file (from Topic Model or Document Infer modules). */
+    /** Filename of main topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String mainTopics;
     /** Filename for the JSON main topic file generated. */
     public String mainOutput;
-    /** Filename to sub topic data (from Topic Model or Document Infer modules), optional, defaults to "". */
+    /** Filename to sub topic data
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}),
+     * optional, defaults to "". */
     public String subTopics;
     /** Flag for distributing over sub topics, defaults to false if subTopics = "". */
     public boolean distributeSubTopics = false;

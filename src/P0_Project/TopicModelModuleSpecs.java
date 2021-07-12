@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
  */
 public class TopicModelModuleSpecs {
 
-    /** Filename to lemma data (from Lemmatise module). */
+    /** Filename to lemma data (from {@link P2_Lemmatise.Lemmatise}). */
     public String lemmas;
     /** Which module to run: "simple" or "hierarchical". */
     public String modelType;

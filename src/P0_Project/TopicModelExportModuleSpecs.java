@@ -12,7 +12,8 @@ import org.json.simple.JSONObject;
  */
 public class TopicModelExportModuleSpecs {
 
-    /** Filename to main topic data (from Topic Model or Document Infer modules). */
+    /** Filename of the main topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String mainTopics;
     /** Filename for the JSON main topic model file generated. */
     public String mainOutput;
@@ -20,7 +21,9 @@ public class TopicModelExportModuleSpecs {
     public String mainOutputCSV;
     /** Flag for exporting main model as CSV, defaults to false if mainOutputCSV = "". */
     public boolean exportMainTopicsCSV;
-    /** Filename to sub topic data (from Topic Model or Document Infer modules), optional, defaults to "". */
+    /** Filename of the sub topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}),
+     * optional, defaults to "". */
     public String subTopics;
     /** Flag for exporting sub model, defaults to false if subTopics = "". */
     public boolean exportSubTopics;
@@ -35,7 +38,8 @@ public class TopicModelExportModuleSpecs {
     public String outputCSV;
     /** Flag for exporting merged model as CSV, defaults to false if outputCSV = "". */
     public boolean exportMergedTopicsCSV;
-    /** Filename to the document data (from Topic Model or Document Infer modules). */
+    /** Filename of the document JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String documents;
     /** List of fields in docData to keep, optional, defaults to empty. */
     public String[] docFields;

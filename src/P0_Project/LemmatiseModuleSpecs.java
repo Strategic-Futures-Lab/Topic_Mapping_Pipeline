@@ -12,7 +12,7 @@ import org.json.simple.JSONObject;
  */
 public class LemmatiseModuleSpecs {
 
-    /** Filename of corpus JSON file (from Input module). */
+    /** Filename of corpus JSON file (from {@link P1_Input} modules). */
     public String corpus;
     /** List of fields in docData to use for text. */
     public String[] textFields;

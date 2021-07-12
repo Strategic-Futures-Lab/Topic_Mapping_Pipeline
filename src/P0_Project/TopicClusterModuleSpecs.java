@@ -11,7 +11,8 @@ import org.json.simple.JSONObject;
  */
 public class TopicClusterModuleSpecs {
 
-    /** Filename of main topic JSON file (from Topic Model or Document Infer modules). */
+    /** Filename of main topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String mainTopics;
     /** Filename of the main topic cluster JSON file generated. */
     public String mainOutput;
@@ -19,7 +20,9 @@ public class TopicClusterModuleSpecs {
     public String linkageMethod;
     /** Number of clusters in main topics, optional, defaults to 1. */
     public int clusters;
-    /** Filename of sub topic JSON file (from Topic Model or Document Infer modules), optional, defaults to "". */
+    /** Filename of sub topic JSON file
+     * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}),
+     * optional, defaults to "". */
     public String subTopics;
     /** Flag for grouping and "clustering" sub topics, defaults to false if subTopics = "". */
     public boolean groupingSubTopics = false;

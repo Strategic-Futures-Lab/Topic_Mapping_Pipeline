@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
 public class DocumentInferModuleSpecs {
 
     // INPUT
-    /** Filename to lemma data to infer (from Lemmatise module). */
+    /** Filename to lemma data to infer (from {@link P2_Lemmatise.Lemmatise}). */
     public String lemmas;
     /** Number of iterations for the inferencer to go through, optional, defaults to 100. */
     public int iterations = 100;

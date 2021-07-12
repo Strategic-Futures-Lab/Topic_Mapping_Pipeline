@@ -13,9 +13,11 @@ import org.json.simple.JSONObject;
  */
 public class CompareDistributionsModuleSpecs {
 
-    /** Filename for main topics, containing the distribution to compare (from TopicDistrib module). */
+    /** Filename for main topics, containing the distribution to compare
+     * (from {@link P4_Analysis.TopicDistribution.TopicDistribution}). */
     public String mainTopics;
-    /** Filename for sub topics, containing the distribution to compare (from TopicDistrib module),
+    /** Filename for sub topics, containing the distribution to compare
+     * (from {@link P4_Analysis.TopicDistribution.TopicDistribution}),
      * optional, defaults to "". */
     public String subTopics = "";
     /** Flag for comparing sub topics, defaults to false if subTopics = "". */
