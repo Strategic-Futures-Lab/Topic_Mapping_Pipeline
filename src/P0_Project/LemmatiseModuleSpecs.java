@@ -5,7 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * Class reading and validating parameters for the Lemmatise module ({@link P2_Lemmatise}).
+ * Class reading and validating parameters for the Lemmatise module ({@link P2_Lemmatise.Lemmatise}).
  *
  * @author P. Le Bras
  * @version 1

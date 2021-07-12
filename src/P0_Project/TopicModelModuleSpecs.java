@@ -3,42 +3,42 @@ package P0_Project;
 import org.json.simple.JSONObject;
 
 /**
- * Class reading and validating parameters for the Topic Model modules ({@link P3_TopicModelling}).
+ * Class reading and validating parameters for the Topic Model modules ({@link P3_TopicModelling.TopicModelling} and
+ * {@link P3_TopicModelling.HierarchicalTopicModelling}).
  *
  * @author P. Le Bras
  * @version 2
  */
 public class TopicModelModuleSpecs {
 
-    /** Filename to lemma data (from Lemmatise module) */
+    /** Filename to lemma data (from Lemmatise module). */
     public String lemmas;
-    /** Which module to run: "simple" or "hierarchical" */
+    /** Which module to run: "simple" or "hierarchical". */
     public String modelType;
     /** Directory name in which to write the topic model data
-     * (can be same as corpus or lemma, or a level lower to contain all files in one place) */
+     * (can be same as corpus or lemma, or a level lower to contain all files in one place). */
     public String dataDir;
-    /** Model specifications for the topic model (main topic model if "hierarchical" module used) */
+    /** Model specifications for the topic model (main topic model if "hierarchical" module used). */
     public ModelSpecs mainModel;
-    /** Model specifications for the sub topic model (if "hierarchical" module used) */
+    /** Model specifications for the sub topic model (if "hierarchical" module used). */
     public ModelSpecs subModel;
-    /** Filename for the JSON document file generated, not including directory */
+    /** Filename for the JSON document file generated, not including directory. */
     public String documentOutput;
     /** Filename for the CSV similarity file, not including directory:
      * similarity between main and sub topic model if "hierarchical" module used,
-     * optional, defaults to "" */
+     * optional, defaults to "". */
     public String similarityOutput;
     /** Flag for writing similarity between main and sub topic model if "hierarchical" module used,
-     * defaults to false if similarityOuput = "" */
+     * defaults to false if similarityOuput = "". */
     public boolean outputSimilarity = false;
     /** Filename for the CSV assignment file, not including directory:
-     * assignment between main and sub topics if "hierarchical" module used,
-     * optional, defaults to "" */
+     * assignment between main and sub topics if "hierarchical" module used, optional, defaults to "". */
     public String assignmentOutput;
     /** Flag for writing assignment between main and sub topics if "hierarchical" module used,
-     * defaults to false if assignmentOutput = "" */
+     * defaults to false if assignmentOutput = "". */
     public boolean outputAssignment = false;
     /** Maximum number of times a sub topic gets assigned to main topics, if "hierarchical" module used,
-     * optional, defaults to 1 */
+     * optional, defaults to 1. */
     public int maxAssign;
     /** Type of similarity to use for assignment, if "hierarchical" module used, optional, defaults to "Perceptual".
      * "Perceptual" will use the topics' labels overlap. "Document" will use the topics' distribution in document space. */
