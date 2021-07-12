@@ -3,33 +3,36 @@ package P0_Project;
 import org.json.simple.JSONObject;
 
 /**
- * Class for Label Index module project specification
+ * Class reading and validating parameters for the Label Indexing module ({@link P4_Analysis.LabelIndex.LabelIndexing}).
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class LabelIndexModuleSpecs {
 
-    /** Filename to document data (from Topic Model module), optional, defaults to "" */
+    /** Filename to document data (from Topic Model or Document Infer modules), optional, defaults to "". */
     public String documents;
-    /** Flag for indexing documents, defaults to false if documents = "" */
+    /** Flag for indexing documents, defaults to false if documents = "". */
     public boolean indexDocuments = false;
-    /** Flag for indexing documents not referenced in topics, optional, defaults to false */
+    /** Flag for indexing documents not referenced in topics, optional, defaults to false. */
     public boolean useAllDocuments = false;
-    /** Flag for indexing labels from documents not indexed from topics, optional, defaults to false */
+    /** Flag for indexing labels from documents not indexed from topics, optional, defaults to false. */
     public boolean useAllLabels = false;
-    /** Filename to main topic data (from Topic Model module) */
+    /** Filename to main topic data (from Topic Model or Document Infer modules). */
     public String mainTopics;
-    /** Filename to sub topic data (from Topic Model module), optional, defaults to "" */
+    /** Filename to sub topic data (from Topic Model or Document Infer modules), optional, defaults to "". */
     public String subTopics;
-    /** Flag for indexing sub topics, defaults to false if subTopics = "" or modelType meta-parameter = "simple" */
+    /** Flag for indexing sub topics, defaults to false if subTopics = "" or modelType meta-parameter = "simple". */
     public boolean indexSubTopics = false;
-    /** Filename for the JSON index file generated */
+    /** Filename for the JSON index file generated. */
     public String indexOutput;
 
     /**
-     * Constructor: reads the specification from the "indexLabels" entry in the project file
-     * @param specs JSON object attached to "indexLabels"
+     * Constructor: parses and validates the given JSON object to set parameters.
+     * @param specs JSON object attached to "indexLabels" in project file.
+     * @param metaSpecs Meta-parameter specifications.
      */
     public LabelIndexModuleSpecs(JSONObject specs, MetaSpecs metaSpecs) {
-
         documents = (String) specs.getOrDefault("documents", "");
         indexDocuments = documents.length() > 0;
         if(indexDocuments){
@@ -37,8 +40,8 @@ public class LabelIndexModuleSpecs {
             useAllDocuments = (boolean) specs.getOrDefault("useAllDocuments", false);
             useAllLabels = (boolean) specs.getOrDefault("useAllLabels", false);
         }
-        mainTopics = metaSpecs.getDataDir() + (String) specs.get("mainTopics");
-        indexOutput = metaSpecs.getOutputDir() + (String) specs.get("output");
+        mainTopics = metaSpecs.getDataDir() + specs.get("mainTopics");
+        indexOutput = metaSpecs.getOutputDir() + specs.get("output");
         subTopics = (String) specs.getOrDefault("subTopics", "");
         indexSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(indexSubTopics){
