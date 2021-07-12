@@ -1,6 +1,7 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -77,6 +78,12 @@ public class CompareDistributionsModuleSpecs {
         if(output.length() > 0){
             output = metaSpecs.getDataDir() + output;
             outputAll = true;
+        }
+
+        // validations
+        if(numWordId < 1){
+            LogPrint.printNote("Compare Distribution module: numWordId must be greater than 0, parameter was set to "+numWordId+", will be set to 1");
+            numWordId = 1;
         }
     }
 }

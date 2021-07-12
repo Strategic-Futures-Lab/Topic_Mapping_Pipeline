@@ -1,5 +1,6 @@
 package P0_Project;
 
+import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 /**
@@ -44,6 +45,16 @@ public class TopicClusterModuleSpecs {
         if(groupingSubTopics){
             subTopics = metaSpecs.getDataDir() + subTopics;
             subOutput = metaSpecs.getDataDir() + specs.get("subOutput");
+        }
+
+        // validations
+        if(!linkageMethod.equals("avg") && !linkageMethod.equals("min") && !linkageMethod.equals("max")){
+            LogPrint.printNote("Topic Clustering module: linkageMethod must be either \"avg\", \"min\" or \"max\", parameter was set to \""+linkageMethod+"\", will be set to default: \"avg\"");
+            linkageMethod = "avg";
+        }
+        if(clusters < 1){
+            LogPrint.printNote("Topic Clustering module: clusters must be greater than 0, parameter was set to "+clusters+", will be set to default: 1");
+            clusters = 1;
         }
     }
 }

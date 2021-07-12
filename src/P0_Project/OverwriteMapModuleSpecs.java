@@ -3,7 +3,7 @@ package P0_Project;
 import org.json.simple.JSONObject;
 
 /**
- * Class reading an validating parameters for the Overwrite Map module ({@link P5_TopicMapping.OverwriteMap}).
+ * Class reading and validating parameters for the Overwrite Map module ({@link P5_TopicMapping.OverwriteMap}).
  *
  * @author P. Le Bras
  * @version 1

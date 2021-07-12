@@ -137,11 +137,11 @@ public class HierarchicalTopicModelling {
      * Method calculating the similarities between sub and main topics.
      */
     private void GetAndSetModelSimilarity(){
-        if(assignType.equals("Document")){
+        if(assignType.equals("document")){
             SimilarityMatrix = TopicsSimilarity.DocumentCosineSimilarity(SubTopicModel.getModelledDocuments(),
                     MainTopicModel.getModelledDocuments());
         } else {
-            // Default similarity measure "Perceptual"
+            // Default similarity measure "perceptual"
             SimilarityMatrix = TopicsSimilarity.PerceptualSimilarity(SubTopicModel.getModelledTopics(),
                     MainTopicModel.getModelledTopics());
         }

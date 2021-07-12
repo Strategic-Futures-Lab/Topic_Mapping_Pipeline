@@ -1,6 +1,7 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -80,5 +81,11 @@ public class TopicModelExportModuleSpecs {
                 metaSpecs.docFields :
                 JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
+
+        // validations
+        if(numWordId < 1){
+            LogPrint.printNote("Topic Model Export module: numWordId must be greater than 0, parameter was set to "+numWordId+", will be set to 1");
+            numWordId = 1;
+        }
     }
 }

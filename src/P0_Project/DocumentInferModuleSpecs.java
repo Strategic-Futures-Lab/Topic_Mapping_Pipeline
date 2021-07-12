@@ -1,6 +1,7 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -92,6 +93,12 @@ public class DocumentInferModuleSpecs {
             docFields = metaSpecs.useMetaDocFields() ?
                     metaSpecs.docFields :
                     JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
+
+            // validations
+            if(numWordId < 1){
+                LogPrint.printNote("Infer Document module: numWordId must be greater than 0, parameter was set to "+numWordId+", will be set to 1");
+                numWordId = 1;
+            }
         }
 
         documentsOutput = (String) specs.getOrDefault("documentsOutput", "");
@@ -113,6 +120,12 @@ public class DocumentInferModuleSpecs {
         if(mergeSubTopics){
             subTopicsOutput = outputDir + subTopicsOutput;
             subTopics = modelDir + specs.get("subTopics");
+        }
+
+        // validations
+        if(iterations < 1){
+            LogPrint.printNote("Infer Document module: iterations must be greater than 0, parameter was set to "+iterations+", will be set to default: 100");
+            iterations = 100;
         }
     }
 }

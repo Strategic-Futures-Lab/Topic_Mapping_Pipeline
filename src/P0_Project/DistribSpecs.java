@@ -1,12 +1,13 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 
 /**
- * Class reading an validating parameters for a topic distribution.
+ * Class reading and validating parameters for a topic distribution.
  *
  * @author P. Le Bras
  * @version 2
@@ -21,9 +22,10 @@ public class DistribSpecs {
     public String fieldSeparator = "";
     /** Filename of JSON distribution file to generate, optional, defaults to "": save in topic data. */
     public String output = "";
-    /** Maximum number of unique value weights to save, optional, defaults to -1: all values,
-     * if sets to 0: nothing saved but the total topic weight. */
-    public int topPerTopic = -1;
+    /** Maximum number of unique value weights to save, optional, defaults to 0: nothing saved but the total topic weight,
+     * if set to 0: nothing saved but the total topic weight
+     * if set to -1: include all the distribution domain. */
+    public int topPerTopic = 0;
     /** Name of field in docData to weight distribution, has to be numerical values,
      * optional, defaults to "": use 1.0 (document count). */
     public String valueField = "";
@@ -52,7 +54,7 @@ public class DistribSpecs {
         if(output.length() > 0){
             output = metaSpecs.getOutputDir() + output;
         }
-        topPerTopic = Math.toIntExact((long) specs.getOrDefault("topPerTopic", (long) -1));
+        topPerTopic = Math.toIntExact((long) specs.getOrDefault("topPerTopic", (long) 0));
         valueField = (String) specs.getOrDefault("valueField", "");
         domainDataFile = (String) specs.getOrDefault("domainData", "");
         if(domainDataFile.length() > 0){
@@ -61,6 +63,12 @@ public class DistribSpecs {
             domainDataId = (String) specs.getOrDefault("domainDataId", "id");
             domainDataFields = JSONIOWrapper.getStringMap((JSONObject) specs.get("domainDataFields"));
 
+        }
+
+        // validations
+        if(topPerTopic < -1){
+            LogPrint.printNote("Topic Distribution module: topPerTopic must be greater than -1, parameter was set to "+topPerTopic+", will be set to default: 0 (only include totals per topics)");
+            topPerTopic = 0;
         }
     }
 

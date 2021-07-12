@@ -122,7 +122,7 @@ public class ModelSpecs {
      */
     private int validate(String name, int value, int minimum){
         if(value < minimum){
-            LogPrint.printNote("Topic Model module: "+name+" must be greater than "+(minimum-1)+", parameter was set to "+value+", will be set to: "+minimum);
+            LogPrint.printNote("Topic Model module: "+name+" must be greater than "+(minimum-1)+", parameter was set to "+value+", will be set to "+minimum);
             return minimum;
         }
         return value;
@@ -138,7 +138,7 @@ public class ModelSpecs {
      */
     private int validate(String name, int value, int minimum, int maximum){
         if(value < minimum || value > maximum){
-            LogPrint.printNote("Topic Model module: "+name+" must be greater than "+(minimum-1)+" and less than "+(maximum+1)+", parameter was set to "+value+", will be set to: "+minimum);
+            LogPrint.printNote("Topic Model module: "+name+" must be greater than "+(minimum-1)+" and less than "+(maximum+1)+", parameter was set to "+value+", will be set to "+minimum);
             return minimum;
         }
         return value;
@@ -153,7 +153,7 @@ public class ModelSpecs {
      */
     private double validatePositive(String name, double value, double defValue){
         if(value <= 0){
-            LogPrint.printNote("Topic Model module: "+name+" must be greater than 0, parameter was set to "+value+", will be set to: "+defValue);
+            LogPrint.printNote("Topic Model module: "+name+" must be greater than 0, parameter was set to "+value+", will be set to "+defValue);
             return defValue;
         }
         return value;
