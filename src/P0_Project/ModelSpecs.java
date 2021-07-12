@@ -1,9 +1,10 @@
 package P0_Project;
 
+import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 /**
- * Class reading an validating parameters for one topic model.
+ * Class reading and validating parameters for one topic model.
  *
  * @author P. Le Bras, A. Vidal.
  * @version 2
@@ -79,8 +80,10 @@ public class ModelSpecs {
         if(!similarityOutput.equals("")){
             outputSimilarity = true;
             similarityOutput = dataDir + similarityOutput;
+            numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
+            // validation
+            numWordId = validate("numWordId", numWordId, 1);
         }
-        numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
         llOutput = (String) specs.getOrDefault("llOutput", "");
         if(!llOutput.equals("")){
             outputLL = true;
@@ -96,6 +99,76 @@ public class ModelSpecs {
         if(!topicLogOutput.equals("")){
             outputTopicLog = true;
             topicLogOutput = dataDir + topicLogOutput;
+        }
+
+        // validations
+        validateError("topics", topics, 1);
+        words = validate("words", words, 3);
+        docs = validate("docs", docs, 3);
+        iterations = validate("iterations", iterations, 50);
+        iterationsMax = validate("iterationsMax", iterationsMax, 0);
+        seedIndex = validate("seed", seedIndex, 0, 99);
+        optimInterval = validate("optimInterval", optimInterval, 0);
+        alphaSum = validatePositive("alphaSum", alphaSum, 1.0);
+        beta = validatePositive("beta", beta, 0.01);
+    }
+
+    /**
+     * Method validating that an integer parameter is greater than a given minimum.
+     * @param name Name of parameter to check.
+     * @param value Value of parameter to check.
+     * @param minimum Minimum value to check against.
+     * @return Value corrected if necessary.
+     */
+    private int validate(String name, int value, int minimum){
+        if(value < minimum){
+            LogPrint.printNote("Topic Model module: "+name+" must be greater than "+(minimum-1)+", parameter was set to "+value+", will be set to: "+minimum);
+            return minimum;
+        }
+        return value;
+    }
+
+    /**
+     * Method validating that an integer parameter is greater than a given minimum and less than a given maximum.
+     * @param name Name of parameter to check.
+     * @param value Value of parameter to check.
+     * @param minimum Minimum value to check against.
+     * @param maximum Maximum value to check against.
+     * @return Value corrected if necessary.
+     */
+    private int validate(String name, int value, int minimum, int maximum){
+        if(value < minimum || value > maximum){
+            LogPrint.printNote("Topic Model module: "+name+" must be greater than "+(minimum-1)+" and less than "+(maximum+1)+", parameter was set to "+value+", will be set to: "+minimum);
+            return minimum;
+        }
+        return value;
+    }
+
+    /**
+     * Method validating that an double parameter is greater than 0.
+     * @param name Name of parameter to check.
+     * @param value Value of parameter to check.
+     * @param defValue Default value to correct the parameter to.
+     * @return Value corrected if necessary.
+     */
+    private double validatePositive(String name, double value, double defValue){
+        if(value <= 0){
+            LogPrint.printNote("Topic Model module: "+name+" must be greater than 0, parameter was set to "+value+", will be set to: "+defValue);
+            return defValue;
+        }
+        return value;
+    }
+
+    /**
+     * Method validating that an integer parameter is greater than a given minimum, prints an error and halt process otherwise.
+     * @param name Name of parameter to check.
+     * @param value Value of parameter to check.
+     * @param minimum Minimum value to check against.
+     */
+    private void validateError(String name, int value, int minimum){
+        if(value < minimum){
+            LogPrint.printNoteError("Topic Model module: "+name+" must be greater than "+(minimum-1)+", parameter was set to "+value);
+            System.exit(1);
         }
     }
 }

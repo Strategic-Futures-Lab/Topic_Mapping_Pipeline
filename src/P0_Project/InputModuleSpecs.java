@@ -1,6 +1,7 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
@@ -44,10 +45,14 @@ public class InputModuleSpecs{
      */
     public InputModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         module = (String) specs.get("module");
-        source = metaSpecs.getSourceDir() + (String) specs.get("source");
-        output = metaSpecs.getDataDir() + (String) specs.get("output");
+        source = metaSpecs.getSourceDir() + specs.get("source");
+        output = metaSpecs.getDataDir() + specs.get("output");
         if(module.equals("PDF") || module.equals("TXT")) {
             wordsPerDoc = Math.toIntExact((long) specs.getOrDefault("wordsPerDoc", (long) -1));
+            if(wordsPerDoc < -1){
+                LogPrint.printNote("Input module: wordsPerDoc must be greater than -2, parameter was set to "+wordsPerDoc+", will be set to default: -1 (no document split)");
+                wordsPerDoc = -1;
+            }
         }
         if(module.equals("CSV") || module.equals("GTR")) {
             fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));

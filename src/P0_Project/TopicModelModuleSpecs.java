@@ -1,5 +1,6 @@
 package P0_Project;
 
+import PY_Helper.LogPrint;
 import org.json.simple.JSONObject;
 
 /**
@@ -40,8 +41,8 @@ public class TopicModelModuleSpecs {
     /** Maximum number of times a sub topic gets assigned to main topics, if "hierarchical" module used,
      * optional, defaults to 1. */
     public int maxAssign;
-    /** Type of similarity to use for assignment, if "hierarchical" module used, optional, defaults to "Perceptual".
-     * "Perceptual" will use the topics' labels overlap. "Document" will use the topics' distribution in document space. */
+    /** Type of similarity to use for assignment, if "hierarchical" module used, optional, defaults to "perceptual".
+     * "perceptual" will use the topics' labels overlap. "document" will use the topics' distribution in document space. */
     public String assignmentType;
 
     /**
@@ -50,11 +51,11 @@ public class TopicModelModuleSpecs {
      * @param metaSpecs Meta-parameter specifications.
      */
     public TopicModelModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
-        lemmas = metaSpecs.getDataDir() + (String) specs.get("lemmas");
+        lemmas = metaSpecs.getDataDir() + specs.get("lemmas");
         modelType = metaSpecs.useMetaModelType() ?
                 metaSpecs.modelType :
                 (String) specs.getOrDefault("modelType", specs.get("module"));
-        dataDir = metaSpecs.getDataDir() + (String) specs.getOrDefault("dataDir", specs.getOrDefault("outputDir", ""));
+        dataDir = metaSpecs.getDataDir() + specs.getOrDefault("dataDir", specs.getOrDefault("outputDir", ""));
         if(!dataDir.endsWith("/")){
             dataDir = dataDir + "/";
         }
@@ -64,7 +65,7 @@ public class TopicModelModuleSpecs {
             subModel = new ModelSpecs((JSONObject) specs.get("subModel"), dataDir);
             JSONObject hierarchySpecs = (JSONObject) specs.get("hierarchy");
             maxAssign = Math.toIntExact((long) hierarchySpecs.getOrDefault("maxAssign", (long) 1));
-            assignmentType = (String) hierarchySpecs.getOrDefault("assignmentType", "Perceptual");
+            assignmentType = (String) hierarchySpecs.getOrDefault("assignmentType", "perceptual");
             similarityOutput = (String) hierarchySpecs.getOrDefault("modelSimOutput", "");
             if(!similarityOutput.equals("")){
                 outputSimilarity = true;
@@ -75,6 +76,20 @@ public class TopicModelModuleSpecs {
                 outputAssignment = true;
                 assignmentOutput = dataDir + assignmentOutput;
             }
+
+            if(maxAssign < 1){
+                LogPrint.printNote("Topic Model module: maxAssign must be greater than 0, parameter was set to "+maxAssign+", will be set to default: 1");
+                maxAssign = 1;
+            }
+            if(!assignmentType.equals("perceptual") && !assignmentType.equals("document")){
+                LogPrint.printNote("Topic Model module: assignmentType must be either \"perceptual\" or \"document\", parameter was set to \""+assignmentType+"\", will be set to default: \"perceptual\"");
+                assignmentType = "perceptual";
+            }
+        }
+
+        if(!modelType.equals("simple") && !modelType.equals("hierarchical")){
+            LogPrint.printNoteError("Parameter Error: Topic Model module: modelType must be either \"simple\" of \"hierarchical\", parameter was set to "+modelType);
+            System.exit(1);
         }
     }
 }

@@ -1,6 +1,7 @@
 package P0_Project;
 
 import PX_Data.JSONIOWrapper;
+import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -50,5 +51,14 @@ public class LemmatiseModuleSpecs {
         minDocLemmas = Math.toIntExact((long) specs.getOrDefault("minDocLemmas", specs.getOrDefault("minLemmas", (long) 1)));
         minLemmaCount = Math.toIntExact((long) specs.getOrDefault("minLemmaCount", (long) 0));
         output = metaSpecs.getDataDir() + specs.get("output");
+
+        if(minDocLemmas < 1){
+            LogPrint.printNote("Lemmatise module: minDocLemmas must be greater than 0, parameter was set to "+minDocLemmas+", will be set to default: 1");
+            minDocLemmas = 1;
+        }
+        if(minLemmaCount < 0){
+            LogPrint.printNote("Lemmatise module: minLemmaCount must be greater than -1, parameter was set to "+minLemmaCount+", will be set to default: 0");
+            minLemmaCount = 0;
+        }
     }
 }
