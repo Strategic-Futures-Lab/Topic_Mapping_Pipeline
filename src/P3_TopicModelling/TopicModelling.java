@@ -351,7 +351,6 @@ public class TopicModelling {
                     entry.getValue().setMainTopicFullWordDistances(doc.fullTopicDistances);
                     entry.getValue().setMainTopicCompWordDistances(doc.compTopicDistances);
                 }
-                System.out.println("test");
             }
         }
         LogPrint.printCompleteStep();
