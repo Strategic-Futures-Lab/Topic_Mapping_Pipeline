@@ -4,7 +4,7 @@ The Topic Mapping Pipeline reads textual data, models it into topics, analyses t
 
 Click [here](doc/index.md) to access the documentation.
 
-Make sure sure to read the [Getting Started guide](doc/GettingStarted.md).
+Make sure to read the [Getting Started guide](doc/GettingStarted.md).
 
 This work has been developed and maintained by the [Strategic Futures Lab](https://strategicfutures.org/).
 It is licensed under a [Creative Commons Attribution 4.0 International  License][cc-by-nc].
