@@ -63,7 +63,7 @@ The Infer Documents module entry in the project file should have the following s
 - \* These paths are relative to the [data directory](MetaParameters.md);
 - \** This path is relative to the [source directory](MetaParameters.md);
 - \*** These paths are relative to `modelDir`;
-- \**** This default value implies a non-hierarchical model, but can be overwritten by the [model type meta-parameter](MetaParameters.md);
+- \**** This default value implies a non-hierarchical model, if the [model type meta-parameter](MetaParameters.md) is set to `hierarchical`, a path must be provided;
 - \***** These paths are relative to `outputDir`;
 - \****** This gets overwritten by the [document fields meta-parameter](MetaParameters.md) (if set).
 

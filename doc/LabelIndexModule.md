@@ -38,7 +38,7 @@ The Label Index module entry in the project file should have the following struc
 | `useAllLabels` | Flag for indexing all labels (in documents), not just the top labels of each topic  | Yes, only needed if `documents` is set | `false` (only index top labels in topics) |
 | `output` | Path to the output index JSON file *** | No | |
 - \* These paths are relative to the [data directory](MetaParameters.md);
-- \** This default value implies a non-hierarchical model, but can be overwritten by the [model type meta-parameter](MetaParameters.md);
+- \** This default value implies a non-hierarchical model, if the [model type meta-parameter](MetaParameters.md) is set to `hierarchical`, a path must be provided;
 - \*** This path is relative to the [output directory](MetaParameters.md).
 
 ## Output

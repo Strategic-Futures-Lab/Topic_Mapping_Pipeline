@@ -1,10 +1,14 @@
-# Topic Mapping Pipeline - 2020 [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+# Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+
+[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](TopicClusteringModule.md)
+
+---
+
 # Topic Distribution Module
 
-The Topic Distribution module is the seventh module of the Topic Mapping pipeline, and second in the `P4_Analysis` 
-package. It reads the topic weights in documents to get customised topic distribution(s) across documents (or document fields),
-e.g. authors, organisations, years, etc. It then saves this information either in the ***Topic JSON files***, or in separate
-***Distribution JSON file***.
+The Topic Distribution module reads the topic weights in documents to get customised topic distribution(s) across 
+documents (or document fields), e.g. authors, organisations, years, etc. It then saves this information either in 
+the ***Topic JSON files***, or in separate ***Distribution JSON file***.
 
 The use of this module is optional, but required for using the [*BubbleMap* Topic Mapping module](TopicMapping.md) later.
 
@@ -18,9 +22,9 @@ The Topic Distribution module entry in the project file should have the followin
 {...
   "distributeTopics": {
     "documents": "path",
-    "mainTopics" | "topics" : "path",
+    "topics" | "mainTopics" : "path",
     "subTopics": "path",
-    "mainOutput": "path",
+    "output" | "mainOutput": "path",
     "subOutput": "path",
     "distributions": [ ... ]
   },
@@ -30,12 +34,12 @@ The Topic Distribution module entry in the project file should have the followin
 | --- | --- | --- | --- |
 | `documents` | Path to the documents JSON file * | No | |
 | `topics` or `mainTopics` (if the model is hierarchical) | Path to the input (main) topics JSON file * | No | |
-| `subTopics` | Path to the input sub topics JSON file * | Required if the model is hierarchical | `""`** |
+| `subTopics` | Path to the input sub topics JSON file * | Required if the model is hierarchical | `""` ** |
 | `output` or `mainOutput` (if the model is hierarchical) | Path to the (main) topics JSON file generated * | No | |
 | `subOutput` | Path to the sub topics JSON file generated * | Required if the model is hierarchical | |
 | `distributions` | List of specifications for the distributions to estimate, see below | No | |
 - \* These paths are relative to the [data directory](MetaParameters.md);
-- \** This default value implies a non-hierarchical model, but can be overwritten by the [model type meta-parameter](MetaParameters.md) (if set).
+- \** This default value implies a non-hierarchical model, if the [model type meta-parameter](MetaParameters.md) is set to `hierarchical`, a path must be provided.
 
 The Topic Distribution module allows for multiple distributions to be calculated simultaneously. Each distribution
 is specified using an object in the `distributions` field shown above. A distribution specification has the following
@@ -58,20 +62,20 @@ structure:
 ```
 | Name | Description | Optional | Default |
 | --- | --- | --- | --- |
-| `fieldName` | Document's key in their `docData` to set the distribution domain, eg, institution | Yes | `""` (No domain) |
-| `fieldSeparator` | String to split `docData` to get unique domain entries, eg, an author field containing `Name1 & Name2` split into `Name1` and `Name2` using `-` | Yes | `""` (No Split) |
+| `fieldName` | Document's key in their `docData` to set the distribution domain, eg, `"institution"` or `"author"` | Yes | `""` (No domain) |
+| `fieldSeparator` | String to split `docData` to get unique domain entries, eg, an author field containing `Name1 & Name2` split into `Name1` and `Name2` using `&` | Yes | `""` (No Split) |
 | `valueField` | Document's key in their `docData` to weight the distribution values, eg, money. | Yes | `""` (No weighting) |
 | `topPerTopic` | Number of domain entries to keep per topic in the distribution data | Yes | `-1` (Keep all entries) |
 | `output` | Path to the separate distribution JSON file where the distribution data should be saved * | Yes | `""` (Save in the topics JSON file) |
 | `domainData` | Path to a CSV file containing additional data about the distribution domain ** | Yes | `""` (No additional data added) |
 | `domainDataId` | Column name, in `domainData`, containing the same `fieldName` identifier for the domain entry | Yes | `"id"` |
 | `domainDataFields` | List of columns, from `domainData`, to include: `{"a":"A"}` -> include column `A` under key `a` | Yes | Empty object |
-- \* This path is relative to the [data directory](MetaParameters.md). If unset or empty, the distribution data will
+- \* This path is relative to the [output directory](MetaParameters.md). If unset or empty, the distribution data will
   be saved with the topics, in the topic JSON file(s) instead.
 - \** This path is relative to the [source directory](MetaParameters.md). Note that this additional domain data is
   only saved if the distribution is set to be written in a seperate distribution JSON file.
 
-The image below illustrates the results of using som of these options.
+The image below illustrates the results of using some of these options.
 
 ![Distribution Options](img/distributions.png)
 
@@ -154,7 +158,6 @@ set to `-1`).
 
 [< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](TopicClusteringModule.md)
 
----
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].
 

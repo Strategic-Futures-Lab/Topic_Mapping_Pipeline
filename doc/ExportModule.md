@@ -45,7 +45,7 @@ The Export Model module entry in the project file should have the following stru
 | `outputCSV` | Path to the document CSV file listing documents and their weights in both main and sub topics, note that is the model is non-hierarchical this is equivalent to `mainOutputCSV` **** | Yes | `""` (no export) |
 | `numWordId` | Number of labels used to identify topics in document CSV files | Yes | `3` |
 - \* These paths are relative to the [data directory](MetaParameters.md);
-- \** This default value implies a non-hierarchical model, but can be overwritten by the [model type meta-parameter](MetaParameters.md);
+- \** This default value implies a non-hierarchical model, if the [model type meta-parameter](MetaParameters.md) is set to `hierarchical`, a path must be provided;
 - \*** This gets overwritten by the [document fields meta-parameter](MetaParameters.md) (if set);
 - \**** These paths are relative to the [output directory](MetaParameters.md).
 
