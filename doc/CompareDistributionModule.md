@@ -10,13 +10,15 @@ The Compare Distribution module reads two sets of topics (same topics, one set o
 documents) and produces a comparison of their distributions. Each comparison is saved with the new topics, in their 
 ***Topic JSON files*** , and optionally on separate ***Comparison CSV file(s)*** for summary.
 
-The use of this module is optional, and only fits with the use of the [Document Inference module](InferenceModule.md).
+The use of this module is optional, and only fits with the use of the [Document Inference module](InferenceModule.md):
+with new documents having their topic distribution inferred, topics have new weights.
 
 The Compare Distribution module is contained in the `P4_Analysis.TopicDistribution` package, in the
 `CompareDistributions.java` class.
 
 ## Specifications
 
+The Compare Distribution module entry in the project file should have the following structure:
 ```json5
 {...
   "compareDistributions": {

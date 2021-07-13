@@ -15,7 +15,8 @@
         - [Topic Distribution](TopicDistributionModule.md)
             - [Compare Distribution](CompareDistributionModule.md)
         - [Topic Clustering](TopicClusteringModule.md)
-    - [Topic Mapping](TopicMapping.md)
+    - [Topic Mapping](TopicMappingModule.md)
+        - [Overwrite Map](OverwriteMapModule.md)
 
 ## References
 

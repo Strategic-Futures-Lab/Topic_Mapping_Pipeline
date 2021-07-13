@@ -48,7 +48,7 @@ Examples of final data files:
 - inferred documents files from the [Document Inference Module](InferenceModule.md);
 - label index from the [Label Index Module](LabelIndexModule.md);
 - separate distribution files from the [Distribution Module](TopicDistributionModule.md);
-- map data files from the [Mapping Modules](TopicMapping.md).
+- map data files from the [Mapping Modules](TopicMappingModule.md).
 
 All of these parameters are optional, and will only come to complete the filenames used at module level with the 
 structure: 

@@ -1,6 +1,6 @@
 # Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
-[< Previous](CompareDistributionModule.md) | [Index](index.md) | [Next >](TopicMapping.md)
+[< Previous](CompareDistributionModule.md) | [Index](index.md) | [Next >](TopicMappingModule.md)
 
 ---
 
@@ -109,7 +109,7 @@ Each sub topic group contains:
 
 ---
 
-[< Previous](CompareDistributionModule.md) | [Index](index.md) | [Next >](TopicMapping.md)
+[< Previous](CompareDistributionModule.md) | [Index](index.md) | [Next >](TopicMappingModule.md)
 
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].

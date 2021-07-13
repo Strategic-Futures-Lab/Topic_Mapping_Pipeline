@@ -10,7 +10,7 @@ The Topic Distribution module reads the topic weights in documents to get custom
 documents (or document fields), e.g. authors, organisations, years, etc. It then saves this information either in 
 the ***Topic JSON files***, or in separate ***Distribution JSON file***.
 
-The use of this module is optional, but required for using the [*BubbleMap* Topic Mapping module](TopicMapping.md) later.
+The use of this module is optional, but required for using the [*BubbleMap* Topic Mapping module](TopicMappingModule.md) later.
 
 The Topic Distribution module is contained in the `P4_Analysis.TopicDistribution` package, in the
 `TopicDistribution.java` class.
