@@ -45,7 +45,7 @@ public class OverwriteMapModuleSpecs {
     public OverwriteMapModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         mainDistribFile = metaSpecs.getDataDir() + specs.getOrDefault("mainDistribution", specs.get("distribution"));
         mainMapFile = metaSpecs.getSourceDir() + specs.getOrDefault("mainMap", specs.get("map"));
-        mainMapOutput = metaSpecs.getOutputDir() + specs.getOrDefault("mainMapOutput", specs.get("output"));
+        mainMapOutput = metaSpecs.getOutputDir() + specs.getOrDefault("mainMapOutput", specs.get("mapOutput"));
         subDistribFile = (String) specs.getOrDefault("subDistribution", "");
         if(subDistribFile.length() > 0){
             subDistribFile = metaSpecs.getDataDir() + subDistribFile;

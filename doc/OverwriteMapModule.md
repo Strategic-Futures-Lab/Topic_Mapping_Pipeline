@@ -23,9 +23,9 @@ The Overwrite Map module entry in the project file should have the following str
     "distribution" | "mainDistribution": "path",
     "subDistribution": "path",
     "map" | "mainMap": "path",
-    "subMap": "path",
-    "output" | "mainOutput": "path",
-    "subOutput": "path",
+    "subMaps": "path",
+    "mapOutput" | "mainMapOutput": "path",
+    "subMapsOutput": "path",
     "sizeName": "distributionName",
     "overwriteLabels": false
   },
@@ -37,9 +37,9 @@ The Overwrite Map module entry in the project file should have the following str
 | `distribution` or `mainDistribution` (if the model is hierarchical) | Path to the distributed (main) topics JSON file, with updated topics * | No | |
 | `subDistribution` | Path to the sub topics JSON file, with updated topics * | Required if the model is hierarchical | `""` ** |
 | `map` or `mainMap` (if the model is hierarchical) | Path to the existing (main) map JSON file *** | No | |
-| `subMap` | Path to the existing sub map JSON file *** | Required if the model is hierarchical | |
-| `output` or `mainOutput` (if the model is hierarchical) | Path to the output new (main) map JSON file **** | No | |
-| `subOutput` | Path to the output new sub map JSON file **** | Required if the model is hierarchical | |
+| `subMaps` | Path to the existing sub map JSON file *** | Required if the model is hierarchical | |
+| `mapOutput` or `mainMapOutput` (if the model is hierarchical) | Path to the output new (main) map JSON file **** | No | |
+| `subMapsOutput` | Path to the output new sub map JSON file **** | Required if the model is hierarchical | |
 | `sizeName` | Name of the topic distribution to use to update topic size data in the map | Yes | `""` (no update) |
 | `overwriteLabels` | Flag for updating the topics' top labels in the map | Yes | `false` (no update) |
 - \* These paths are relative to the [data directory](MetaParameters.md);
