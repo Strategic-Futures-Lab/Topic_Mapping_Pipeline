@@ -81,6 +81,10 @@ public class CompareDistributionsModuleSpecs {
         }
 
         // validations
+        if(distributions.length < 1){
+            LogPrint.printNoteError("Compare Distribution module: No distribution to compare provided.");
+            System.exit(1);
+        }
         if(numWordId < 1){
             LogPrint.printNote("Compare Distribution module: numWordId must be greater than 0, parameter was set to "+numWordId+", will be set to 1");
             numWordId = 1;

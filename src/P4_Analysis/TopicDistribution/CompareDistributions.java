@@ -138,6 +138,7 @@ public class CompareDistributions {
             output = specs.output;
         }
         if(distributionNames.length < 1){
+            // should have been checked in specs class
             LogPrint.printNoteError("Error: No distributions to compare.");
             System.exit(1);
         }

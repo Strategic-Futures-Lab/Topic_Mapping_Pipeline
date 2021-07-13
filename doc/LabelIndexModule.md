@@ -32,7 +32,7 @@ The Label Index module entry in the project file should have the following struc
 | Name | Description | Optional | Default |
 | --- | --- | --- | --- |
 | `topics` or `mainTopics` (if the model is hierarchical) | Path to the (main) topics JSON file * | No | |
-| `subTopics` | Path to the sub topics JSON file * | Yes | `""` (no indexing of labels in sub topics) ** |
+| `subTopics` | Path to the sub topics JSON file * | Required if the model is hierarchical | `""` (no indexing of labels in sub topics) ** |
 | `documents` | Path to the documents JSON file * | Yes | `""` (no indexing of labels in documents) |
 | `useAllDocuments` | Flag for indexing labels from all documents, not just the top documents of each topic | Yes, only needed if `documents` is set | `false` (only index from top documents in topics) |
 | `useAllLabels` | Flag for indexing all labels (in documents), not just the top labels of each topic  | Yes, only needed if `documents` is set | `false` (only index top labels in topics) |

@@ -1,6 +1,6 @@
 # Topic Mapping Pipeline [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
-[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](TopicClusteringModule.md)
+[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](CompareDistributionModule.md)
 
 ---
 
@@ -156,7 +156,7 @@ set to `-1`).
 
 ---
 
-[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](TopicClusteringModule.md)
+[< Previous](LabelIndexModule.md) | [Index](index.md) | [Next >](CompareDistributionModule.md)
 
 This work is licensed under a [Creative Commons Attribution 4.0 International
 License][cc-by-nc].

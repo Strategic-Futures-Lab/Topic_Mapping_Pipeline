@@ -13,6 +13,7 @@
     - Analysis
         - [Label Indexing](LabelIndexModule.md)
         - [Topic Distribution](TopicDistributionModule.md)
+            - [Compare Distribution](CompareDistributionModule.md)
         - [Topic Clustering](TopicClusteringModule.md)
     - [Topic Mapping](TopicMapping.md)
 
