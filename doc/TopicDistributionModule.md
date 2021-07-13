@@ -35,8 +35,8 @@ The Topic Distribution module entry in the project file should have the followin
 | `documents` | Path to the documents JSON file * | No | |
 | `topics` or `mainTopics` (if the model is hierarchical) | Path to the input (main) topics JSON file * | No | |
 | `subTopics` | Path to the input sub topics JSON file * | Required if the model is hierarchical | `""` ** |
-| `output` or `mainOutput` (if the model is hierarchical) | Path to the (main) topics JSON file generated * | No | |
-| `subOutput` | Path to the sub topics JSON file generated * | Required if the model is hierarchical | |
+| `output` or `mainOutput` (if the model is hierarchical) | Path to the output distributed (main) topics JSON * | No | |
+| `subOutput` | Path to the output distributed sub topics * | Required if the model is hierarchical | |
 | `distributions` | List of specifications for the distributions to estimate, see below | No | |
 - \* These paths are relative to the [data directory](MetaParameters.md);
 - \** This default value implies a non-hierarchical model, if the [model type meta-parameter](MetaParameters.md) is set to `hierarchical`, a path must be provided.

@@ -41,8 +41,8 @@ The Topic Clustering module entry in the project file should have the following 
 | `subTopics` | Path to the sub topics JSON file * | Required if the model is hierarchical | `""` ** |
 | `linkageMethod` | Method to use when merging items during hierarchical clustering, see below | Yes | `"avg"` |
 | `clusters` | Number of clusters to identify in the set of (main) topics | Yes | `1` |
-| `output` or `mainOutput` | Path to the clustered (main) topics JSON file to generate * | No | |
-| `subOutput` | Path to the clustered sub topics JSON file to generate * |  Required if the model is hierarchical | |
+| `output` or `mainOutput` (if the model is hierarchical) | Path to the output clustered (main) topics JSON file to generate * | No | |
+| `subOutput` | Path to the output clustered sub topics JSON file to generate * |  Required if the model is hierarchical | |
 - \* These paths are relative to the [data directory](MetaParameters.md);
 - \** This default value implies a non-hierarchical model, if the [model type meta-parameter](MetaParameters.md) is set to `hierarchical`, a path must be provided.
 
