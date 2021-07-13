@@ -45,7 +45,7 @@ public class LabelIndexModuleSpecs {
             useAllDocuments = (boolean) specs.getOrDefault("useAllDocuments", false);
             useAllLabels = (boolean) specs.getOrDefault("useAllLabels", false);
         }
-        mainTopics = metaSpecs.getDataDir() + specs.get("mainTopics");
+        mainTopics = metaSpecs.getDataDir() + specs.getOrDefault("mainTopics", specs.get("topics"));
         indexOutput = metaSpecs.getOutputDir() + specs.get("output");
         subTopics = (String) specs.getOrDefault("subTopics", "");
         indexSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
