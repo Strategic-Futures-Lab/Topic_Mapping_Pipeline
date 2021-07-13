@@ -10,7 +10,7 @@
 
 1. You will need to have a Java Runtime Environment (JRE) installed on your machine, version 11 at least.
 
-2. Download the pipeline's JAR, in the `build` folder.
+2. Download the pipeline's JAR from the [release page](https://github.com/strategicfutureslab/Topic_Mapping_Pipeline/releases).
 
 3. Create a `project.json` file:
     - follow the rest of this guide for more details, starting with the [System Overview](SystemOverview.md);
@@ -47,8 +47,9 @@ The `-Xmx` option lets you adjust the maximum heap size of the application, in t
     - don't forget to instruct your IDE to take `project.json` as parameter;
     - you can also instruct your IDE to adjust the maximum heap size  of the application using the `-Xmx` option.
    
-5. When setting up the build process, to create an updated JAR of the pipeline, you should instruct your IDE to extract
-dependencies to the target JAR file.
+5. When setting up the build process, to create an updated JAR of the pipeline:
+    - you should instruct your IDE to extract dependencies to the target JAR file;
+    - make sure to publish the [new release](https://github.com/strategicfutureslab/Topic_Mapping_Pipeline/releases/new).
    
 6. The `.idea` folder and `Topic_Mapping_Pipeline.iml` file should allow you to set up the project with IntelliJ IDEA.
 
