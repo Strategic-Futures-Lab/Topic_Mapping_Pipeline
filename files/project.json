@@ -1,14 +1,16 @@
 {
   "run": {
-    "input": false,
-    "lemmatise": false,
-    "model": false,
+    "input": true,
+    "lemmatise": true,
+    "model": true,
     "inferDocuments": false,
-    "exportTopicModel": false,
-    "indexLabels": false,
+    "exportTopicModel": true,
+    "indexLabels": true,
     "distributeTopics": true,
-    "clusterTopics": false,
-    "mapTopics": false
+    "compareDistributions": false,
+    "clusterTopics": true,
+    "mapTopics": true,
+    "overwriteMap": false
   },
   "metaParameters": {
     "projectDir": "files/",
@@ -23,73 +25,81 @@
     "source": "test_train.csv",
     "fields": {"title": "Title", "university": "Organisation", "abstract": "Abstract",
       "authors": "Authors", "money":  "Money", "date": "Date"},
-    "wordsPerDoc" : -1,
     "output": "corpus_train.json"
   },
   "lemmatise": {
     "corpus": "corpus_train.json",
     "textFields": ["title", "abstract"],
-    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "stopWords": [],
+    "stopPhrases": [],
     "minLemmas": 10,
-    "removeLowCounts": 0,
+    "minLemmaCount": 0,
     "output": "lemmas_train.json"
   },
   "model": {
     "lemmas": "lemmas_train.json",
-    "modelType": "hierarchical",
-    "dataDir": "topicModel/",
+    "outputDir": "topicModel/",
+    "documentOutput": "documents.json",
     "mainModel": {
       "topics": 20,
-      "words": 5,
-      "docs": 0,
-      "iterations": 100,
-      "serialise": "trainedMainModel.ser",
+      "words": 10,
+      "docs": 20,
+      "iterations": 1000,
+      "iterationsMax": 100,
       "topicOutput": "mainTopics.json",
+      "serialise": "trainedMainModel.ser",
       "topicSimOutput": "mainTopicsSim.csv",
-      "numWordId": 5,
       "llOutput": "mainLL.json",
-      "topicLogOutput": "mainTopicLog.json",
-      "alphaSum": 0.5,
-      "beta": 0.1
+      "wordDistances": true
     },
     "subModel": {
-      "topics": 50,
-      "words": 5,
-      "docs": 0,
-      "iterations": 100,
-      "serialise": "trainedSubModel.ser",
+      "topics": 20,
+      "words": 10,
+      "docs": 20,
+      "iterations": 1000,
+      "iterationsMax": 100,
       "topicOutput": "subTopics.json",
+      "serialise": "trainedSubnModel.ser",
       "topicSimOutput": "subTopicsSim.csv",
-      "numWordId": 5
+      "llOutput": "subLL.json",
+      "wordDistances": true
     },
-    "documentOutput": "documents.json",
     "hierarchy": {
-      "modelSimOutput": "modelSim.csv",
+      "assignmentType" :  "perceptual",
       "maxAssign": 1,
-      "maxAssignMain": 1,
-      "maxAssignSub": 3,
-      "assignmentType" :  "Perceptual",
+      "modelSimOutput": "modelSim.csv",
       "assignmentOutput": "assignment.csv"
     }
   },
-  "inferDocuments": { },
+  "inferDocuments": {
+    "lemmas": "lemmas_infer.json",
+    "modelDir": "previous/topicModel/",
+    "mainModel": "trainedMainModel.ser",
+    "subModel": "trainedSubModel.ser",
+    "documents": "documents.json",
+    "subTopics": "subTopics.json",
+    "mainTopics": "mainTopics.json",
+    "iterations": 1000,
+    "outputDir": "inferred/",
+    "csvOutput": "documents.csv",
+    "documentsOutput": "documents.json",
+    "mainTopicsOutput": "mainTopics.json",
+    "subTopicsOutput": "subTopics.json"
+  },
   "exportTopicModel": {
     "mainTopics": "topicModel/mainTopics.json",
     "subTopics": "topicModel/subTopics.json",
     "documents": "topicModel/documents.json",
-    "docFields": ["title", "abstract", "university", "money", "authors", "date"],
     "mainOutput": "mainModel.json",
     "subOutput": "subModel.json",
-    "outputCSV": "model.csv",
-    "numWordId": 5
+    "outputCSV": "model.csv"
   },
   "indexLabels": {
     "documents": "topicModel/documents.json",
     "mainTopics": "topicModel/mainTopics.json",
     "subTopics": "topicModel/subTopics.json",
     "useAllDocuments": false,
-    "useAllLabels": false,
+    "useAllLabels": true,
     "output": "labelIndex.json"
   },
   "distributeTopics": {
@@ -110,6 +120,14 @@
       "output": "distributionDate.json"
     }]
   },
+  "compareDistributions": {
+    "mainTopics": "mainTopics_distrib.json",
+    "subTopics": "subTopics_distrib.json",
+    "previousMainTopics": "previous/mainTopics_distrib.json",
+    "previousSubTopics": "previous/subTopics_distrib.json",
+    "distributions": ["-"],
+    "output": "topics_distribComp.csv"
+  },
   "clusterTopics": {
     "mainTopics": "mainTopics_distrib.json",
     "subTopics": "subTopics_distrib.json",
@@ -126,5 +144,15 @@
     "bubbleScale": [20, 40],
     "mainOutput": "mainMap.json",
     "subOutput": "subMaps.json"
+  },
+  "overwriteMap": {
+    "mainDistribution": "mainTopics_distrib_infer.json",
+    "subDistribution": "subTopics_distrib_infer.json",
+    "mainMap": "previous/mainMap.json",
+    "subMaps": "previous/subMaps.json",
+    "mainMapOutput": "mainMap_infer.json",
+    "subMapsOutput": "subMaps_infer.json",
+    "sizeName": "-",
+    "overwriteLabels": false
   }
 }
