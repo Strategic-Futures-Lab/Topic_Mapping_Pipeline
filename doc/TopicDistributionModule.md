@@ -64,15 +64,16 @@ structure:
 | --- | --- | --- | --- |
 | `fieldName` | Document's key in their `docData` to set the distribution domain, eg, `"institution"` or `"author"` | Yes | `""` (No domain) |
 | `fieldSeparator` | String to split `docData` to get unique domain entries, eg, an author field containing `Name1 & Name2` split into `Name1` and `Name2` using `&` | Yes | `""` (No Split) |
-| `valueField` | Document's key in their `docData` to weight the distribution values, eg, money. | Yes | `""` (No weighting) |
-| `topPerTopic` | Number of domain entries to keep per topic in the distribution data | Yes | `-1` (Keep all entries) |
-| `output` | Path to the separate distribution JSON file where the distribution data should be saved * | Yes | `""` (Save in the topics JSON file) |
-| `domainData` | Path to a CSV file containing additional data about the distribution domain ** | Yes | `""` (No additional data added) |
+| `valueField` | Document's key in their `docData` to weight the distribution values, eg, money | Yes | `""` (No weighting) |
+| `topPerTopic` | Number of domain entries to keep per topic in the distribution data * | Yes | `0` (Only save total per topic) |
+| `output` | Path to the separate distribution JSON file where the distribution data should be saved ** | Yes | `""` (Save in the topics JSON file) |
+| `domainData` | Path to a CSV file containing additional data about the distribution domain *** | Yes | `""` (No additional data added) |
 | `domainDataId` | Column name, in `domainData`, containing the same `fieldName` identifier for the domain entry | Yes | `"id"` |
 | `domainDataFields` | List of columns, from `domainData`, to include: `{"a":"A"}` -> include column `A` under key `a` | Yes | Empty object |
-- \* This path is relative to the [output directory](MetaParameters.md). If unset or empty, the distribution data will
+- \* Setting `topPerTopic` to `-1` will save all entries in the distribution domain for each topic, setting it to `0` will only save the totals for each topic;
+- \** This path is relative to the [output directory](MetaParameters.md). If unset or empty, the distribution data will
   be saved with the topics, in the topic JSON file(s) instead.
-- \** This path is relative to the [source directory](MetaParameters.md). Note that this additional domain data is
+- \*** This path is relative to the [source directory](MetaParameters.md). Note that this additional domain data is
   only saved if the distribution is set to be written in a seperate distribution JSON file.
 
 The image below illustrates the results of using some of these options.
