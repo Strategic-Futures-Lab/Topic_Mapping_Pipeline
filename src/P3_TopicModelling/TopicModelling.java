@@ -12,10 +12,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -447,6 +444,13 @@ public class TopicModelling {
         LogPrint.printNewStep("Saving topic similarities", 0);
         File file = new File(simOutput);
         file.getParentFile().mkdirs();
+        try {
+            // this will erase the content of the file before appending data to it.
+            new FileWriter(file.getPath(), false).close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
+            e.printStackTrace();
+        }
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
         try(CsvAppender appender = writer.append(file, StandardCharsets.UTF_8)){

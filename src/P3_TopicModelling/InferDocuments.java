@@ -12,10 +12,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -418,6 +415,13 @@ public class InferDocuments {
         }
         File file = new File(csvOutput);
         file.getParentFile().mkdirs();
+        try {
+            // this will erase the content of the file before appending data to it.
+            new FileWriter(file.getPath(), false).close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
+            e.printStackTrace();
+        }
         CsvWriter csvWriter = new CsvWriter();
         csvWriter.setAlwaysDelimitText(true);
         try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){

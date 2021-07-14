@@ -11,6 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -287,6 +288,13 @@ public class ExportTopicModel {
         }
         File file = new File(filename);
         file.getParentFile().mkdirs();
+        try {
+            // this will erase the content of the file before appending data to it.
+            new FileWriter(file.getPath(), false).close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
+            e.printStackTrace();
+        }
         CsvWriter csvWriter = new CsvWriter();
         csvWriter.setAlwaysDelimitText(true);
         try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){
@@ -351,6 +359,13 @@ public class ExportTopicModel {
         }
         File file = new File(outputCSV);
         file.getParentFile().mkdirs();
+        try {
+            // this will erase the content of the file before appending data to it.
+            new FileWriter(file.getPath(), false).close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
+            e.printStackTrace();
+        }
         CsvWriter csvWriter = new CsvWriter();
         csvWriter.setAlwaysDelimitText(true);
         try(CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)){

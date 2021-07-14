@@ -10,6 +10,8 @@ import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,6 +227,13 @@ public class HierarchicalTopicModelling {
 
         File file = new File(similarityOutput);
         file.getParentFile().mkdirs();
+        try {
+            // this will erase the content of the file before appending data to it.
+            new FileWriter(file.getPath(), false).close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
+            e.printStackTrace();
+        }
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
 
@@ -259,6 +268,13 @@ public class HierarchicalTopicModelling {
 
         File file = new File(assignmentOutput);
         file.getParentFile().mkdirs();
+        try {
+            // this will erase the content of the file before appending data to it.
+            new FileWriter(file.getPath(), false).close();
+        } catch (IOException e) {
+            LogPrint.printNoteError("Error while saving similarity matrix\n");
+            e.printStackTrace();
+        }
         CsvWriter writer = new CsvWriter();
         writer.setAlwaysDelimitText(true);
 
