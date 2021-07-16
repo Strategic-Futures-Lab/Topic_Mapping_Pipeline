@@ -38,8 +38,8 @@ The Export Model module entry in the project file should have the following stru
 | `subTopics` | Path to the sub topics JSON file * | Required if the model is hierarchical | `""` ** |
 | `documents` | Path to the documents JSON file * | No | |
 | `docFields` | List of keys, in documents' `docData`, to export on file (JSON and CSV) *** | Yes | `[]` |
-| `output` or `mainOutput` (if the model is hierarchical) | Path to the (main) topics JSON file exported **** | No | |
-| `subOutput` | Path to the sub topics JSON file exported **** | Required if the model is hierarchical | |
+| `output` or `mainOutput` (if the model is hierarchical) | Path to the (main) topics JSON file exported **** | Yes | `""` (no export) |
+| `subOutput` | Path to the sub topics JSON file exported **** | Yes | `""` (no export) |
 | `mainOutputCSV` | Path to the document CSV file listing documents and their weights in main topics **** | Yes | `""` (no export) |
 | `subOutputCSV` | Path to the document CSV file listing documents and their weights in sub topics **** | Yes | `""` (no export) |
 | `outputCSV` | Path to the document CSV file listing documents and their weights in both main and sub topics, note that is the model is non-hierarchical this is equivalent to `mainOutputCSV` **** | Yes | `""` (no export) |

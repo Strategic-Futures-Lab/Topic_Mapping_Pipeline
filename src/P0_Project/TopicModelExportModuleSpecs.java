@@ -16,8 +16,10 @@ public class TopicModelExportModuleSpecs {
     /** Filename of the main topic JSON file
      * (from {@link P3_TopicModelling.TopicModelling} or {@link P3_TopicModelling.InferDocuments}). */
     public String mainTopics;
-    /** Filename for the JSON main topic model file generated. */
+    /** Filename for the JSON main topic model file generated, optional, defaults to "". */
     public String mainOutput;
+    /** Flag for exporting main model as JSON, defaults to false if mainOutput = "". */
+    public boolean exportMainTopicsJSON;
     /** Filename for the CSV main topic model file generated, optional, defaults to "". */
     public String mainOutputCSV;
     /** Flag for exporting main model as CSV, defaults to false if mainOutputCSV = "". */
@@ -28,8 +30,11 @@ public class TopicModelExportModuleSpecs {
     public String subTopics;
     /** Flag for exporting sub model, defaults to false if subTopics = "". */
     public boolean exportSubTopics;
-    /** Filename for the JSON sub topic model file generated, only required if subTopics != "". */
+    /** Filename for the JSON sub topic model file generated, only needed if subTopics != "",
+     * optional, defaults to "". */
     public String subOutput;
+    /** Flag for exporting sub model as JSON, defaults to false if subOutput = "". */
+    public boolean exportSubTopicsJSON;
     /** Filename for the CSV sub topic model file generated, only needed if subTopics != "",
      * optional, defaults to "". */
     public String subOutputCSV;
@@ -54,7 +59,11 @@ public class TopicModelExportModuleSpecs {
      */
     public TopicModelExportModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         mainTopics = metaSpecs.getDataDir() + specs.getOrDefault("mainTopics", specs.get("topics"));
-        mainOutput = metaSpecs.getOutputDir() + specs.getOrDefault("mainOutput", specs.get("output"));
+        mainOutput = (String) specs.getOrDefault("mainOutput", specs.getOrDefault("output", ""));
+        exportMainTopicsJSON = mainOutput.length() > 0;
+        if(exportMainTopicsJSON){
+            mainOutput = metaSpecs.getOutputDir() + mainOutput;
+        }
         mainOutputCSV = (String) specs.getOrDefault("mainOutputCSV", "");
         exportMainTopicsCSV = mainOutputCSV.length() > 0;
         if(exportMainTopicsCSV){
@@ -64,7 +73,11 @@ public class TopicModelExportModuleSpecs {
         exportSubTopics = metaSpecs.useMetaModelType() ? metaSpecs.doHierarchical() : subTopics.length() > 0;
         if(exportSubTopics){
             subTopics = metaSpecs.getDataDir() + subTopics;
-            subOutput = metaSpecs.getOutputDir() + specs.get("subOutput");
+            subOutput = (String) specs.getOrDefault("subOutput", "");
+            exportSubTopicsJSON = subOutput.length() > 0;
+            if(exportSubTopicsJSON){
+                subOutput = metaSpecs.getOutputDir() + subOutput;
+            }
             subOutputCSV = (String) specs.getOrDefault("subOutputCSV", "");
             exportSubTopicsCSV = subOutputCSV.length() > 0;
             if(exportSubTopicsCSV){

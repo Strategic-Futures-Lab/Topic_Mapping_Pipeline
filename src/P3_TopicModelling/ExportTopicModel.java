@@ -32,6 +32,8 @@ public class ExportTopicModel {
 
     /** Filename of the input main topic JSON file. */
     private String mainTopicsFile;
+    /** Boolean flag for exporting the main topics on a JSON file. */
+    private boolean exportMainTopicsJSON = false;
     /** Filename of the output main topic JSON file. */
     private String mainOutput;
     /** Boolean flag for exporting the main topic distributions on a CSV file. */
@@ -42,6 +44,8 @@ public class ExportTopicModel {
     private boolean exportSubTopics = false;
     /** Filename of the input sub topic JSON file. */
     private String subTopicsFile;
+    /** Boolean flag for exporting the sub topics on a JSON file. */
+    private boolean exportSubTopicsJSON = false;
     /** Filename of the output sub topic JSON file. */
     private String subOutput;
     /** Boolean flag for exporting the sub topic distributions on a CSV file. */
@@ -107,7 +111,10 @@ public class ExportTopicModel {
     private void ProcessArguments(TopicModelExportModuleSpecs exportSpecs){
         LogPrint.printNewStep("Processing arguments", 0);
         mainTopicsFile = exportSpecs.mainTopics;
-        mainOutput = exportSpecs.mainOutput;
+        exportMainTopicsJSON = exportSpecs.exportMainTopicsJSON;
+        if(exportMainTopicsJSON){
+            mainOutput = exportSpecs.mainOutput;
+        }
         exportMainTopicsCSV = exportSpecs.exportMainTopicsCSV;
         if(exportMainTopicsCSV){
             mainOutputCSV = exportSpecs.mainOutputCSV;
@@ -115,7 +122,10 @@ public class ExportTopicModel {
         exportSubTopics = exportSpecs.exportSubTopics;
         if(exportSubTopics){
             subTopicsFile = exportSpecs.subTopics;
-            subOutput = exportSpecs.subOutput;
+            exportSubTopicsJSON = exportSpecs.exportSubTopicsJSON;
+            if(exportSubTopicsJSON){
+                subOutput = exportSpecs.subOutput;
+            }
             exportSubTopicsCSV = exportSpecs.exportSubTopicsCSV;
             if(exportSubTopicsCSV){
                 subOutputCSV = exportSpecs.subOutputCSV;
@@ -130,8 +140,10 @@ public class ExportTopicModel {
         numWordId = exportSpecs.numWordId;
         LogPrint.printCompleteStep();
         // Logging options
+        if(exportMainTopicsJSON) LogPrint.printNote("Exporting main topic model to JSON");
         if(exportMainTopicsCSV) LogPrint.printNote("Exporting main topic model to CSV");
         if(exportSubTopics) LogPrint.printNote("Exporting sub topics");
+        if(exportSubTopicsJSON) LogPrint.printNote("Exporting sub topic model to JSON");
         if(exportSubTopicsCSV) LogPrint.printNote("Exporting sub topics to CSV");
         if(exportMergedTopicsCSV) LogPrint.printNote("Exporting main and sub topics merged in one CSV file");
         if(exportMainTopicsCSV || exportSubTopicsCSV || exportMergedTopicsCSV) LogPrint.printNote("Identifying topics with "+numWordId+" labels");
@@ -226,36 +238,46 @@ public class ExportTopicModel {
     }
 
     /**
-     * Method writing the model(s) on JSON file(s).
+     * Method launching the save processes.
      * Each model is a list of topics, each topic has top words and top documents with data fields.
      */
     private void SaveModel(){
         LogPrint.printNewStep("Saving model", 0);
-        JSONObject root = new JSONObject();
-        for(Map.Entry<String, Object> m: JSONIOWrapper.getJSONObjectMap(documentsMetadata).entrySet()){
-            mainTopicsMetadata.put(m.getKey(), m.getValue());
+        SaveJSON();
+        SaveCSV();
+    }
+
+    /**
+     * Method writing the model(s) on JSON file(s).
+     * Each model is a list of topics, each topic has top words and top documents with data fields.
+     */
+    private void SaveJSON(){
+        if(exportMainTopicsJSON){
+            JSONObject root = new JSONObject();
+            for(Map.Entry<String, Object> m: JSONIOWrapper.getJSONObjectMap(documentsMetadata).entrySet()){
+                mainTopicsMetadata.put(m.getKey(), m.getValue());
+            }
+            root.put("metadata", mainTopicsMetadata);
+            JSONArray topics = new JSONArray();
+            for(Map.Entry<String, TopicIOWrapper> t: mainTopics.entrySet()){
+                topics.add(t.getValue().toJSON());
+            }
+            root.put("topics", topics);
+            JSONIOWrapper.SaveJSON(root, mainOutput, 1);
         }
-        root.put("metadata", mainTopicsMetadata);
-        JSONArray topics = new JSONArray();
-        for(Map.Entry<String, TopicIOWrapper> t: mainTopics.entrySet()){
-            topics.add(t.getValue().toJSON());
-        }
-        root.put("topics", topics);
-        JSONIOWrapper.SaveJSON(root, mainOutput, 1);
-        if(exportSubTopics){
-            root = new JSONObject();
+        if(exportSubTopicsJSON){
+            JSONObject root = new JSONObject();
             for(Map.Entry<String, Object> m: JSONIOWrapper.getJSONObjectMap(documentsMetadata).entrySet()){
                 subTopicsMetadata.put(m.getKey(), m.getValue());
             }
             root.put("metadata", subTopicsMetadata);
-            topics = new JSONArray();
+            JSONArray topics = new JSONArray();
             for(Map.Entry<String, TopicIOWrapper> t: subTopics.entrySet()){
                 topics.add(t.getValue().toJSON());
             }
             root.put("topics", topics);
             JSONIOWrapper.SaveJSON(root, subOutput, 1);
         }
-        SaveCSV();
     }
 
     /**
