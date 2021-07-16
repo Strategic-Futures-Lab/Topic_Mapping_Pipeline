@@ -25,7 +25,7 @@ The Export Model module entry in the project file should have the following stru
     "output" | "mainOutput": "path",
     "subOutput": "path",
     "mainOutputCSV": "path",
-    "subOutputCSV": "parh",
+    "subOutputCSV": "path",
     "outputCSV": "path",
     "numWordId": 3
   },
