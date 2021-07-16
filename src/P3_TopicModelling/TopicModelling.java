@@ -368,14 +368,16 @@ public class TopicModelling {
                 if(count >= nWords) break;
                 Pair<String, Double> label = topic.getLabel(l);
                 topicWords.add(new TopicIOWrapper.JSONTopicWeight(label.getLeft(), label.getRight()));
+                count++;
             }
             // Get the top nDocs documents
             List<TopicIOWrapper.JSONTopicWeight> topicDocs = new ArrayList<>();
             count = 0;
             for(int d = 0; d < topic.nDocs; d++){
-                if(count > nDocs) break;
+                if(count >= nDocs) break;
                 Pair<String, Double> doc = topic.getDoc(d);
                 topicDocs.add(new TopicIOWrapper.JSONTopicWeight(doc.getLeft(), doc.getRight()));
+                count++;
             }
             // Create the new topic and add to our list
             Topics.put(Integer.toString(t), new TopicIOWrapper(Integer.toString(t), t, topicWords, topicDocs));
