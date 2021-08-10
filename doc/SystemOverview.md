@@ -32,7 +32,7 @@ and saving the topic and document data in JSON files;
 model), to infer the topic distributions of those documents;
 - ***Export Model*** (`P3_TopicModelling` package) reading the model data outputs and generating concise model JSON 
 files, as well as complete CSV files;
-- ***Label Index*** (`P4_Analysis.LabelIndex` package) reading the topic data and generating an index of their labels;
+- ***Label Index*** (`P4_Analysis.LabelIndex` package) reading the topic data and generating an index of their labels. This will be used in the 'search' function of the interface;
 - ***Topic Distribution*** (`P4_Analysis.TopicDistribution` package) reading the topic and document data to calculate
 the distribtution of topics over specific the documents (including per field and/or using specific values);
 - ***Compare Distributions*** (`P4_Analysis.TopicDistribution` package) reading two sets of topic distribution data
