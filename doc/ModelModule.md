@@ -178,7 +178,7 @@ Then the file has a `documents` list, with one object per document with the foll
 - otherwise, the document has been used in the topic model(s) and now has topic weights data:
     - `mainTopicDistribution` the list of (main) topic weights (regardless of which module was uses);
     - `subTopicDistribution` the list of sub topic weights (if the Hierarchical Topic Modelling module was used);
-    - if `wordDistances` was set to true:
+    - if `wordDistances` was set to true ( This is where the Hellinger Scores are saved):
       - `mainTopicFullWordDistances` the list of word distances between (main) topics and the full document;
       - `mainTopicCompWordDistances` the list of word distances between (main) topics and their related document's components;
       - `subTopicFullWordDistances` the list of word distances between sub topics and the full document (if the Hierarchical Topic Modelling module was used);
