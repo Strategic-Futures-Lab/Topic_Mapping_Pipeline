@@ -7,7 +7,6 @@ import PX_Data.TopicIOWrapper;
 import PY_Helper.LogPrint;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
-import org.apache.commons.logging.Log;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
