@@ -27,11 +27,11 @@ hs_err_pid*
 out/**
 lib/**
 *.iml
-files/output/**
+files/output/
 files/projects/**
-javadoc/**
+javadoc/
+src/test
 
 # Added by Ana
-files/**
 local/**
 
