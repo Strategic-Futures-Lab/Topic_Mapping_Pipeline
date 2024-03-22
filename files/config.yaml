@@ -1,34 +1,40 @@
 # Meta parameters
 project:
   directories:
-    project: files/
+    project: files
     sources: projects/test/
     data: output/tmp/
     output: output/
   docFields: [ title, abstract, university, money, authors, date ]
-  modelType: single
+  modelType: 12
 
 # run order
 run:
   - csvInput1
   - csvInput2
-  - ldaModel
+#  - ldaModel
 
 # CSV load module
 csvInput1:
   run: false
-  type: CSVInput
+  type: inputCSV
   source: documents.csv
   output: corpus_1.json
+  fields:
+    title: title
+    abstract: abstract
 
 csvInput2:
   run: false
-  type: CSVInput
+  type: inputCSV
   source: otherDocs.csv
   output: corpus_2.json
+  fields:
+    title: title
+    abstract: abstract
 
 
 # Modelling module
-ldaModel:
-  run: false
-  type: LDAModel
+#ldaModel:
+#  run: false
+#  type: LDAModel

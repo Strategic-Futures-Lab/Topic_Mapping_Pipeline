@@ -22,7 +22,6 @@ public class ProjectConfig {
     }
 
     private static ProjectConfig PROJECT_CONFIG;
-    private static final String MODULE_NAME = "Config Parser";
     private HashMap<String, Object> projectParameters;
     private ArrayList<String> workflow;
     private HashMap<String, Object> modulesParameters;
@@ -51,12 +50,29 @@ public class ProjectConfig {
      */
     public HashMap<String, Object> getModulesParameters(){ return modulesParameters; }
 
+    /**
+     * Returns the parameters for a specific module to run
+     * @param moduleName The module to query
+     * @return The module's parameters
+     * @throws ParseException If the module's parameters don't parse has a map
+     */
+    public HashMap<String, Object> getModuleParameters(String moduleName) throws ParseException{
+        return parseMap(modulesParameters.get(moduleName), moduleName);
+    }
+
     private static ProjectConfig getInstance(){
         if(PROJECT_CONFIG == null) PROJECT_CONFIG = new ProjectConfig();
         return PROJECT_CONFIG;
     }
 
-    private static HashMap<String, Object> parseMap(Object o, String cfg) throws ParseException{
+    /**
+     * Parses an object into a map String -> Object
+     * @param o The object to parse
+     * @param cfg The config key being parsed (for logging error)
+     * @return The parsed map
+     * @throws ParseException If the object is not a map, or one of the key is not a String
+     */
+    public static HashMap<String, Object> parseMap(Object o, String cfg) throws ParseException{
         HashMap<String, Object> res = new HashMap<>();
         if(o instanceof HashMap<?,?>){
             HashMap map = (HashMap) o;
@@ -64,7 +80,7 @@ public class ProjectConfig {
                 if(k instanceof String){
                     res.put((String)k, map.get(k));
                 } else {
-                    throw new ParseException("key in \""+cfg+"\" needs to be a string");
+                    throw new ParseException("Key in \""+cfg+"\" needs to be a string");
                 }
             }
         } else {
@@ -73,7 +89,14 @@ public class ProjectConfig {
         return res;
     }
 
-    private static ArrayList<String> parseList(Object o , String cfg) throws ParseException{
+    /**
+     * Parses an object into an array of Strings
+     * @param o The object to parse
+     * @param cfg The configuration key being parsed (for logging error)
+     * @return The parsed array
+     * @throws ParseException If the object is not an ArrayList, or one of the items is not a String
+     */
+    public static ArrayList<String> parseList(Object o , String cfg) throws ParseException{
         ArrayList<String> res = new ArrayList<>();
         if(o instanceof ArrayList<?>){
             ArrayList list = (ArrayList) o;
@@ -81,13 +104,73 @@ public class ProjectConfig {
                 if(s instanceof String){
                     res.add((String) s);
                 } else {
-                    throw new ParseException("item in \""+cfg+"\" needs to be a string");
+                    throw new ParseException("Item in \""+cfg+"\" needs to be a string");
                 }
             }
         } else {
             throw new ParseException("Config \""+cfg+"\" needs to be a list of strings");
         }
         return res;
+    }
+
+    /**
+     * Parses an object into a String
+     * @param o The object to parse
+     * @param cfg The configuration key being parsed (for logging error)
+     * @return The parsed String
+     * @throws ParseException If the object is not a String
+     */
+    public static String parseString(Object o, String cfg) throws ParseException{
+        if(o instanceof String){
+            return (String) o;
+        } else {
+            throw new ParseException("Value for \""+cfg+"\" needs to be a string");
+        }
+    }
+
+    /**
+     * Parses an object into an integer
+     * @param o The object to parse
+     * @param cfg The configuration key being parsed (for logging error)
+     * @return The parsed integer
+     * @throws ParseException If the object is not an integer
+     */
+    public static int parseInt(Object o, String cfg) throws ParseException{
+        if(o instanceof Integer){
+            return (Integer) o;
+        } else {
+            throw new ParseException("Value for \""+cfg+"\" needs to be an integer");
+        }
+    }
+
+    /**
+     * Parses an object into a double
+     * @param o The object to parse
+     * @param cfg The configuration key being parsed (for logging error)
+     * @return The parsed double
+     * @throws ParseException If the object is not a double
+     */
+    public static double parseDouble(Object o, String cfg) throws ParseException{
+        if(o instanceof Double){
+            return (Double) o;
+        } else {
+            throw new ParseException("Value for \""+cfg+"\" needs to be a double");
+        }
+    }
+
+    /**
+     * Parses an object into a boolean
+     * @param o The object to parse
+     * @param cfg The configuration key being parsed (for logging error)
+     * @return The parsed boolean
+     * @throws ParseException If the object is not a boolean
+     */
+    public static boolean parseBoolean(Object o, String cfg) throws ParseException{
+        if(o instanceof Boolean){
+            return (Boolean) o;
+        } else {
+            throw new ParseException("Value for \""+cfg+"\" needs to be a boolean");
+        }
     }
 
     private static void parseConfig(HashMap<String, Object> configMap) throws ParseException{
@@ -116,7 +199,6 @@ public class ProjectConfig {
                 Console.tick();
             }
         }
-        Console.success("Configuration file parsed successfully");
     }
 
     /**
@@ -126,8 +208,7 @@ public class ProjectConfig {
      * @throws ParseException If the configuration file doesn't conform to expectations
      * @throws FileNotFoundException If the filename provided doesn't refer to an existing file
      */
-    public static ProjectConfig readConfigFromYAML(String filename) throws ParseException, FileNotFoundException{
-        Console.submoduleStart(MODULE_NAME);
+    public static ProjectConfig readConfigFromYAML(String filename) throws ParseException, FileNotFoundException, ClassCastException{
         Yaml yaml = new Yaml();
         ProjectConfig config = ProjectConfig.getInstance();
         try {
@@ -141,8 +222,10 @@ public class ProjectConfig {
         } catch (ParseException e){
             Console.error(e.getMessage());
             throw e;
+        } catch (ClassCastException e){
+            Console.error("Expected a YAML compatible file, with key/value pairs");
+            throw e;
         }
-        Console.submoduleComplete(MODULE_NAME);
         return config;
     }
 
