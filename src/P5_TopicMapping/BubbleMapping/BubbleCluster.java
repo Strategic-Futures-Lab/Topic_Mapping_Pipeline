@@ -46,10 +46,10 @@ public class BubbleCluster {
                 // check if there is a cluster split between the leaf and the cluster parent
                 BubbleNode tmp = leaf;
                 double clusterSplit = 0.0;
-                do{
+                while(tmp != clusterParent) {
                     tmp = (BubbleNode) tmp.getParent();
                     if(tmp.isClusterRoot()){ clusterSplit = 1.0; break; }
-                } while(tmp != clusterParent);
+                }
                 // setup padding values
                 double contourParent = clusterParent.isClusterRoot() ? 0.5 : 0.0;
                 double forceParent = (leaf != clusterParent && clusterParent.isClusterRoot()) ? 1.0 : 0.0;
