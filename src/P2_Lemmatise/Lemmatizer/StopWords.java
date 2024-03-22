@@ -101,7 +101,7 @@ public class StopWords {
      */
     public static final List<String> STOPCHARS = List.of("`", "\"", ",", "'", "'s", "#", "£", "$", "&", "!", "-", "/",
             "\\", "|", "?", "%", "^", "(", ")", "=", "+" , "_", "@", "~", ";", ":", "*", " ", "", "\"\"", "``", "''",
-            ",", "/", "\\", "\t", "\n", "\r");
+            ",", "/", "\\", "\t", "\n", "\r", " ");
 
     /**
      * List of other common words to exclude, eg HTML tags accidentally scraped, encoded URLs, etc.

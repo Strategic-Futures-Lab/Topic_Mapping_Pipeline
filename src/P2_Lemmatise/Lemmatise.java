@@ -51,6 +51,8 @@ public class Lemmatise {
     private List<String> stopWords;
     /** List of custom stop phrases to exclude from document texts. */
     private List<String> stopPhrases;
+    /** List of custom words to protect from regex processing. */
+    private HashMap<String, String> protect;
     /** Minimum number of lemmas a document must have. */
     private int minDocLemmas;
     /** Minimum amount of time a lemma must be used (across all documents) to be kept. */
@@ -96,6 +98,11 @@ public class Lemmatise {
         docFields = Arrays.asList(lemmaSpecs.docFields);
         stopWords = Arrays.asList(lemmaSpecs.stopWords);
         stopPhrases = Arrays.asList(lemmaSpecs.stopPhrases);
+        protect = new HashMap<>();
+        for(String initial: Arrays.asList((lemmaSpecs.protect))){
+            String processed = initial.toLowerCase().replaceAll("\\W", " ");
+            protect.put(processed, initial.toLowerCase());
+        };
         minDocLemmas = lemmaSpecs.minDocLemmas;
         minLemmaCount = lemmaSpecs.minLemmaCount;
         LogPrint.printCompleteStep();
@@ -195,8 +202,13 @@ public class Lemmatise {
 
         // removing special characters
         rawText = rawText.replaceAll("\\n", " "); // returns
-        rawText = rawText.replaceAll("\\r", " "); // carraige returns
+        rawText = rawText.replaceAll("\\r", " "); // carriage returns
         rawText = rawText.replaceAll("\\W", " "); // non word characters
+        for(Map.Entry<String,String> p: protect.entrySet()){       // reverse protected words
+            String processed = p.getKey();
+            String initial = p.getValue();
+            rawText = rawText.replaceAll("(^|\\s)"+processed+"($|\\s)", " "+initial+" ");
+        }
         rawText = rawText.trim().replaceAll(" +", " "); //Trim all white space to single spaces
 
         // lemmatising
@@ -274,6 +286,11 @@ public class Lemmatise {
             stopPhrasesArray.add(p);
         }
         metadata.put("stopPhrases", stopPhrasesArray);
+        JSONArray protectArray = new JSONArray();
+        for(String p: protect.values()){
+            protectArray.add(p);
+        }
+        metadata.put("protected", protectArray);
         if(minLemmaCount > 0) {
             metadata.put("nLemmasRemoved", lowCounts.size());
             metadata.put("minLemmaCount", minLemmaCount);

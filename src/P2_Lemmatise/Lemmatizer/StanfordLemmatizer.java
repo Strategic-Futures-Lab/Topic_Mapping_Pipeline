@@ -33,6 +33,7 @@ public class StanfordLemmatizer {
         Properties props;
         props = new Properties();
         props.put("annotators", "tokenize, cleanxml, ssplit, pos, lemma");
+        props.setProperty("tokenize.options", "splitHyphenated=false,americanize=false");
 
         /*
          * This is a pipeline that takes in a string and returns various analyzed linguistic forms.

@@ -26,6 +26,9 @@ public class LemmatiseModuleSpecs {
     /** List of stop-words to remove from lemmas,
      * optional, defaults to []. */
     public String[] stopWords;
+    /** List of word to protect from regex processing, e.g. hyphen,
+     * optional, defaults to []. */
+    public String[] protect;
     /** Minimum number of lemmas a document must have to be kept for topic modelling,
      * optional, defaults to 1. */
     public int minDocLemmas;
@@ -48,6 +51,7 @@ public class LemmatiseModuleSpecs {
                 JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         stopPhrases = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopPhrases", new JSONArray()));
         stopWords = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopWords", new JSONArray()));
+        protect = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("protect", new JSONArray()));
         minDocLemmas = Math.toIntExact((long) specs.getOrDefault("minDocLemmas", specs.getOrDefault("minLemmas", (long) 1)));
         minLemmaCount = Math.toIntExact((long) specs.getOrDefault("minLemmaCount", (long) 0));
         output = metaSpecs.getDataDir() + specs.get("output");
