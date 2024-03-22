@@ -81,7 +81,7 @@ public class HTMLInput {
 
         LogPrint.printModuleEnd("HTML Input");
 
-        return "GtR Input: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
+        return "HTML Input: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
 
     }
 
@@ -118,7 +118,7 @@ public class HTMLInput {
                 for(Map.Entry<String, String> entry: csvFields.entrySet()){
                     doc.addData(entry.getKey(), row.getField(entry.getValue()));
                 }
-                doc.addData("URL", row.getField(urlField));
+                doc.addData("url", row.getField(urlField));
                 Docs.put(doc.getId(), doc);
                 rowNum++;
             }
@@ -161,7 +161,7 @@ public class HTMLInput {
     private void getHTML(Map.Entry<String, DocIOWrapper> entry){
         String id = entry.getKey();
         DocIOWrapper doc = entry.getValue();
-        String url = doc.getData("URL");
+        String url = doc.getData("url");
         try{
             Document HTMLDoc = Jsoup.connect(url).get();
             Element HTMLBody = HTMLDoc.selectFirst(domSelector);
