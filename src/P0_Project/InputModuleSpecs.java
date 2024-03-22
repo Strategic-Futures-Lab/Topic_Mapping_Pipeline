@@ -14,11 +14,11 @@ import java.util.HashMap;
  */
 public class InputModuleSpecs{
 
-    /** Which module to run: CSV, PDF, GTR or TXT. */
+    /** Which module to run: CSV, PDF, HTML, GTR or TXT. */
     public String module;
     /** Source file name or directory name. */
     public String source;
-    /** Fields to keep as docData, only works if data from CSV or GTR.
+    /** Fields to keep as docData, only works if data from CSV, HTML or GTR.
      * Eg: ("t", "Title") will lookup "Title" in source and save it has "t" in the docData. */
     public HashMap<String, String> fields;
     /** Fields to lookup in external source (eg server API), only works if data from GTR,
@@ -29,6 +29,13 @@ public class InputModuleSpecs{
      * optional, defaults to 'ProjectId'.
      * Will be automatically added to the docData. */
     public String GTR_PID = "ProjectId";
+    /** Field name containing the HTML urls, only works if data from HTML,
+     * optional, defaults to 'URL'.
+     * Will be automatically added to the docData. */
+    public String HTML_URL = "URL";
+    /** Selector from which to parse HTML text, only works if data from HTML,
+     * optional, defaults to 'body'. */
+    public String HTML_selector = "body";
     /** Filename for the JSON corpus file generated. */
     public String output;
     /** Number of words limit before splitting a document, only works for PDF or TXT input,
@@ -54,12 +61,16 @@ public class InputModuleSpecs{
                 wordsPerDoc = -1;
             }
         }
-        if(module.equals("CSV") || module.equals("GTR")) {
+        if(module.equals("CSV") || module.equals("HTML") || module.equals("GTR")) {
             fields = JSONIOWrapper.getStringMap((JSONObject) specs.get("fields"));
         }
         if(module.equals("GTR")) {
             GTR_fields = JSONIOWrapper.getStringMap((JSONObject) specs.getOrDefault("GtR_fields", new JSONObject()));
             GTR_PID = (String) specs.getOrDefault("GtR_id", "ProjectId");
+        }
+        if(module.equals("HTML")) {
+            HTML_URL = (String) specs.getOrDefault("url", "URL");
+            HTML_selector = (String) specs.getOrDefault("dom_selector", "body");
         }
         if(module.equals("TXT")) {
             TXT_splitEmptyLines = (boolean) specs.getOrDefault("txt_splitEmptyLines", false);

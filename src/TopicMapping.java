@@ -97,6 +97,9 @@ public class TopicMapping {
             case "GTR":
                 times.add(GTRInput.GTRInput(projectManager.input));
                 break;
+            case "HTML":
+                times.add(HTMLInput.HTMLInput(projectManager.input));
+                break;
             case "PDF":
                 times.add(PDFInput.PDFInput(projectManager.input));
                 break;

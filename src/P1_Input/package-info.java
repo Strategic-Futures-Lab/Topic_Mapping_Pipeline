@@ -6,6 +6,7 @@
  *  - {@link P1_Input.CSVInput} which reads documents from a CSV file and allows to save several data fields;<br>
  *  - {@link P1_Input.TXTInput} which reads documents from a directory of TXT files or a single TXT file;<br>
  *  - {@link P1_Input.PDFInput} which reads documents from a directory of PDF files;<br>
- *  - {@link P1_Input.GTRInput} which reads grant IDs from a CSV file (with other fields) and crawls Gateway to Research (GtR) to find additional info.
+ *  - {@link P1_Input.GTRInput} which reads grant IDs from a CSV file (with other fields) and crawls Gateway to Research (GtR) to find additional info.<br>
+ *  - {@link P1_Input.HTMLInput} which reads URLs from a CSV file (with other fields) and crawls HTML pages to find text.
  */
 package P1_Input;
