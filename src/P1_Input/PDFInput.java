@@ -101,7 +101,7 @@ public class PDFInput {
             findPDFsInDirectory(directory);
             if(fileList.size() > 0){
                 LogPrint.printCompleteStep();
-                LogPrint.printNote("Found "+fileList.size()+" TXT files.", 0);
+                LogPrint.printNote("Found "+fileList.size()+" PDF files.", 0);
             } else {
                 // did not find any pdf file in the directory
                 LogPrint.printNoteError("Error, provided directory source does not contain .pdf files.");
@@ -155,7 +155,7 @@ public class PDFInput {
         try {
             String rootName = file.getName();
             LogPrint.printNewStep("Processing: "+rootName, 1);
-            rootName = rootName.substring(0, rootName.indexOf('.'));
+            rootName = rootName.substring(0, rootName.lastIndexOf('.'));
             // load file
             PDDocument document = PDDocument.load(file);
             String text = "";
