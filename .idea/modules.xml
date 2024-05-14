@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Topic_Mapping_Pipeline.iml" filepath="$PROJECT_DIR$/Topic_Mapping_Pipeline.iml" />
+      <module fileurl="file://$PROJECT_DIR$/TopicMapping.iml" filepath="$PROJECT_DIR$/TopicMapping.iml" />
     </modules>
   </component>
 </project>
