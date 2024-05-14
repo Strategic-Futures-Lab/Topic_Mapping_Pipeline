@@ -4,7 +4,6 @@ import IO.Console;
 import IO.ProjectConfig;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class Project {
@@ -53,7 +52,7 @@ public class Project {
         outputDirectory = projectDirectory + outputDir;
 
         // getting document fields
-        ArrayList<String> fields = ProjectConfig.parseList(projectParams.getOrDefault("docFields", new ArrayList<String>()), "project/docFields");
+        ArrayList<String> fields = ProjectConfig.parseStringList(projectParams.getOrDefault("docFields", new ArrayList<String>()), "project/docFields");
         documentFields = fields.toArray(new String[0]);
         useProjectDocFields = documentFields.length != 0;
 

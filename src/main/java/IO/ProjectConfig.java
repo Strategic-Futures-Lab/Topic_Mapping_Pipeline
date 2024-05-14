@@ -36,7 +36,7 @@ public class ProjectConfig {
      * Returns the project's parameters, used to overwrite certain module parameters
      * @return The project's parameters
      */
-    public HashMap<String,Object> getProjectParameters(){ return projectParameters; }
+    public HashMap<String, Object> getProjectParameters(){ return projectParameters; }
 
     /**
      * Returns the project's workflow, i.e., the list of modules to run
@@ -96,7 +96,7 @@ public class ProjectConfig {
      * @return The parsed array
      * @throws ParseException If the object is not an ArrayList, or one of the items is not a String
      */
-    public static ArrayList<String> parseList(Object o , String cfg) throws ParseException{
+    public static ArrayList<String> parseStringList(Object o , String cfg) throws ParseException{
         ArrayList<String> res = new ArrayList<>();
         if(o instanceof ArrayList<?>){
             ArrayList list = (ArrayList) o;
@@ -178,7 +178,7 @@ public class ProjectConfig {
         ProjectConfig config = getInstance();
         if(configMap.containsKey("run")){
             Console.log("Retrieving run workflow", 1);
-            config.workflow = parseList(configMap.get("run"), "run");
+            config.workflow = parseStringList(configMap.get("run"), "run");
             Console.tick();
             if(configMap.containsKey("project")){
                 Console.log("Retrieving project parameters", 1);
