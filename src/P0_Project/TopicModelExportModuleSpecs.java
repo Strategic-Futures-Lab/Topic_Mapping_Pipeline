@@ -91,7 +91,7 @@ public class TopicModelExportModuleSpecs {
         }
         documents = metaSpecs.getDataDir() + specs.get("documents");
         docFields = metaSpecs.useMetaDocFields() ?
-                metaSpecs.docFields :
+                metaSpecs.getDocFields() :
                 JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
 

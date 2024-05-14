@@ -91,7 +91,7 @@ public class DocumentInferModuleSpecs {
             csvOutput = outputDir + csvOutput;
             numWordId = Math.toIntExact((long) specs.getOrDefault("numWordId", (long) 3));
             docFields = metaSpecs.useMetaDocFields() ?
-                    metaSpecs.docFields :
+                    metaSpecs.getDocFields() :
                     JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
 
             // validations

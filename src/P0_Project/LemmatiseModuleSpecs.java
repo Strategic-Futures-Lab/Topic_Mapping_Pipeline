@@ -47,7 +47,7 @@ public class LemmatiseModuleSpecs {
         corpus = metaSpecs.getDataDir() + specs.get("corpus");
         textFields = JSONIOWrapper.getStringArray((JSONArray) specs.get("textFields"));
         docFields = metaSpecs.useMetaDocFields() ?
-                metaSpecs.docFields :
+                metaSpecs.getDocFields() :
                 JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("docFields", new JSONArray()));
         stopPhrases = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopPhrases", new JSONArray()));
         stopWords = JSONIOWrapper.getStringArray((JSONArray) specs.getOrDefault("stopWords", new JSONArray()));

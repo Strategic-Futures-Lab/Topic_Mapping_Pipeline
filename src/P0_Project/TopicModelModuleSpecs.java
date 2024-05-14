@@ -53,7 +53,7 @@ public class TopicModelModuleSpecs {
     public TopicModelModuleSpecs(JSONObject specs, MetaSpecs metaSpecs){
         lemmas = metaSpecs.getDataDir() + specs.get("lemmas");
         modelType = metaSpecs.useMetaModelType() ?
-                metaSpecs.modelType :
+                metaSpecs.getModelType() :
                 (String) specs.getOrDefault("modelType", specs.get("module"));
         dataDir = metaSpecs.getDataDir() + specs.getOrDefault("dataDir", specs.getOrDefault("outputDir", ""));
         if(!dataDir.endsWith("/")){
