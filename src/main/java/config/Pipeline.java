@@ -1,12 +1,12 @@
 package config;
 
 import IO.Console;
+import config.modules.CorpusCSV;
+import input.CSVInput;
 
 import java.util.ArrayList;
 
 public class Pipeline {
-
-    private static final String MODULE_NAME = "Pipeline Configuration";
 
     private Project project;
     private ArrayList<Module> modules;
@@ -16,18 +16,34 @@ public class Pipeline {
     }
 
     public void loadProjectConfigurations(String configFilename) throws Exception {
+        String MODULE_NAME = "Pipeline Configuration";
         Console.moduleStart(MODULE_NAME);
         try {
-            ProjectConfig config = ProjectConfig.readConfigFromYAML(configFilename);
+            ProjectConfigParser config = ProjectConfigParser.readConfigFromYAML(configFilename);
             project = new Project(config.getProjectParameters());
+            Console.log("Loading modules parameters");
             for(String module: config.getWorkflow()){
                 modules.add(Module.createModuleConfig(module, config.getModuleParameters(module)));
             }
+            Console.tick();
         } catch (Exception e){
             Console.error(e.getMessage());
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
         Console.moduleComplete(MODULE_NAME);
+    }
+
+    public void runPipeline() throws Exception{
+        try{
+            for(Module module: modules){
+                switch(module.moduleType){
+                    case "corpusCSV":
+                        CSVInput.run((CorpusCSV) module, project);
+                }
+            }
+        } catch (Exception e){
+            throw e;
+        }
     }
 }

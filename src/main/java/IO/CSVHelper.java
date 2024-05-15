@@ -22,7 +22,7 @@ public class CSVHelper {
      * Interface for CSV row processor methods
      */
     public interface ProcessCSVRow{
-        void processRow(CsvRow row);
+        void processRow(CsvRow row, int rowNum);
     }
 
     /**
@@ -78,7 +78,7 @@ public class CSVHelper {
         CsvParser parser = reader.parse(file, StandardCharsets.UTF_8);
         CsvRow row;
         while((row = parser.nextRow()) != null && rowNum < PROCESS_MAX_ROWS){
-            rowProcessor.processRow(row);
+            rowProcessor.processRow(row, rowNum);
             rowNum++;
         }
         return rowNum;
