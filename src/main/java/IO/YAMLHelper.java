@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Helper class for loading and parsing data from a YAML file
+ * Helper class for loading and parsing data from a YAML file;
+ * Includes static methods for converting YAML generic types to Java data structures
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class YAMLHelper {
 
