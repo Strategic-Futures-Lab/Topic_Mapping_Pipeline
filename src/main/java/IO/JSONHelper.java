@@ -1,6 +1,5 @@
 package IO;
 
-import PY_Helper.LogPrint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -161,31 +160,25 @@ public class JSONHelper {
     }
 
     /**
-     * Reads a JSON file and save it into a JSONObject instance
+     * Reads a JSON file and saves it into a JSONObject instance
      * @param filename JSON file name
      * @return The JSONObject
      * @throws IOException If the file isn't found
      * @throws ParseException If the JSON parser fails
      */
     public static JSONObject loadJSON(String filename) throws IOException, ParseException{
-        Console.log("Loading "+filename);
-        JSONObject root = loadObject(filename);
-        Console.tick();
-        return root;
+        return loadJSON(filename, 0);
     }
 
     /**
-     * Method to read a JSON file containing an array and save it into a JSONArray instance
+     * Reads a JSON file containing an array and saves it into a JSONArray instance
      * @param filename JSON file name
      * @return The JSONArray
      * @throws IOException If the file isn't found
      * @throws ParseException If the JSON parser fails
      */
     public static JSONArray loadJSONArray(String filename) throws IOException, ParseException{
-        Console.log("Loading "+filename);
-        JSONArray root = loadArray(filename);
-        Console.tick();
-        return root;
+        return loadJSONArray(filename, 0);
     }
 
     /**
@@ -195,9 +188,7 @@ public class JSONHelper {
      * @throws IOException If the file cannot be created/written
      */
     public static void saveJSON(JSONObject obj, String filename) throws IOException{
-        Console.log("Saving "+filename);
-        saveObject(obj, filename);
-        Console.tick();
+        saveJSON(obj, filename, 0);
     }
 
     /**
@@ -207,13 +198,11 @@ public class JSONHelper {
      * @throws IOException If the file cannot be created/written
      */
     public static void saveJSONArray(JSONArray obj, String filename) throws IOException{
-        Console.log("Saving "+filename);
-        saveArray(obj, filename);
-        Console.tick();
+        saveJSONArray(obj, filename, 0);
     }
 
     /**
-     * Method to read a JSON file and save it into a JSONObject instance
+     * Reads a JSON file and saves it into a JSONObject instance
      * @param filename JSON file name
      * @param depth Depth level for logs
      * @return The JSONObject
@@ -228,7 +217,7 @@ public class JSONHelper {
     }
 
     /**
-     * Method to read a JSON file containing an array and save it into a JSONArray instance
+     * Reads a JSON file containing an array and saves it into a JSONArray instance
      * @param filename JSON file name
      * @param depth Depth level for logs
      * @return The JSONArray
