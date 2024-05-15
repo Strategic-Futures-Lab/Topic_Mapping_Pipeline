@@ -1,6 +1,5 @@
 package config;
 
-import IO.ProjectConfig;
 import config.modules.*;
 
 import java.util.ArrayList;
@@ -26,11 +25,11 @@ public class Module {
      * @param moduleName Name of the module as described in the configuration file
      * @param moduleParams Map containing unparsed module parameters
      * @return Subclass instance with specialised parameters
-     * @throws ProjectConfig.ParseException If the module type is absent or not recognised or if the module subclass threw an exception
+     * @throws ProjectConfigParser.ParseException If the module type is absent or not recognised or if the module subclass threw an exception
      */
-    public static Module createModuleConfig(String moduleName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
+    public static Module createModuleConfig(String moduleName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
         if(moduleParams.containsKey("type")){
-            String type = ProjectConfig.parseString(moduleParams.get("type"), moduleName+"/type");
+            String type = ProjectConfigParser.parseString(moduleParams.get("type"), moduleName+"/type");
             switch (type){
                 case "corpusCSV":
                     return new CorpusCSV(moduleName, moduleParams);
@@ -43,10 +42,10 @@ public class Module {
                 case "corpusGTR":
                     return new CorpusGTR(moduleName, moduleParams);
                 default:
-                    throw new ProjectConfig.ParseException("Module type \""+type+"\" is not recognised");
+                    throw new ProjectConfigParser.ParseException("Module type \""+type+"\" is not recognised");
             }
         } else {
-            throw new ProjectConfig.ParseException("Module \""+moduleName+"\" does not have a \"type\" parameter");
+            throw new ProjectConfigParser.ParseException("Module \""+moduleName+"\" does not have a \"type\" parameter");
         }
     }
 
@@ -55,47 +54,47 @@ public class Module {
     // the parameter is not present in the configuration file
     // for complex values (map, list), you should instantiate an empty structure and query containsKey when needed
 
-    protected String getStringParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
-        return ProjectConfig.parseString(moduleParams.get(paramName), moduleName +"/"+paramName);
+    protected String getStringParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+        return ProjectConfigParser.parseString(moduleParams.get(paramName), moduleName +"/"+paramName);
     }
 
-    protected String getDefaultStringParam(String paramName, HashMap<String, Object> moduleParams, String defValue) throws ProjectConfig.ParseException {
+    protected String getDefaultStringParam(String paramName, HashMap<String, Object> moduleParams, String defValue) throws ProjectConfigParser.ParseException {
         if(moduleParams.containsKey(paramName)) return getStringParam(paramName, moduleParams);
         else return defValue;
     }
 
-    protected boolean getBooleanParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
-        return ProjectConfig.parseBoolean(moduleParams.get(paramName), moduleName +"/"+paramName);
+    protected boolean getBooleanParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+        return ProjectConfigParser.parseBoolean(moduleParams.get(paramName), moduleName +"/"+paramName);
     }
 
-    protected boolean getDefaultBooleanParam(String paramName, HashMap<String, Object> moduleParams, boolean defValue) throws ProjectConfig.ParseException {
+    protected boolean getDefaultBooleanParam(String paramName, HashMap<String, Object> moduleParams, boolean defValue) throws ProjectConfigParser.ParseException {
         if(moduleParams.containsKey(paramName)) return getBooleanParam(paramName, moduleParams);
         else return defValue;
     }
 
-    protected int getIntParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
-        return ProjectConfig.parseInt(moduleParams.get(paramName), moduleName +"/"+paramName);
+    protected int getIntParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+        return ProjectConfigParser.parseInt(moduleParams.get(paramName), moduleName +"/"+paramName);
     }
 
-    protected int getDefaultIntParam(String paramName, HashMap<String, Object> moduleParams, int defValue) throws ProjectConfig.ParseException {
+    protected int getDefaultIntParam(String paramName, HashMap<String, Object> moduleParams, int defValue) throws ProjectConfigParser.ParseException {
         if(moduleParams.containsKey(paramName)) return getIntParam(paramName, moduleParams);
         else return defValue;
     }
 
-    protected double getDoubleParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
-        return ProjectConfig.parseDouble(moduleParams.get(paramName), moduleName +"/"+paramName);
+    protected double getDoubleParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+        return ProjectConfigParser.parseDouble(moduleParams.get(paramName), moduleName +"/"+paramName);
     }
 
-    protected double getDefaultDoubleParam(String paramName, HashMap<String, Object> moduleParams, double defValue) throws ProjectConfig.ParseException {
+    protected double getDefaultDoubleParam(String paramName, HashMap<String, Object> moduleParams, double defValue) throws ProjectConfigParser.ParseException {
         if(moduleParams.containsKey(paramName)) return getDoubleParam(paramName, moduleParams);
         else return defValue;
     }
 
-    protected HashMap<String,Object> getMapParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
-        return ProjectConfig.parseMap(moduleParams.get(paramName), moduleName +"/"+paramName);
+    protected HashMap<String,Object> getMapParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+        return ProjectConfigParser.parseMap(moduleParams.get(paramName), moduleName +"/"+paramName);
     }
 
-    protected ArrayList<String> getStringListParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException {
-        return ProjectConfig.parseStringList(moduleParams.get(paramName), moduleName +"/"+paramName);
+    protected ArrayList<String> getStringListParam(String paramName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+        return ProjectConfigParser.parseStringList(moduleParams.get(paramName), moduleName +"/"+paramName);
     }
 }

@@ -1,10 +1,9 @@
-package IO;
+package config;
 
-import org.yaml.snakeyaml.Yaml;
+import IO.Console;
+import IO.YAMLHelper;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,7 +11,7 @@ import java.util.HashMap;
  * Class for reading and parsing a Topic Map project configuration.
  * Reading (and parsing) is provided as a static method, and returns a singleton instance containing parameters.
  */
-public class ProjectConfig {
+public class ProjectConfigParser {
 
     /**
      * Exception class for parsing errors on the ProjectConfig
@@ -21,12 +20,12 @@ public class ProjectConfig {
         public ParseException(String msg){ super(msg); }
     }
 
-    private static ProjectConfig PROJECT_CONFIG;
+    private static ProjectConfigParser PROJECT_CONFIG;
     private HashMap<String, Object> projectParameters;
     private ArrayList<String> workflow;
     private HashMap<String, Object> modulesParameters;
 
-    private ProjectConfig(){
+    private ProjectConfigParser(){
         projectParameters = new HashMap<>();
         workflow = new ArrayList<>();
         modulesParameters = new HashMap<>();
@@ -60,8 +59,8 @@ public class ProjectConfig {
         return parseMap(modulesParameters.get(moduleName), moduleName);
     }
 
-    private static ProjectConfig getInstance(){
-        if(PROJECT_CONFIG == null) PROJECT_CONFIG = new ProjectConfig();
+    private static ProjectConfigParser getInstance(){
+        if(PROJECT_CONFIG == null) PROJECT_CONFIG = new ProjectConfigParser();
         return PROJECT_CONFIG;
     }
 
@@ -73,20 +72,11 @@ public class ProjectConfig {
      * @throws ParseException If the object is not a map, or one of the key is not a String
      */
     public static HashMap<String, Object> parseMap(Object o, String cfg) throws ParseException{
-        HashMap<String, Object> res = new HashMap<>();
-        if(o instanceof HashMap<?,?>){
-            HashMap map = (HashMap) o;
-            for(Object k: map.keySet()){
-                if(k instanceof String){
-                    res.put((String)k, map.get(k));
-                } else {
-                    throw new ParseException("Key in \""+cfg+"\" needs to be a string");
-                }
-            }
-        } else {
-            throw new ParseException("Config \""+cfg+"\" needs to be a list of key/value pairs");
+        try{
+            return YAMLHelper.parseMap(o);
+        } catch (YAMLHelper.YAMLParseException e){
+            throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
-        return res;
     }
 
     /**
@@ -97,20 +87,11 @@ public class ProjectConfig {
      * @throws ParseException If the object is not an ArrayList, or one of the items is not a String
      */
     public static ArrayList<String> parseStringList(Object o , String cfg) throws ParseException{
-        ArrayList<String> res = new ArrayList<>();
-        if(o instanceof ArrayList<?>){
-            ArrayList list = (ArrayList) o;
-            for(Object s: list){
-                if(s instanceof String){
-                    res.add((String) s);
-                } else {
-                    throw new ParseException("Item in \""+cfg+"\" needs to be a string");
-                }
-            }
-        } else {
-            throw new ParseException("Config \""+cfg+"\" needs to be a list of strings");
+        try{
+            return YAMLHelper.parseStringList(o);
+        } catch (YAMLHelper.YAMLParseException e){
+            throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
-        return res;
     }
 
     /**
@@ -121,10 +102,10 @@ public class ProjectConfig {
      * @throws ParseException If the object is not a String
      */
     public static String parseString(Object o, String cfg) throws ParseException{
-        if(o instanceof String){
-            return (String) o;
-        } else {
-            throw new ParseException("Value for \""+cfg+"\" needs to be a string");
+        try{
+            return YAMLHelper.parseString(o);
+        } catch (YAMLHelper.YAMLParseException e){
+            throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
     }
 
@@ -136,10 +117,10 @@ public class ProjectConfig {
      * @throws ParseException If the object is not an integer
      */
     public static int parseInt(Object o, String cfg) throws ParseException{
-        if(o instanceof Integer){
-            return (Integer) o;
-        } else {
-            throw new ParseException("Value for \""+cfg+"\" needs to be an integer");
+        try{
+            return YAMLHelper.parseInt(o);
+        } catch (YAMLHelper.YAMLParseException e){
+            throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
     }
 
@@ -151,10 +132,10 @@ public class ProjectConfig {
      * @throws ParseException If the object is not a double
      */
     public static double parseDouble(Object o, String cfg) throws ParseException{
-        if(o instanceof Double){
-            return (Double) o;
-        } else {
-            throw new ParseException("Value for \""+cfg+"\" needs to be a double");
+        try{
+            return YAMLHelper.parseDouble(o);
+        } catch (YAMLHelper.YAMLParseException e){
+            throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
     }
 
@@ -166,16 +147,16 @@ public class ProjectConfig {
      * @throws ParseException If the object is not a boolean
      */
     public static boolean parseBoolean(Object o, String cfg) throws ParseException{
-        if(o instanceof Boolean){
-            return (Boolean) o;
-        } else {
-            throw new ParseException("Value for \""+cfg+"\" needs to be a boolean");
+        try{
+            return YAMLHelper.parseBoolean(o);
+        } catch (YAMLHelper.YAMLParseException e){
+            throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
     }
 
     private static void parseConfig(HashMap<String, Object> configMap) throws ParseException{
         Console.log("Parsing configuration file");
-        ProjectConfig config = getInstance();
+        ProjectConfigParser config = getInstance();
         if(configMap.containsKey("run")){
             Console.log("Retrieving run workflow", 1);
             config.workflow = parseStringList(configMap.get("run"), "run");
@@ -208,13 +189,11 @@ public class ProjectConfig {
      * @throws ParseException If the configuration file doesn't conform to expectations
      * @throws FileNotFoundException If the filename provided doesn't refer to an existing file
      */
-    public static ProjectConfig readConfigFromYAML(String filename) throws ParseException, FileNotFoundException, ClassCastException{
-        Yaml yaml = new Yaml();
-        ProjectConfig config = ProjectConfig.getInstance();
+    public static ProjectConfigParser readConfigFromYAML(String filename) throws ParseException, FileNotFoundException, ClassCastException{
+        ProjectConfigParser config = ProjectConfigParser.getInstance();
         try {
-            InputStream input = new FileInputStream(filename);
             Console.info("Reading project configurations from "+filename);
-            HashMap<String,Object> yamlMap = yaml.load(input);
+            HashMap<String,Object> yamlMap = YAMLHelper.loadYAMLFile(filename);
             parseConfig(yamlMap);
         } catch (FileNotFoundException e){
             Console.error("Project configuration file "+filename+" not found!");

@@ -1,6 +1,6 @@
 package config.modules;
 
-import IO.ProjectConfig;
+import config.ProjectConfigParser;
 import config.Module;
 
 import java.util.HashMap;
@@ -29,12 +29,12 @@ public class CorpusGTR extends Module {
      * Constructor, parses and stores module parameters
      * @param moduleName Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
-     * @throws ProjectConfig.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public CorpusGTR(String moduleName, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException{
+    public CorpusGTR(String moduleName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
         super(moduleName, "corpusGTR");
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfig.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
         source = getStringParam("source", moduleParams);
         output = getStringParam("output", moduleParams);
@@ -42,13 +42,13 @@ public class CorpusGTR extends Module {
         gtrFields = new HashMap<>();
         HashMap<String, Object> gtrFieldsMap = getMapParam("gtrFields", moduleParams);
         for(String k: gtrFieldsMap.keySet()){
-            gtrFields.put(k, ProjectConfig.parseString(gtrFieldsMap.get(k), moduleName+"/gtrFields/"+k));
+            gtrFields.put(k, ProjectConfigParser.parseString(gtrFieldsMap.get(k), moduleName+"/gtrFields/"+k));
         }
         fields = new HashMap<>();
         if(moduleParams.containsKey("fields")){
             HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
             for(String k: fieldsMap.keySet()){
-                fields.put(k, ProjectConfig.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
+                fields.put(k, ProjectConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
             }
         }
     }

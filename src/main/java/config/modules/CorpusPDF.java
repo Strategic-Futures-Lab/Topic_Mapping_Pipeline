@@ -1,6 +1,6 @@
 package config.modules;
 
-import IO.ProjectConfig;
+import config.ProjectConfigParser;
 import config.Module;
 
 import java.util.HashMap;
@@ -21,12 +21,12 @@ public class CorpusPDF extends Module {
      * Constructor, parses and stores module parameters
      * @param name Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
-     * @throws ProjectConfig.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public CorpusPDF(String name, HashMap<String, Object> moduleParams) throws ProjectConfig.ParseException{
+    public CorpusPDF(String name, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
         super(name, "corpusPDF");
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfig.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
         source = getStringParam("source", moduleParams);
         output = getStringParam("output", moduleParams);
