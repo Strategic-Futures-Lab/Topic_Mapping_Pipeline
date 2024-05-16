@@ -1,4 +1,5 @@
 import IO.Console;
+import IO.Timer;
 import config.Pipeline;
 
 public class Main {
@@ -13,32 +14,19 @@ public class Main {
         }
 
         Console.moduleStart(MODULE_NAME);
-        long startTime = System.currentTimeMillis();
-
+        Timer.start(MODULE_NAME);
+        Pipeline pipeline = new Pipeline();
         try {
-            Pipeline pipeline = new Pipeline();
             pipeline.loadProjectConfigurations(args[0]);
+            pipeline.runPipeline();
         } catch (Exception e) {
+            Timer.print();
             Console.moduleFail(MODULE_NAME);
             System.exit(1);
         }
 
-
-
-
-
-
-
-//        TopicMapping startClass = new TopicMapping();
-//        startClass.CheckArgs(args);
-//        startClass.LoadProject();
-//        startClass.Run();
-//        for(String t: times){
-//            LogPrint.printNote(t);
-//        }
-
-        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
-        Console.info("Time taken: "+Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.");
+        Timer.stop(MODULE_NAME);
+        Timer.print();
         Console.moduleComplete(MODULE_NAME);
     }
 }

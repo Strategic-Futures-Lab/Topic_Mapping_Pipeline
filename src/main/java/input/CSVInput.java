@@ -2,6 +2,7 @@ package input;
 
 import IO.CSVHelper;
 import IO.Console;
+import IO.Timer;
 import config.Project;
 import config.modules.CorpusCSV;
 import data.Document;
@@ -9,36 +10,31 @@ import data.Document;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class CSVInput {
-
-    private final ConcurrentHashMap<String, Document> documents = new ConcurrentHashMap<>();
+public class CSVInput extends InputModule {
 
     private String sourceFile;
     private String outputFile;
     private HashMap<String, String> docFields;
 
-
-    public static String run(CorpusCSV moduleParameters, Project projectParameters) throws IOException {
+    public static void run(CorpusCSV moduleParameters, Project projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
-        long startTime = System.currentTimeMillis();
+        Timer.start(MODULE_NAME);
         CSVInput instance = new CSVInput();
         instance.processParameters(moduleParameters, projectParameters);
         try {
             instance.loadCSV();
-            // TODO
-//            instance.outputJSON();
+            instance.writeJSON(instance.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
-        long timeTaken = (System.currentTimeMillis() - startTime) / (long)1000;
         Console.moduleComplete(MODULE_NAME);
-        return MODULE_NAME+": " + Math.floorDiv(timeTaken, 60) + " m, " + timeTaken % 60 + " s.";
+        Timer.stop(MODULE_NAME);
     }
 
+    // processes project and module parameters
     private void processParameters(CorpusCSV moduleParameters, Project projectParameters){
         Console.log("Processing parameters");
         sourceFile = projectParameters.sourceDirectory+moduleParameters.source;
@@ -48,18 +44,22 @@ public class CSVInput {
         Console.info("Reading CSV input from "+sourceFile+" and saving to "+outputFile, 1);
     }
 
+    // loads document data from CSV
     private void loadCSV() throws IOException {
         CSVHelper.ProcessCSVRow rowProcessor = (row, rowNum) -> {
-            // TODO integrate with document data
+            Document doc = new Document(Integer.toString(rowNum),rowNum);
             for(Map.Entry<String, String> entry: docFields.entrySet()){
-                Console.log(row.getField(entry.getValue()));
+                doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
+            documents.put(doc.getId(), doc);
         };
         try {
             CSVHelper.loadCSVFile(sourceFile, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;
+        } finally {
+            Console.note("Number of documents loaded from file: "+documents.size());
         }
     }
 }
