@@ -5,6 +5,7 @@ import config.modules.CorpusCSV;
 import input.CSVInput;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Pipeline {
 
@@ -23,9 +24,15 @@ public class Pipeline {
             project = new Project(config.getProjectParameters());
             Console.log("Loading modules parameters");
             for(String module: config.getWorkflow()){
-                modules.add(Module.createModuleConfig(module, config.getModuleParameters(module)));
+                HashMap<String, Object> moduleParams = config.getModuleParameters(module);
+                if(moduleParams.containsKey("run") && !ProjectConfigParser.parseBoolean(moduleParams.get("run"), module+"/run")){
+                    Console.warning("Skipping module "+module+" - run set to false", 1);
+                } else {
+                    Console.log("Configuring module "+module, 1);
+                    modules.add(Module.createModuleConfig(module, moduleParams));
+                    Console.tick();
+                }
             }
-            Console.tick();
         } catch (Exception e){
             Console.error(e.getMessage());
             Console.moduleFail(MODULE_NAME);

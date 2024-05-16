@@ -36,7 +36,7 @@ public class Timer {
      */
     public static void stop(String key){
         if(instance != null && instance.starts.containsKey(key)){
-            instance.times.put(key, (System.currentTimeMillis()-instance.starts.get(key)/(long)1000));
+            instance.times.put(key, ((System.currentTimeMillis()-instance.starts.get(key))/(long)1000));
             instance.starts.remove(key);
         }
     }
