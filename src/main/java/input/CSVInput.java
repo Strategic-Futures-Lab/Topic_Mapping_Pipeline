@@ -25,9 +25,9 @@ public class CSVInput extends InputModule {
 
     /**
      * Main module method - processes parameters, reads CSV file and write JSON corpus
-     * @param moduleParameters
-     * @param projectParameters
-     * @throws IOException
+     * @param moduleParameters module parameters
+     * @param projectParameters project meta parameters
+     * @throws IOException If the CSV file cannot be read properly
      */
     public static void run(CorpusCSV moduleParameters, Project projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
