@@ -11,12 +11,24 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Module generating a corpus from a CSV file
+ *
+ * @author P. Le Bras
+ * @version 2
+ */
 public class CSVInput extends InputModule {
 
     private String sourceFile;
     private String outputFile;
     private HashMap<String, String> docFields;
 
+    /**
+     * Main module method - processes parameters, reads CSV file and write JSON corpus
+     * @param moduleParameters
+     * @param projectParameters
+     * @throws IOException
+     */
     public static void run(CorpusCSV moduleParameters, Project projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
