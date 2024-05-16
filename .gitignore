@@ -28,6 +28,7 @@ lib/**
 *.iml
 files/output/
 files/projects/**
+projects/test/out/**
 javadoc/
 src/test
 
