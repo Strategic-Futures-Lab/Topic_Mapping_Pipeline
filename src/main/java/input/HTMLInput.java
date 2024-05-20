@@ -28,7 +28,6 @@ public class HTMLInput extends InputModule {
     private String domSelector;
 
     // crawl variables
-    private ConcurrentHashMap<String, Document> missingDocs;
     private ConcurrentHashMap<String, String> crawlErrors;
     private int pagesCrawled;
 
