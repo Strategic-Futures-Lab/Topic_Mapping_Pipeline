@@ -2,19 +2,16 @@ package input;
 
 import IO.Console;
 import IO.Timer;
-import config.Project;
-import config.modules.CorpusTXT;
-import data.Document;
+import config.ModuleConfig;
+import config.ProjectConfig;
+import config.modules.InputConfigTXT;
 import data.Pair;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Module generating a corpus from a TXT file or directory of TXT files
@@ -36,12 +33,12 @@ public class TXTInput extends FileInput {
      * @param projectParameters project meta parameters
      * @throws IOException If the file(s) type is unexpected
      */
-    public static void run(CorpusTXT moduleParameters, Project projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
         TXTInput instance = new TXTInput();
-        instance.processParameters(moduleParameters, projectParameters);
+        instance.processParameters((InputConfigTXT) moduleParameters, projectParameters);
         instance.extension = ".txt";
         try {
             instance.findFiles();
@@ -56,7 +53,7 @@ public class TXTInput extends FileInput {
     }
 
     // processes project and module parameters
-    private void processParameters(CorpusTXT moduleParameters, Project projectParameters){
+    private void processParameters(InputConfigTXT moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
         source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;

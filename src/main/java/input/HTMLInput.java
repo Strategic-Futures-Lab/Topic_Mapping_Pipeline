@@ -3,8 +3,9 @@ package input;
 import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
-import config.Project;
-import config.modules.CorpusHTML;
+import config.ModuleConfig;
+import config.ProjectConfig;
+import config.modules.InputConfigHTML;
 import data.Document;
 import org.jsoup.Jsoup;
 
@@ -40,12 +41,12 @@ public class HTMLInput extends InputModule {
      * @param projectParameters project meta parameters
      * @throws IOException If the CSV file cannot be read properly
      */
-    public static void run(CorpusHTML moduleParameters, Project projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
         HTMLInput instance = new HTMLInput();
-        instance.processParameters(moduleParameters, projectParameters);
+        instance.processParameters((InputConfigHTML) moduleParameters, projectParameters);
         try {
             instance.loadCSV();
             instance.crawlHTML();
@@ -59,7 +60,7 @@ public class HTMLInput extends InputModule {
     }
 
     // processes project and module parameters
-    private void processParameters(CorpusHTML moduleParameters, Project projectParameters){
+    private void processParameters(InputConfigHTML moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
         source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;

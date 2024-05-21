@@ -1,7 +1,11 @@
 package config;
 
+import IO.Console;
 import config.modules.*;
+import pipeline.ModuleType;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,41 +15,41 @@ import java.util.HashMap;
  * @author P. Le Bras
  * @version 1
  */
-public class Module {
+public class ModuleConfig {
 
     /** Name of the module, as described in the config file */
     public final String moduleName;
     /** Type of module (internal pipeline name) */
-    public final String moduleType;
+    public final ModuleType moduleType;
 
-    protected Module(String moduleName, String moduleType){
+    protected ModuleConfig(String moduleName, ModuleType moduleType){
         this.moduleName = moduleName;
         this.moduleType = moduleType;
     }
 
     /**
-     * Factory method for instantiating a specialised module parameter subclass
+     * Factory method for instantiating a specialised module parameter subclass;
+     * Uses the enum {@link ModuleType} to retrieve the correct constructor
      * @param moduleName Name of the module as described in the configuration file
      * @param moduleParams Map containing unparsed module parameters
      * @return Subclass instance with specialised parameters
      * @throws ProjectConfigParser.ParseException If the module type is absent or not recognised or if the module subclass threw an exception
+     * @throws RuntimeException If the module configuration class instantiation fails
      */
-    public static Module createModuleConfig(String moduleName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+    public static ModuleConfig createModuleConfig(String moduleName, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException, RuntimeException {
         if(moduleParams.containsKey("type")){
             String type = ProjectConfigParser.parseString(moduleParams.get("type"), moduleName+"/type");
-            switch (type){
-                case "corpusCSV":
-                    return new CorpusCSV(moduleName, moduleParams);
-                case "corpusTXT":
-                    return new CorpusTXT(moduleName, moduleParams);
-                case "corpusPDF":
-                    return new CorpusPDF(moduleName, moduleParams);
-                case "corpusHTML":
-                    return new CorpusHTML(moduleName, moduleParams);
-                case "corpusGTR":
-                    return new CorpusGTR(moduleName, moduleParams);
-                default:
-                    throw new ProjectConfigParser.ParseException("Module type \""+type+"\" is not recognised");
+            try {
+                ModuleType moduleType = ModuleType.getType(type);
+                Class configClass = moduleType.config;
+                Constructor configCtor = configClass.getConstructor(String.class, ModuleType.class, HashMap.class);
+                return (ModuleConfig) configCtor.newInstance(moduleName, moduleType, moduleParams);
+            } catch (NoSuchMethodException e) {
+                Console.error("Invalid constructor for Module Configuration " + type);
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                Console.error("Error while instantiating Module Configuration " + type);
+                throw new RuntimeException(e);
             }
         } else {
             throw new ProjectConfigParser.ParseException("Module \""+moduleName+"\" does not have a \"type\" parameter");

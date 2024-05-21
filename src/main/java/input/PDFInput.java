@@ -2,8 +2,9 @@ package input;
 
 import IO.Console;
 import IO.Timer;
-import config.Project;
-import config.modules.CorpusPDF;
+import config.ModuleConfig;
+import config.ProjectConfig;
+import config.modules.InputConfigPDF;
 import data.Pair;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -33,12 +34,12 @@ public class PDFInput extends FileInput {
      * @param projectParameters project meta parameters
      * @throws IOException If the file(s) type is unexpected
      */
-    public static void run(CorpusPDF moduleParameters, Project projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
         PDFInput instance = new PDFInput();
-        instance.processParameters(moduleParameters, projectParameters);
+        instance.processParameters((InputConfigPDF) moduleParameters, projectParameters);
         instance.extension = ".pdf";
         try {
             instance.findFiles();
@@ -53,7 +54,7 @@ public class PDFInput extends FileInput {
     }
 
     // processes project and module parameters
-    private void processParameters(CorpusPDF moduleParameters, Project projectParameters){
+    private void processParameters(InputConfigPDF moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
         source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;

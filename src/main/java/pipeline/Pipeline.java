@@ -1,6 +1,9 @@
-package config;
+package pipeline;
 
 import IO.Console;
+import config.ModuleConfig;
+import config.ProjectConfig;
+import config.ProjectConfigParser;
 import config.modules.*;
 import input.*;
 
@@ -15,14 +18,14 @@ import java.util.HashMap;
  */
 public class Pipeline {
 
-    private Project project;
-    private ArrayList<Module> modules;
+    private ProjectConfig projectConfig;
+    private ArrayList<ModuleConfig> moduleConfigs;
 
     /**
      * Constructor, sets up an empty list of module configurations to run
      */
     public Pipeline(){
-        modules = new ArrayList<>();
+        moduleConfigs = new ArrayList<>();
     }
 
     /**
@@ -35,7 +38,7 @@ public class Pipeline {
         Console.moduleStart(MODULE_NAME);
         try {
             ProjectConfigParser config = ProjectConfigParser.readConfigFromYAML(configFilename);
-            project = new Project(config.getProjectParameters());
+            projectConfig = new ProjectConfig(config.getProjectParameters());
             Console.log("Loading modules parameters");
             for(String module: config.getWorkflow()){
                 HashMap<String, Object> moduleParams = config.getModuleParameters(module);
@@ -43,7 +46,7 @@ public class Pipeline {
                     Console.warning("Skipping module "+module+" - run set to false", 1);
                 } else {
                     Console.log("Configuring module "+module, 1);
-                    modules.add(Module.createModuleConfig(module, moduleParams));
+                    moduleConfigs.add(ModuleConfig.createModuleConfig(module, moduleParams));
                     Console.tick();
                 }
             }
@@ -61,19 +64,8 @@ public class Pipeline {
      */
     public void runPipeline() throws Exception{
         try{
-            for(Module module: modules){
-                switch(module.moduleType){
-                    case "corpusCSV":
-                        CSVInput.run((CorpusCSV) module, project);
-                    case "corpusTXT":
-                        TXTInput.run((CorpusTXT) module, project);
-                    case "corpusPDF":
-                        PDFInput.run((CorpusPDF) module, project);
-                    case "corpusCSV":
-                        CSVInput.run((CorpusCSV) module, project);
-                    case "corpusCSV":
-                        CSVInput.run((CorpusCSV) module, project);
-                }
+            for(ModuleConfig moduleConfig : moduleConfigs){
+                moduleConfig.moduleType.runModule(moduleConfig, projectConfig);
             }
         } catch (Exception e){
             throw e;

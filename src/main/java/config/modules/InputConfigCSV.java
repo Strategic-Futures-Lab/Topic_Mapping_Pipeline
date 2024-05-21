@@ -1,7 +1,8 @@
 package config.modules;
 
 import config.ProjectConfigParser;
-import config.Module;
+import config.ModuleConfig;
+import pipeline.ModuleType;
 
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
  * @author P. Le Bras
  * @version 1
  */
-public class CorpusCSV extends Module {
+public class InputConfigCSV extends ModuleConfig {
 
     private static final String[] MANDATORY_PARAMS = new String[]{"source","output","fields"};
 
@@ -29,8 +30,8 @@ public class CorpusCSV extends Module {
      * @param moduleParams Map of unparsed YAML parameters
      * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public CorpusCSV(String name, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
-        super(name, "corpusCSV");
+    public InputConfigCSV(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+        super(name, type);
         for(String p: MANDATORY_PARAMS){
             if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }

@@ -3,8 +3,9 @@ package input;
 import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
-import config.Project;
-import config.modules.CorpusCSV;
+import config.ModuleConfig;
+import config.ProjectConfig;
+import config.modules.InputConfigCSV;
 import data.Document;
 
 import java.io.IOException;
@@ -28,12 +29,12 @@ public class CSVInput extends InputModule {
      * @param projectParameters project meta parameters
      * @throws IOException If the CSV file cannot be read properly
      */
-    public static void run(CorpusCSV moduleParameters, Project projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
         CSVInput instance = new CSVInput();
-        instance.processParameters(moduleParameters, projectParameters);
+        instance.processParameters((InputConfigCSV) moduleParameters, projectParameters);
         try {
             instance.loadCSV();
             instance.writeJSON();
@@ -46,7 +47,7 @@ public class CSVInput extends InputModule {
     }
 
     // processes project and module parameters
-    private void processParameters(CorpusCSV moduleParameters, Project projectParameters){
+    private void processParameters(InputConfigCSV moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
         source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;

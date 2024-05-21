@@ -5,7 +5,7 @@ import IO.Console;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Project {
+public class ProjectConfig {
 
     /** Top level project directory, optional, defaults to "" */
     public final String projectDirectory;
@@ -32,7 +32,7 @@ public class Project {
      * @param projectParams
      * @throws ProjectConfigParser.ParseException
      */
-    public Project(HashMap<String, Object> projectParams) throws ProjectConfigParser.ParseException {
+    public ProjectConfig(HashMap<String, Object> projectParams) throws ProjectConfigParser.ParseException {
         Console.log("Loading project parameters");
 
         // getting directories

@@ -3,10 +3,10 @@ package input;
 import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
-import config.Project;
-import config.modules.CorpusGTR;
+import config.ModuleConfig;
+import config.ProjectConfig;
+import config.modules.InputConfigGTR;
 import data.Document;
-import org.jsoup.Jsoup;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -47,12 +47,12 @@ public class GTRInput extends InputModule {
      * @param projectParameters project meta parameters
      * @throws IOException If the CSV file cannot be read properly
      */
-    public static void run(CorpusGTR moduleParameters, Project projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
         GTRInput instance = new GTRInput();
-        instance.processParameters(moduleParameters, projectParameters);
+        instance.processParameters((InputConfigGTR) moduleParameters, projectParameters);
         try {
             instance.loadCSV();
             instance.crawlGTR();
@@ -66,7 +66,7 @@ public class GTRInput extends InputModule {
     }
 
     // processes project and module parameters
-    private void processParameters(CorpusGTR moduleParameters, Project projectParameters){
+    private void processParameters(InputConfigGTR moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
         source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;

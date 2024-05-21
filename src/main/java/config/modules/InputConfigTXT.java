@@ -1,17 +1,18 @@
 package config.modules;
 
+import config.ModuleConfig;
 import config.ProjectConfigParser;
-import config.Module;
+import pipeline.ModuleType;
 
 import java.util.HashMap;
 
 /**
- * Class for parsing and storing PDF corpus input parameters
+ * Class for parsing and storing TXT corpus input parameters
  *
  * @author P. Le Bras
  * @version 1
  */
-public class CorpusPDF extends Module {
+public class InputConfigTXT extends ModuleConfig {
 
     private static final String[] MANDATORY_PARAMS = new String[]{"source","output"};
 
@@ -19,8 +20,8 @@ public class CorpusPDF extends Module {
     public final String source;
     /** Filename of the output corpus JSON file */
     public final String output;
-    /** Consider split X pages as a separate document */
-    public final int splitPages;
+    /** Flag for considering empty lines as document separators */
+    public final boolean splitEmptyLines;
 
     /**
      * Constructor, parses and stores module parameters
@@ -28,13 +29,13 @@ public class CorpusPDF extends Module {
      * @param moduleParams Map of unparsed YAML parameters
      * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public CorpusPDF(String name, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
-        super(name, "corpusPDF");
+    public InputConfigTXT(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+        super(name, type);
         for(String p: MANDATORY_PARAMS){
             if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
         source = getStringParam("source", moduleParams);
         output = getStringParam("output", moduleParams);
-        splitPages = getDefaultIntParam("splitPages", moduleParams, 0);
+        splitEmptyLines = getDefaultBooleanParam("emptyLineSplit", moduleParams, false);
     }
 }

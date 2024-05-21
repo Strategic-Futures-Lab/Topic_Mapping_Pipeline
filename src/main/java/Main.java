@@ -1,6 +1,6 @@
 import IO.Console;
 import IO.Timer;
-import config.Pipeline;
+import pipeline.Pipeline;
 
 public class Main {
 
