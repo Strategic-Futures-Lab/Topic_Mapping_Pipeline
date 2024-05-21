@@ -66,9 +66,7 @@ public class TXTInput extends FileInput {
     private void loadTXT(Pair<File, String> txt){
         File file = txt.getLeft();
         String directory = txt.getRight();
-        String rootName = file.getName();
-        Console.log("Processing: "+rootName, 1);
-        rootName = rootName.substring(0, rootName.lastIndexOf('.'));
+        String rootName = file.getName().substring(0, file.getName().lastIndexOf('.'));
         try {
             // load file
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -111,12 +109,9 @@ public class TXTInput extends FileInput {
                     subDocCount++;
                 }
             }
-            Console.tick();
-            if(subDocCount > 0){
-                Console.note("Number of sub-documents extracted: " + subDocCount, 2);
-            }
+            Console.log(file.getName()+" read successfully"+(subDocCount>0?" ("+subDocCount+" sub-documents)":""), 1);
         } catch (Exception e) {
-            Console.error("Could not read text file - skipping");
+            Console.error("Could not read "+file.getName()+" - skipping", 1);
         }
     }
 }

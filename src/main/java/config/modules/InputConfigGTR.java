@@ -42,7 +42,7 @@ public class InputConfigGTR extends ModuleConfig {
         }
         source = getStringParam("source", moduleParams);
         output = getStringParam("output", moduleParams);
-        pidField = getStringParam("urlField", moduleParams);
+        pidField = getStringParam("pidField", moduleParams);
         gtrFields = new HashMap<>();
         HashMap<String, Object> gtrFieldsMap = getMapParam("gtrFields", moduleParams);
         for(String k: gtrFieldsMap.keySet()){

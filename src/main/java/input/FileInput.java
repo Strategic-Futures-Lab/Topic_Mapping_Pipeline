@@ -69,7 +69,7 @@ public abstract class FileInput extends InputModule {
         Console.note("Number of documents loaded: "+documents.size());
     }
 
-    protected void addDocument(HashMap<String, String> docFields){
+    protected synchronized void addDocument(HashMap<String, String> docFields){
         Document doc = new Document(Integer.toString(docCount), docCount);
         for(Map.Entry<String, String> entry: docFields.entrySet()){
             doc.addField(entry.getKey(), entry.getValue());

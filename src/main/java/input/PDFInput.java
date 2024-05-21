@@ -67,9 +67,7 @@ public class PDFInput extends FileInput {
     private void loadPDF(Pair<File, String> pdf){
         File file = pdf.getLeft();
         String directory = pdf.getRight();
-        String rootName = file.getName();
-        Console.log("Processing: "+rootName, 1);
-        rootName = rootName.substring(0, rootName.lastIndexOf('.'));
+        String rootName = file.getName().substring(0, file.getName().lastIndexOf('.'));
         try {
             // load file
             PDDocument doc = PDDocument.load(file);
@@ -87,7 +85,7 @@ public class PDFInput extends FileInput {
                 // read PDF by block of pages
                 for(int pageStart = 1; pageStart<doc.getNumberOfPages(); pageStart+=splitPages){
                     s.setStartPage(pageStart);
-                    int pageEnd = Math.min(pageStart+splitPages+1, doc.getNumberOfPages());
+                    int pageEnd = Math.min(pageStart+splitPages-1, doc.getNumberOfPages());
                     s.setEndPage(pageEnd);
                     String text = s.getText(doc);
                     docFields.put("text", text);
@@ -100,12 +98,9 @@ public class PDFInput extends FileInput {
                 }
 
             }
-            Console.tick();
-            if(subDocCount>0){
-                Console.note("Number of sub-documents extracted: " + subDocCount, 2);
-            }
+            Console.log(file.getName()+" read successfully"+(subDocCount>0?" ("+subDocCount+" sub-documents)":""), 1);
         } catch (Exception e) {
-            Console.error("Could not read pdf file - skipping");
+            Console.error("Could not read "+file.getName()+" - skipping", 1);
         }
     }
 }
