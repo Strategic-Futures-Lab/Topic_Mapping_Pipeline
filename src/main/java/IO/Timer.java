@@ -1,5 +1,6 @@
 package IO;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,13 +11,13 @@ import java.util.Map;
 public class Timer {
 
     private HashMap<String, Long> starts;
-    private HashMap<String, Long> times;
+    private ArrayList<String> times;
 
     private static Timer instance;
 
     private Timer(){
         starts = new HashMap<>();
-        times = new HashMap<>();
+        times = new ArrayList<>();
     }
 
     /**
@@ -36,7 +37,8 @@ public class Timer {
      */
     public static void stop(String key){
         if(instance != null && instance.starts.containsKey(key)){
-            instance.times.put(key, ((System.currentTimeMillis()-instance.starts.get(key))/(long)1000));
+            long time = (System.currentTimeMillis()-instance.starts.get(key))/(long)1000;
+            instance.times.add(key+": " + Math.floorDiv(time, 60) + " m, " + time % 60 + " s.");
             instance.starts.remove(key);
         }
     }
@@ -47,8 +49,8 @@ public class Timer {
      */
     public static void print(){
         if(instance != null){
-            for(Map.Entry<String, Long> time: instance.times.entrySet()){
-                Console.note(time.getKey()+": " + Math.floorDiv(time.getValue(), 60) + " m, " + time.getValue() % 60 + " s.");
+            for(String time: instance.times){
+                Console.note(time);
             }
             instance.times.clear();
         }
