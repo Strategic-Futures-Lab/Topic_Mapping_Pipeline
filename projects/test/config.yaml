@@ -10,15 +10,18 @@ project:
 # run order
 run:
   - csvInput1
-#  - txtInput2
+#  - pdfInput1
+#  - txtInput1
+#  - htmlInput1
+  - gtrInput1
 #  - ldaModel
 
 # CSV load module
 csvInput1:
   run: true
-  type: corpusCSV
-  source: test.csv
-  output: corpus_1.json
+  type: inputCSV
+  source: csv_input.csv
+  output: corpus_csv.json
   fields:
     title: title
     abstract: abs
@@ -26,14 +29,36 @@ csvInput1:
     organisation: org
     value: val
 
-csvInput2:
-  run: false
-  type: corpusTXT
-  source: otherDocs.csv
-  output: corpus_2.json
+pdfInput1:
+  type: inputPDF
+  source: pdfs
+  output: corpus_pdf.json
+  splitPages: 2
+
+txtInput1:
+  type: inputTXT
+  source: texts
+  output: corpus_txt.json
+  emptyLineSplit: false
+
+htmlInput1:
+  type: inputHTML
+  source: html_input.csv
+  output: corpus_html.json
   fields:
     title: title
-    abstract: abstract
+    source: src
+  urlField: url
+  domSelector: div.content
+
+gtrInput1:
+  type: inputGTR
+  source: gtr_input.csv
+  output: corpus_gtr.json
+  gtrFields:
+    abstract: Abstract
+  pidField: pid
+
 
 
 # Modelling module
