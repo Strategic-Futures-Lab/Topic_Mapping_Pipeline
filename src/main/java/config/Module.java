@@ -7,6 +7,9 @@ import java.util.HashMap;
 
 /**
  * Superclass for parsing and storing module parameters, contains a factory static method for creating specialised subclasses
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class Module {
 

@@ -7,6 +7,9 @@ import java.util.HashMap;
 
 /**
  * Class for parsing and storing PDF corpus input parameters
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class CorpusPDF extends Module {
 
@@ -16,6 +19,8 @@ public class CorpusPDF extends Module {
     public final String source;
     /** Filename of the output corpus JSON file */
     public final String output;
+    /** Consider split X pages as a separate document */
+    public final int splitPages;
 
     /**
      * Constructor, parses and stores module parameters
@@ -30,5 +35,6 @@ public class CorpusPDF extends Module {
         }
         source = getStringParam("source", moduleParams);
         output = getStringParam("output", moduleParams);
+        splitPages = getDefaultIntParam("splitPages", moduleParams, 0);
     }
 }

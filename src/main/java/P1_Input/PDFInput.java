@@ -23,7 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author T. Methven, P. Le Bras, A. Gharavi
  * @version 2
+ * @deprecated
  */
+@Deprecated
 public class PDFInput {
 
     /**  List of documents read from PDF directory. */

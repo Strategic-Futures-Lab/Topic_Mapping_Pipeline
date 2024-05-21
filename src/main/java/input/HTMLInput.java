@@ -21,8 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HTMLInput extends InputModule {
 
-    private String sourceFile;
-    private String outputFile;
+    // module parameters
     private HashMap<String, String> docFields;
     private String urlField;
     private String domSelector;
@@ -31,6 +30,7 @@ public class HTMLInput extends InputModule {
     private ConcurrentHashMap<String, String> crawlErrors;
     private int pagesCrawled;
 
+    // Flag for processing PDFs in parallel (may affect order of documents)
     private final static boolean RUN_IN_PARALLEL = true;
     private final static int MAX_RETRIES = 3;
 
@@ -49,7 +49,7 @@ public class HTMLInput extends InputModule {
         try {
             instance.loadCSV();
             instance.crawlHTML();
-            instance.writeJSON(instance.outputFile);
+            instance.writeJSON();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -61,13 +61,13 @@ public class HTMLInput extends InputModule {
     // processes project and module parameters
     private void processParameters(CorpusHTML moduleParameters, Project projectParameters){
         Console.log("Processing parameters");
-        sourceFile = projectParameters.sourceDirectory+moduleParameters.source;
+        source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;
         docFields = moduleParameters.fields;
         urlField = moduleParameters.urlField;
         domSelector = moduleParameters.domSelector;
         Console.tick();
-        Console.info("Crawling HTML pages listed in "+sourceFile+" and saving to "+outputFile, 1);
+        Console.info("Crawling HTML pages listed in "+source+" and saving to "+outputFile, 1);
     }
 
     // loads document data from CSV
@@ -81,7 +81,7 @@ public class HTMLInput extends InputModule {
             documents.put(doc.getId(), doc);
         };
         try {
-            CSVHelper.loadCSVFile(sourceFile, rowProcessor);
+            CSVHelper.loadCSVFile(source, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;

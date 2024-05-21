@@ -31,7 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author T. Methven, A. Gharavi, P. Le Bras
  * @version 2
+ * @deprecated
  */
+@Deprecated
 public class GTRInput {
 
     /** Maximum number of CSV rows the module can process. */

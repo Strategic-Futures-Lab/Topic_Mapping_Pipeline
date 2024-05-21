@@ -22,7 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author T. Methven, P. Le Bras
  * @version 2
+ * @deprecated
  */
+@Deprecated
 public class CSVInput {
 
     /** Maximum number of rows the module can process. */

@@ -7,5 +7,9 @@
  *  - {@link P1_Input.TXTInput} which reads documents from a directory of TXT files or a single TXT file;<br>
  *  - {@link P1_Input.PDFInput} which reads documents from a directory of PDF files;<br>
  *  - {@link P1_Input.GTRInput} which reads grant IDs from a CSV file (with other fields) and crawls Gateway to Research (GtR) to find additional info.
+ *
+ * @deprecated
+ * Replaced by input package in version 3
  */
+@Deprecated
 package P1_Input;

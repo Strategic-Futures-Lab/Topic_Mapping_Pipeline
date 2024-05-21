@@ -12,14 +12,21 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Superclass for input modules;
  * Contains protected properties/methods for each input module to use
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public abstract class InputModule {
 
-    // every input module will fill a list of document
+    // every input module fills a list with document
     protected final ConcurrentHashMap<String, Document> documents = new ConcurrentHashMap<>();
 
+    // every input module has a source (file or directory name) and output file name
+    protected String source;
+    protected String outputFile;
+
     // every input module write the corpus on a JSON file
-    protected void writeJSON(String filename) throws IOException {
+    protected void writeJSON() throws IOException {
         JSONObject root = new JSONObject();
         JSONArray corpus = new JSONArray();
         JSONObject meta = new JSONObject();
@@ -29,7 +36,6 @@ public abstract class InputModule {
             corpus.add(doc.getValue().toJSON());
         }
         root.put("corpus", corpus);
-        JSONHelper.saveJSON(root, filename);
+        JSONHelper.saveJSON(root, outputFile);
     }
-
 }

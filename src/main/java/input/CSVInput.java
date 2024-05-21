@@ -14,13 +14,12 @@ import java.util.Map;
 /**
  * Module generating a corpus from a CSV file
  *
- * @author P. Le Bras
- * @version 2
+ * @author T. Methven, P. Le Bras
+ * @version 3
  */
 public class CSVInput extends InputModule {
 
-    private String sourceFile;
-    private String outputFile;
+    // module parameters
     private HashMap<String, String> docFields;
 
     /**
@@ -37,7 +36,7 @@ public class CSVInput extends InputModule {
         instance.processParameters(moduleParameters, projectParameters);
         try {
             instance.loadCSV();
-            instance.writeJSON(instance.outputFile);
+            instance.writeJSON();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -49,11 +48,11 @@ public class CSVInput extends InputModule {
     // processes project and module parameters
     private void processParameters(CorpusCSV moduleParameters, Project projectParameters){
         Console.log("Processing parameters");
-        sourceFile = projectParameters.sourceDirectory+moduleParameters.source;
+        source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;
         docFields = moduleParameters.fields;
         Console.tick();
-        Console.info("Reading CSV input from "+sourceFile+" and saving to "+outputFile, 1);
+        Console.info("Reading CSV input from "+source+" and saving to "+outputFile, 1);
     }
 
     // loads document data from CSV
@@ -66,7 +65,7 @@ public class CSVInput extends InputModule {
             documents.put(doc.getId(), doc);
         };
         try {
-            CSVHelper.loadCSVFile(sourceFile, rowProcessor);
+            CSVHelper.loadCSVFile(source, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;

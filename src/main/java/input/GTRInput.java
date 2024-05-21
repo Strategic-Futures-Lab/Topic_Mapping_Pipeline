@@ -23,13 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Module generating a corpus from a CSV file containing Gateway to Research project IDs
  *
- * @author P. Le Bras
- * @version 2
+ * @author T. Methven, A. Gharavi, P. Le Bras
+ * @version 3
  */
 public class GTRInput extends InputModule {
 
-    private String sourceFile;
-    private String outputFile;
+    // module parameters
     private HashMap<String, String> docFields;
     private String pidField;
     private HashMap<String, String> gtrFields;
@@ -38,6 +37,7 @@ public class GTRInput extends InputModule {
     private ConcurrentHashMap<String, String> crawlErrors;
     private int projectsCrawled;
 
+    // Flag for processing PDFs in parallel (may affect order of documents)
     private final static boolean RUN_IN_PARALLEL = true;
     private final static int MAX_RETRIES = 3;
 
@@ -56,7 +56,7 @@ public class GTRInput extends InputModule {
         try {
             instance.loadCSV();
             instance.crawlGTR();
-            instance.writeJSON(instance.outputFile);
+            instance.writeJSON();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -68,13 +68,13 @@ public class GTRInput extends InputModule {
     // processes project and module parameters
     private void processParameters(CorpusGTR moduleParameters, Project projectParameters){
         Console.log("Processing parameters");
-        sourceFile = projectParameters.sourceDirectory+moduleParameters.source;
+        source = projectParameters.sourceDirectory+moduleParameters.source;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;
         docFields = moduleParameters.fields;
         pidField = moduleParameters.pidField;
         gtrFields = moduleParameters.gtrFields;
         Console.tick();
-        Console.info("Crawling GtR projects listed in "+sourceFile+" and saving to "+outputFile, 1);
+        Console.info("Crawling GtR projects listed in "+source+" and saving to "+outputFile, 1);
     }
 
     // loads document data from CSV
@@ -88,7 +88,7 @@ public class GTRInput extends InputModule {
             documents.put(doc.getId(), doc);
         };
         try {
-            CSVHelper.loadCSVFile(sourceFile, rowProcessor);
+            CSVHelper.loadCSVFile(source, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;

@@ -7,6 +7,9 @@ import java.util.HashMap;
 
 /**
  * Class for parsing and storing TXT corpus input parameters
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class CorpusTXT extends Module {
 
