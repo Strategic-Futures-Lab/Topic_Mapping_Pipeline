@@ -29,7 +29,7 @@ public class InputConfigPDF extends ModuleConfig {
      * @param moduleParams Map of unparsed YAML parameters
      * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public InputConfigPDF(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+    public InputConfigPDF(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
         super(name, type);
         for(String p: MANDATORY_PARAMS){
             if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
