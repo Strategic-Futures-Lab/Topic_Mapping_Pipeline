@@ -9,11 +9,15 @@ import config.modules.*;
 import java.lang.reflect.InvocationTargetException;
 
 public enum ModuleType {
+
+    // Input modules
     CSVInput (input.CSVInput.class, InputConfigCSV.class),
     TXTInput (input.TXTInput.class, InputConfigTXT.class),
     PDFInput (input.PDFInput.class, InputConfigPDF.class),
     HTMLInput (input.HTMLInput.class, InputConfigHTML.class),
-    GTRInput (input.GTRInput.class, InputConfigGTR.class);
+    GTRInput (input.GTRInput.class, InputConfigGTR.class),
+    // Corpus management modules
+    BuildText (corpus.BuildText.class, BuildTextConfig.class);
 
     public final Class module;
     public final Class config;
@@ -39,6 +43,7 @@ public enum ModuleType {
             case "inputPDF": return PDFInput;
             case "inputHTML": return HTMLInput;
             case "inputGTR": return GTRInput;
+            case "buildText": return BuildText;
             default:
                 throw new ProjectConfigParser.ParseException("Module type \""+typeName+"\" is not recognised");
         }

@@ -10,13 +10,14 @@ project:
 # run order
 run:
   - csvInput1
+  - buildText1
 #  - pdfInput1
 #  - txtInput1
 #  - htmlInput1
-  - gtrInput1
+#  - gtrInput1
 #  - ldaModel
 
-# CSV load module
+# CSV input module
 csvInput1:
   run: true
   type: inputCSV
@@ -29,11 +30,18 @@ csvInput1:
     organisation: org
     value: val
 
+buildText1:
+  type: buildText
+  corpus: corpus_csv.json
+  output: corpus_with_text.json
+  textFields: [ title, abstract ]
+
+
 pdfInput1:
   type: inputPDF
   source: pdfs
   output: corpus_pdf.json
-  splitPages: 2
+#  splitPages: 2
 
 txtInput1:
   type: inputTXT

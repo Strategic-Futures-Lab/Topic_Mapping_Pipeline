@@ -4,10 +4,7 @@ import IO.JSONHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class representing a document.
@@ -119,6 +116,12 @@ public class Document {
     public HashMap<String, String> getFields(){ return fields; }
 
     /**
+     * Getter method for the document data keys
+     * @return The document data keys
+     */
+    public Set<String> getFieldsKey() { return fields.keySet(); }
+
+    /**
      * Getter method for a particular data value, returns null if not found
      * @param key Data key
      * @return The data value or null if key is not found
@@ -166,7 +169,7 @@ public class Document {
     public void addText(String key){
         if(fields.containsKey(key)) {
             initText();
-            text += (text.isEmpty() ? "" : " ") + fields.get(key);
+            text += (text.isEmpty() ? "" : " ---- ") + fields.get(key);
         }
     }
 
@@ -175,6 +178,12 @@ public class Document {
      * @return The text String
      */
     public String getText(){ return text; }
+
+    /**
+     * Checks if the document's text is missing or empty
+     * @return Boolean for text empty/missing
+     */
+    public boolean emptyText(){ return text == null || text.isEmpty(); }
 
     // Parses a string of lemmas (separated by space) and saves into the list of lemmas
     private void parseLemmas(String lemmas){

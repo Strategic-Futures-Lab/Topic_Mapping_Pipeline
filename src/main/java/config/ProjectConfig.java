@@ -21,10 +21,7 @@ public class ProjectConfig {
 
     /** List of fields in documents' docData to overwrite lists of lemmatise and exportModel modules,
      *  optional, defaults to null, i.e., use module level configuration */
-    public final String[] documentFields;
-
-    /** Flag to instruct modules to use project-defined document fields, i.e., if the fields are non-empty */
-    public final boolean useProjectDocFields;
+    public final String[] docFields;
 
 
     /**
@@ -52,8 +49,7 @@ public class ProjectConfig {
 
         // getting document fields
         ArrayList<String> fields = ProjectConfigParser.parseStringList(projectParams.getOrDefault("docFields", new ArrayList<String>()), "project/docFields");
-        documentFields = fields.toArray(new String[0]);
-        useProjectDocFields = documentFields.length != 0;
+        docFields = fields.isEmpty() ? null : fields.toArray(new String[0]);
 
         Console.tick();
     }
