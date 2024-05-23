@@ -7,7 +7,7 @@ import pipeline.ModuleType;
 import java.util.HashMap;
 
 /**
- * Class for loading a corpus (.json) and using document fields to build their text string
+ * Configuration class for BuildText module
  *
  * @author P. Le Bras
  * @version 1

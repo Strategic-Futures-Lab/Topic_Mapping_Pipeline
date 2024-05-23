@@ -7,7 +7,7 @@ import pipeline.ModuleType;
 import java.util.HashMap;
 
 /**
- * Class for parsing and storing TXT corpus input parameters
+ * Configuration class for TXTInput module
  *
  * @author P. Le Bras
  * @version 1

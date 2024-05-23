@@ -7,7 +7,7 @@ import pipeline.ModuleType;
 import java.util.HashMap;
 
 /**
- * Class for parsing and storing PDF corpus input parameters
+ * Configuration class for PDFInput module
  *
  * @author P. Le Bras
  * @version 1

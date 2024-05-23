@@ -7,7 +7,7 @@ import pipeline.ModuleType;
 import java.util.HashMap;
 
 /**
- * Class for parsing and storing CSV corpus input parameters
+ * Configuration class for CSV Input module
  *
  * @author P. Le Bras
  * @version 1

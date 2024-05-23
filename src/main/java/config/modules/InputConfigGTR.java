@@ -7,7 +7,7 @@ import pipeline.ModuleType;
 import java.util.HashMap;
 
 /**
- * Class for parsing and storing GTR corpus input parameters
+ * Configuration class for GTRInput module
  *
  * @author P. Le Bras
  * @version 1
