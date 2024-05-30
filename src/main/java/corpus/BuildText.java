@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Module loading aa corpus JSON file and building a text string from given document fields
+ * Module loading a corpus JSON file and building a text string from given document fields
  *
  * @author P. Le Bras
  * @version 1
@@ -31,9 +31,9 @@ public class BuildText extends CorpusModule {
 
     /**
      * Main module method - processes parameters, loads corpus, builds texts and save corpus again
-     * @param moduleParameters
-     * @param projectParameters
-     * @throws Exception
+     * @param moduleParameters module parameters
+     * @param projectParameters project meta parameters
+     * @throws Exception If the corpus cannot load properly
      */
     public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";

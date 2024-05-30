@@ -8,6 +8,9 @@ import config.modules.*;
 
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Enumeration of all modules in the pipeline, with associated classes (inc. configuration)
+ */
 public enum ModuleType {
 
     // Input modules
