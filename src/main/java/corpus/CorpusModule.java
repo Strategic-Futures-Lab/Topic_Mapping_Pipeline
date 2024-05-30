@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Supercall for corpus management modules, containing typical properties and methods
@@ -23,7 +24,7 @@ import java.util.List;
 public abstract class CorpusModule {
 
     // corpus modules typically handle a list of documents and keep track of the corpus metadata
-    protected HashMap<String, Document> documents;
+    protected ConcurrentHashMap<String, Document> documents;
     protected JSONObject metadata;
 
     // typical corpus module parameters
@@ -34,7 +35,7 @@ public abstract class CorpusModule {
     // method for reading a corpus JSON file and generating a list of documents using default properties
     protected void loadCorpus() throws IOException, ParseException {
         Pair<JSONObject, HashMap<String, Document>> loaded = loadCorpus(corpus);
-        documents = loaded.getRight();
+        documents = new ConcurrentHashMap<> (loaded.getRight());
         metadata = loaded.getLeft();
     }
 
@@ -73,7 +74,7 @@ public abstract class CorpusModule {
     }
 
     // method for writing the (transformed) corpus JSON file
-    protected void writeCorpus(JSONObject meta, HashMap<String, Document> documentList, String filename) throws IOException {
+    protected void writeCorpus(JSONObject meta, ConcurrentHashMap<String, Document> documentList, String filename) throws IOException {
         try {
             JSONObject root = new JSONObject();
             JSONArray corpus = new JSONArray();
