@@ -38,7 +38,7 @@ public class Timer {
     public static void stop(String key){
         if(instance != null && instance.starts.containsKey(key)){
             long time = (System.currentTimeMillis()-instance.starts.get(key))/(long)1000;
-            instance.times.add(key+": " + Math.floorDiv(time, 60) + " m, " + time % 60 + " s.");
+            instance.times.add(key+": " + convert(time));
             instance.starts.remove(key);
         }
     }
@@ -56,4 +56,21 @@ public class Timer {
         }
     }
 
+    /**
+     * Converts a time number to a string representation of time
+     * @param time time in seconds
+     * @return Time string in minutes and seconds
+     */
+    public static String convert(long time){
+        return Math.floorDiv(time, 60) + " m, " + time % 60 + " s.";
+    }
+
+    /**
+     * Converts a time number to a string representation of time
+     * @param time time in seconds
+     * @return Time string in minutes and seconds
+     */
+    public static String convert(float time){
+        return Math.floor(time/60) + " m, " + time % 60 + " s.";
+    }
 }

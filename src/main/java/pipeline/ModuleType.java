@@ -21,7 +21,8 @@ public enum ModuleType {
     GTRInput (input.GTRInput.class, InputConfigGTR.class),
     // Corpus management modules
     BuildText (corpus.BuildText.class, BuildTextConfig.class),
-    MergeCorpus (corpus.MergeCorpus.class, MergeCorpusConfig.class);
+    MergeCorpus (corpus.MergeCorpus.class, MergeCorpusConfig.class),
+    Lemmatise (corpus.Lemmatise.class, LemmatiseConfig.class);
 
     public final Class module;
     public final Class config;
@@ -49,6 +50,7 @@ public enum ModuleType {
             case "inputGTR": return GTRInput;
             case "buildText": return BuildText;
             case "mergeCorpus": return MergeCorpus;
+            case "lemmatise": return Lemmatise;
             default:
                 throw new ProjectConfigParser.ParseException("Module type \""+typeName+"\" is not recognised");
         }
