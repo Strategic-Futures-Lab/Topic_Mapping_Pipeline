@@ -76,7 +76,7 @@ public class PDFInput extends FileInput {
             int subDocCount = 0;
             if(splitPages<1){
                 // read PDF in single block
-                String text = s.getText(doc);
+                String text = cleanText(s.getText(doc));
                 docFields.put("text", text);
                 docFields.put("folder", directory);
                 docFields.put("file", rootName);
@@ -87,7 +87,7 @@ public class PDFInput extends FileInput {
                     s.setStartPage(pageStart);
                     int pageEnd = Math.min(pageStart+splitPages-1, doc.getNumberOfPages());
                     s.setEndPage(pageEnd);
-                    String text = s.getText(doc);
+                    String text = cleanText(s.getText(doc));
                     docFields.put("text", text);
                     docFields.put("folder", directory);
                     docFields.put("file", rootName);
@@ -102,5 +102,10 @@ public class PDFInput extends FileInput {
         } catch (Exception e) {
             Console.error("Could not read "+file.getName()+" - skipping", 1);
         }
+    }
+
+    // fixes typical issues with reading pdf text (new lines, split words)
+    private String cleanText(String in){
+        return in.replaceAll("-\n","").replaceAll("\n", " ");
     }
 }
