@@ -10,7 +10,10 @@ project:
 # run order
 run:
   - csvInput1
+  - csvInput2
+  - mergeCorpus1
   - buildText1
+  - lemmatise1
 #  - pdfInput1
 #  - txtInput1
 #  - htmlInput1
@@ -19,10 +22,9 @@ run:
 
 # CSV input module
 csvInput1:
-  run: true
   type: inputCSV
-  source: csv_input.csv
-  output: corpus_csv.json
+  source: csv_input_1.csv
+  output: corpus_csv_1.json
   fields:
     title: title
     abstract: abs
@@ -30,12 +32,33 @@ csvInput1:
     organisation: org
     value: val
 
+csvInput2:
+  type: inputCSV
+  source: csv_input_2.csv
+  output: corpus_csv_2.json
+  fields:
+    title: title
+    abstract: abs
+    authors: auth
+    organisation: org
+    value: val
+
+mergeCorpus1:
+  type: mergeCorpus
+  corpora: [ corpus_csv_1.json, corpus_csv_2.json ]
+  output: corpus_csv.json
+  docFields: [ title, abstract, authors, organisation, value ]
+
 buildText1:
   type: buildText
   corpus: corpus_csv.json
-  output: corpus_with_text.json
+#  output: corpus_with_text.json
   textFields: [ title, abstract ]
 
+lemmatise1:
+  type: lemmatise
+  corpus: corpus_csv.json
+  stopWords: stopwords.txt
 
 pdfInput1:
   type: inputPDF
