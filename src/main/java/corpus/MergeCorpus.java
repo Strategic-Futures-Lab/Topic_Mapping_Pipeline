@@ -85,7 +85,7 @@ public class MergeCorpus extends CorpusModule {
             }
             corpusIndex++;
         }
-        Console.info(corpusIndex+" copora loaded, "+docIndex+" documents in total", 1);
+        Console.info(corpusIndex+" copora loaded, "+docIndex+" documents in total");
     }
 
     // consolidate the new metadata object

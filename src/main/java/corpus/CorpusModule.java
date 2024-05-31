@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Supercall for corpus management modules, containing typical properties and methods
+ * Super class for corpus management modules, containing typical properties and methods
  *
  * @author P. Le Bras
  * @version 1

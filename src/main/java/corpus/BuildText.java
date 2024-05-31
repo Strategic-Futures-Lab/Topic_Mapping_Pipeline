@@ -26,7 +26,7 @@ public class BuildText extends CorpusModule {
     private int missingTextField = 0;
     private int emptyText = 0;
 
-    // Flag for processing documnents in parallel
+    // Flag for processing documents in parallel
     private final static boolean RUN_IN_PARALLEL = true;
 
     /**
