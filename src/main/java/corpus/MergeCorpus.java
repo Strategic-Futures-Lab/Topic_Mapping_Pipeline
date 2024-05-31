@@ -11,10 +11,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Module loading several corpus JSON files and merging them into a single corpus
@@ -71,6 +69,8 @@ public class MergeCorpus extends CorpusModule {
     private void loadCorpora() throws IOException, ParseException {
         int corpusIndex = 0;
         int docIndex = 0;
+        documents = new ConcurrentHashMap<>();
+        metadataList = new ArrayList<>();
         for(String filename: corpora){
             Pair<JSONObject, HashMap<String, Document>> loadedCorpus = loadCorpus(filename);
             metadataList.add(loadedCorpus.getLeft());
@@ -79,6 +79,7 @@ public class MergeCorpus extends CorpusModule {
                 String newId = corpusIndex+"_"+doc.getId();
                 doc.setId(newId);
                 doc.setIndex(docIndex);
+                filterDocumentFields(doc);
                 documents.put(newId, doc);
                 docIndex++;
             }
