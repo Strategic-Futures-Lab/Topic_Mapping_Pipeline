@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
  * @author T. Methven, P. Le Bras
  * @version 2
  */
+@Deprecated
 public class Lemmatise {
 
     /** JSON object containing the documents metadata. */

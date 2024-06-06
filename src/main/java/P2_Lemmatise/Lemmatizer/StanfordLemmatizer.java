@@ -19,6 +19,7 @@ import java.util.Properties;
  * @author S. Padilla, T. Methven, P. Le Bras
  * @version 2
  */
+@Deprecated
 public class StanfordLemmatizer {
 
     /** Lemmatizer pipeline, eg annotating + tokenising + PoS tagging + lemmatising. */

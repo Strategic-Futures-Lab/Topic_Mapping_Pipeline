@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
  * @author P. Le Bras
  * @version 1
  */
+@Deprecated
 public class ProjectManager {
 
     /** Project meta-parameters. */

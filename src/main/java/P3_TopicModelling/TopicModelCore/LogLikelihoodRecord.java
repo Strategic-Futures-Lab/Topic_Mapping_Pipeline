@@ -14,6 +14,7 @@ import java.util.List;
  * @author P. Le Bras
  * @version 1
  */
+@Deprecated
 public class LogLikelihoodRecord {
 
     /**

@@ -12,6 +12,7 @@ import java.util.HashMap;
  * @author P. Le Bras
  * @version 1
  */
+@Deprecated
 public class InputModuleSpecs{
 
     /** Which module to run: CSV, PDF, GTR or TXT. */

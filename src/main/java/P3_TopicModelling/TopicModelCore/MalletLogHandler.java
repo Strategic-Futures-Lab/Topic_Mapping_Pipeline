@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
  * @author P. Le Bras
  * @version 1
  */
+@Deprecated
 public class MalletLogHandler extends Handler {
 
     /** List of log-likelihood logs recorded from MALLET. */

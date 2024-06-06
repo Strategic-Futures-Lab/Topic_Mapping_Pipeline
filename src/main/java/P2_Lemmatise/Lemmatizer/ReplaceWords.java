@@ -10,6 +10,7 @@ import java.util.stream.Stream;
  * @author P. Le Bras
  * @version 1
  */
+@Deprecated
 public class ReplaceWords {
 
     public static final Map<String, String> REPLACEWORDS = Stream.of(new String[][] {

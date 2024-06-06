@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
  * @author P. Le Bras
  * @version 1
  */
+@Deprecated
 public class LemmatiseModuleSpecs {
 
     /** Filename of corpus JSON file (from {@link P1_Input} modules). */

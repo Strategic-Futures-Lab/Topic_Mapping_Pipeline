@@ -8,6 +8,7 @@ import java.util.List;
  * @author S. Padilla, T. Methven, P. Le Bras
  * @version 2
  */
+@Deprecated
 public class StopWords {
 
     /**
