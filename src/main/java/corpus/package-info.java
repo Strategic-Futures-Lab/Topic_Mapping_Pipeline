@@ -1,4 +1,4 @@
 /**
- * Contains modules for corpus management, including cleaning texts.
+ * Contains modules for corpus management, including cleaning texts
  */
 package corpus;
