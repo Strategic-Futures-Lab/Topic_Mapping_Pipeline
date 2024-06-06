@@ -76,11 +76,10 @@ public class MergeCorpus extends CorpusModule {
             metadataList.add(loadedCorpus.getLeft());
             for(Map.Entry<String, Document> entry: loadedCorpus.getRight().entrySet()){
                 Document doc = entry.getValue();
-                String newId = corpusIndex+"_"+doc.getId();
-                doc.setId(newId);
+                doc.prefixId(Integer.toString(corpusIndex));
                 doc.setIndex(docIndex);
                 filterDocumentFields(doc);
-                documents.put(newId, doc);
+                documents.put(doc.getId(), doc);
                 docIndex++;
             }
             corpusIndex++;

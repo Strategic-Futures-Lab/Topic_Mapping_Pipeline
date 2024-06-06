@@ -36,7 +36,7 @@ public class Document {
 
     /**
      * JSON constructor, used when loading from JSON file
-     * @param doc
+     * @param doc Document to parse
      */
     public Document(JSONObject doc){
         id = (String) doc.get("id");
@@ -270,9 +270,7 @@ public class Document {
         root.put("index", idx);
         // Saving fields
         JSONObject data = new JSONObject();
-        for(Map.Entry<String, String> entry: fields.entrySet()){
-            data.put(entry.getKey(), entry.getValue());
-        }
+        data.putAll(fields);
         root.put("data", data);
         // Saving text
         if(text!=null && !text.isEmpty()){

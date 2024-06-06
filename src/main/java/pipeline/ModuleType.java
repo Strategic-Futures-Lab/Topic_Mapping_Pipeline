@@ -44,17 +44,19 @@ public enum ModuleType {
     }
 
     public static ModuleType getType(String typeName) throws ProjectConfigParser.ParseException {
-        switch (typeName){
-            case "inputCSV": return CSVInput;
-            case "inputTXT": return TXTInput;
-            case "inputPDF": return PDFInput;
-            case "inputHTML": return HTMLInput;
-            case "inputGTR": return GTRInput;
-            case "buildText": return BuildText;
-            case "mergeCorpus": return MergeCorpus;
-            case "lemmatise": return Lemmatise;
-            default:
-                throw new ProjectConfigParser.ParseException("Module type \""+typeName+"\" is not recognised");
-        }
+        return switch (typeName) {
+            case "inputCSV" -> CSVInput;
+            case "inputTXT" -> TXTInput;
+            case "inputPDF" -> PDFInput;
+            case "inputHTML" -> HTMLInput;
+            case "inputGTR" -> GTRInput;
+            case "buildText" -> BuildText;
+            case "mergeCorpus" -> MergeCorpus;
+            case "stopPhrases" -> StopPhrases;
+            case "lemmatise" -> Lemmatise;
+            case "stopWords" -> StopWords;
+            default ->
+                    throw new ProjectConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
+        };
     }
 }

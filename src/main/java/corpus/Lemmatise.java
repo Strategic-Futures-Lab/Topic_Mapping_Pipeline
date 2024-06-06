@@ -8,7 +8,6 @@ import config.modules.LemmatiseConfig;
 import corpus.lemmatizer.StanfordLemmatizer;
 import data.Document;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
