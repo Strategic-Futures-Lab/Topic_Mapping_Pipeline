@@ -179,6 +179,12 @@ public class Document {
     public String getText(){ return text; }
 
     /**
+     * Setter for the document text String
+     * @param txt Text to set as document text
+     */
+    public void setText(String txt){ text = txt; }
+
+    /**
      * Checks if the document's text is missing or empty
      * @return Boolean for text empty/missing
      */
@@ -208,7 +214,7 @@ public class Document {
      * Returns the number of lemmas
      * @return The number of lemmas
      */
-    public int getNumLemmas(){ return lemmasList.size(); }
+    public int getNumLemmas(){ return lemmasList==null ? 0 : lemmasList.size(); }
 
     /**
      * Setter for the list of lemmas
@@ -248,6 +254,12 @@ public class Document {
     }
 
     /**
+     * Checks if the document's list of lemmas is missing
+     * @return Boolean for lemma list present
+     */
+    public boolean hasLemmas() { return lemmasList != null; }
+
+    /**
      * Formats the document into a JSON object to write on file
      * @return The JSON formatted document
      */
@@ -267,7 +279,7 @@ public class Document {
             root.put("text", text);
         }
         // Saving Lemmas
-        if(lemmasList!=null && !lemmasList.isEmpty()){
+        if(lemmasList!=null){
             root.put("lemmas", getLemmasString());
         }
         return root;

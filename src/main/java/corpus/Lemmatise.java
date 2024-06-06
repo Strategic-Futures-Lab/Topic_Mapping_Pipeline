@@ -84,6 +84,7 @@ public class Lemmatise extends CleaningModule {
         if(keepWordsFile != null) Console.info("Keeping words in "+keepWordsFile, 2);
     }
 
+    // launches lemmatisation process
     private void lemmatise(){
         Console.log("Loading lemmatiser, following input from Stanford CoreNLP");
         slem = new StanfordLemmatizer();
@@ -124,6 +125,7 @@ public class Lemmatise extends CleaningModule {
         Console.submoduleComplete("Lemmatisation");
     }
 
+    // lemmatises one document
     private void lemmatiseDocument(Map.Entry<String, Document> docEntry){
         if(documentsProcessed % UPDATE_FREQUENCY == 0 && documentsProcessed != 0) {
             long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
