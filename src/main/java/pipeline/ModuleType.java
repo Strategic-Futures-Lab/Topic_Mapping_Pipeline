@@ -22,7 +22,9 @@ public enum ModuleType {
     // Corpus management modules
     BuildText (corpus.BuildText.class, BuildTextConfig.class),
     MergeCorpus (corpus.MergeCorpus.class, MergeCorpusConfig.class),
-    Lemmatise (corpus.Lemmatise.class, LemmatiseConfig.class);
+    StopPhrases (corpus.StopPhrases.class, StopPhrasesConfig.class),
+    Lemmatise (corpus.Lemmatise.class, LemmatiseConfig.class),
+    StopWords (corpus.StopPhrases.class, StopWordsConfig.class);
 
     public final Class module;
     public final Class config;

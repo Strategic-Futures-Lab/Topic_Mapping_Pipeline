@@ -26,9 +26,13 @@ public class LemmatiseConfig extends ModuleConfig {
     public final String stopWords;
     /** Filename of the keep word file */
     public final String keepWords;
-    /** List of document fields to keep */
-    public final String[] docFields;
 
+    /**
+     * Constructor, parses and stores module parameters
+     * @param name Module name as described in the YAML config file
+     * @param moduleParams Map of unparsed YAML parameters
+     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     */
     public LemmatiseConfig(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
         super(name, type);
         // mandatory parameters
@@ -41,10 +45,5 @@ public class LemmatiseConfig extends ModuleConfig {
         stopPhrases = getDefaultStringParam("stopPhrases", moduleParams, null);
         stopWords = getDefaultStringParam("stopWords", moduleParams, null);
         keepWords = getDefaultStringParam("keptWords", moduleParams, null);
-        if(moduleParams.containsKey("docFields")){
-            docFields = getStringListParam("docFields", moduleParams).toArray(new String[0]);
-        } else {
-            docFields = null;
-        }
     }
 }

@@ -73,7 +73,6 @@ public class Lemmatise extends CleaningModule {
         Console.log("Processing parameters");
         corpus = projectParameters.dataDirectory+moduleParameters.corpus;
         output = projectParameters.dataDirectory+moduleParameters.output;
-        docFields = moduleParameters.docFields == null ? projectParameters.docFields : moduleParameters.docFields;
         stopPhrasesFile = moduleParameters.stopPhrases == null ? null : projectParameters.sourceDirectory+moduleParameters.stopPhrases;
         stopWordsFile = moduleParameters.stopWords == null ? null : projectParameters.sourceDirectory+moduleParameters.stopWords;
         keepWordsFile = moduleParameters.keepWords == null ? null : projectParameters.sourceDirectory+moduleParameters.keepWords;

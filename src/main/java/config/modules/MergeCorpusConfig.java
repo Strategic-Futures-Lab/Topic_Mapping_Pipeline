@@ -23,6 +23,12 @@ public class MergeCorpusConfig extends ModuleConfig {
     /** List of document fields to keep */
     public final String[] docFields;
 
+    /**
+     * Constructor, parses and stores module parameters
+     * @param name Module name as described in the YAML config file
+     * @param moduleParams Map of unparsed YAML parameters
+     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     */
     public MergeCorpusConfig(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
         super(name, type);
         // mandatory parameters
