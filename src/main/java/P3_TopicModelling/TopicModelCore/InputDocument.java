@@ -8,6 +8,7 @@ import java.io.Serializable;
  * @author S. Padilla, T. Methven, P. Le Bras
  * @version 1
  */
+@Deprecated
 public class InputDocument implements Serializable {
 
     /** Serialisation ID. */

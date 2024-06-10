@@ -11,6 +11,7 @@ import java.util.List;
  * @author P. Le Bras.
  * @version 1
  */
+@Deprecated
 public class ModelledDocument implements java.io.Serializable{
 
     /** Serialisation ID. */

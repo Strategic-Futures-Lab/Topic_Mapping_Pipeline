@@ -13,6 +13,7 @@ import java.util.List;
  * @author S. Padilla, T. Methven, P. Le Bras
  * @version 1
  */
+@Deprecated
 public class ModelledTopic implements java.io.Serializable{
 
     /** Serialisation ID. */
