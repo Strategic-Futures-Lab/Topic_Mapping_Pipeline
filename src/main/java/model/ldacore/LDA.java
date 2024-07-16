@@ -29,28 +29,8 @@ public class LDA implements Serializable {
     @Serial
     private static final long serialVersionUID = -8983749417082119056L;
 
-    // MALLET options
-    /** Number of topics to model */
-    public int nTopics = 50;
-    /** Random seed for the sampler */
-    public int seed = 1;
-    /** Number of sampling iterations */
-    public int samplingIterations = 500;
-    /** Number of maximisation iterations */
-    public int maximisationIterations = 50;
-    /** Sum of alpha dirichlet priors (topics over documents):
-     * High alpha = document mix of more topics;
-     * Low alpha = document mixture of few/one topics */
-    public double alphaSum = 1.0;
-    /** Beta dirichlet prior (words over topics):
-     * High beta = topic mix of more words;
-     * Low beta = topic mix of few words */
-    public double beta = 0.01;
-    /** Flag for making alpha values symmetric:
-     * if asymmetric, some topics more likely to appear across documents */
-    public boolean symmetricAlpha = false;
-    /** Number of iterations between hyperparameters optimisations */
-    public int optimisationInterval = 50;
+    /** LDA parameters */
+    public LDAParameters ldaParameters;
 
     /** Flag for calculating the word distribution differences between documents and topics */
     public boolean getWordDistances = false;
@@ -90,7 +70,8 @@ public class LDA implements Serializable {
      * Constructor taking a list of documents to model
      * @param docs List of documents to model topics from
      */
-    public LDA(List<LDADocument> docs){
+    public LDA(List<LDADocument> docs, LDAParameters ldaParams){
+        ldaParameters = ldaParams;
         setDocuments(docs);
     }
 
@@ -147,16 +128,16 @@ public class LDA implements Serializable {
         instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1));
 
         // Step 3: prepare the model
-        model = new ParallelTopicModel(nTopics, alphaSum, beta); // create model with n topics, alpha sum and beta
-        model.setRandomSeed(seed); // set seed
-        model.setSymmetricAlpha(symmetricAlpha); // set symmetrical optimisation of alphas
+        model = new ParallelTopicModel(ldaParameters.nTopics, ldaParameters.alphaSum, ldaParameters.beta); // create model with n topics, alpha sum and beta
+        model.setRandomSeed(ldaParameters.seed); // set seed
+        model.setSymmetricAlpha(ldaParameters.symmetricAlpha); // set symmetrical optimisation of alphas
         model.addInstances(instances); // add documents
-        model.setNumIterations(samplingIterations); // set n iterations
+        model.setNumIterations(ldaParameters.samplingIterations); // set n iterations
         model.setNumThreads(PROC); // set n threads
         int topicPrintInterval = 50;
         int wordsPerTopicPrint = 10;
         model.setTopicDisplay(topicPrintInterval, wordsPerTopicPrint); // set topic logs, print interval and n words
-        model.setOptimizeInterval(optimisationInterval); // set interval before optimising priors
+        model.setOptimizeInterval(ldaParameters.optimisationInterval); // set interval before optimising priors
 
         // Step 4: run the model
         // add custom log handler
@@ -165,14 +146,14 @@ public class LDA implements Serializable {
         // model
         try {
             model.estimate();
-            if(maximisationIterations > 0) model.maximize(maximisationIterations);
+            if(ldaParameters.maximisationIterations > 0) model.maximize(ldaParameters.maximisationIterations);
         } catch (Exception e){
             throw new LDAModelException("MALLET could not estimate the model");
         }
         // record logs
         ParallelTopicModel.logger.removeHandler(logHandler);
-        logLikelihoodLogs = new LikelihoodLogs(logHandler.getLLRecords(), model.totalTokens, model.modelLogLikelihood(), samplingIterations);
-        topicLogs = new TopicLogs(logHandler.getTopicRecords(), nTopics, samplingIterations, topicPrintInterval);
+        logLikelihoodLogs = new LikelihoodLogs(logHandler.getLLRecords(), model.totalTokens, model.modelLogLikelihood(), ldaParameters.samplingIterations);
+        topicLogs = new TopicLogs(logHandler.getTopicRecords(), ldaParameters.nTopics, ldaParameters.samplingIterations, topicPrintInterval);
         // writing MALLET diagnostics
         TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, wordsPerTopicPrint);
         try{

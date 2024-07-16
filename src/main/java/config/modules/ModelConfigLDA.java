@@ -2,6 +2,7 @@ package config.modules;
 
 import config.ModuleConfig;
 import config.ProjectConfigParser;
+import model.ldacore.LDAParameters;
 import pipeline.ModuleType;
 
 import java.util.HashMap;
@@ -14,26 +15,10 @@ public class ModelConfigLDA extends ModuleConfig {
     public final String corpus;
     /** Filename of the output model file */
     public final String output;
-    /** Number of topics to generate */
-    public final int topics;
-    /** Number of modelling iterations to perform */
-    public final int iter;
-    /** Number of maximisation iterations to perform */
-    public final int iterMax;
-    /** Sum of alpha dirichlet priors (topics over documents):
-     * High alpha = document mix of more topics;
-     * Low alpha = document mixture of few/one topics */
-    public final double alphaSum;
-    /** Flag for running a symmetrical optimization of alpha */
-    public final boolean symmetricAlpha;
-    /** Beta dirichlet prior (words over topics):
-     * High beta = topic mix of more words;
-     * Low beta = topic mix of few words */
-    public final double beta;
-    /** Iteration interval between hyperparameters optimisation */
-    public final int optiInterval;
-    /** Model initialisation seed */
-    public final int seed;
+    /** LDA parameters */
+    public final LDAParameters ldaParams;
+    /** Minimum number of lemmas for a document to be included in the model */
+    public final int minLemmas;
     /** Flag for generating document to topic distance based on word distributions */
     public final boolean wordDistances;
     /** Name of directory where to save log files */
@@ -52,14 +37,15 @@ public class ModelConfigLDA extends ModuleConfig {
         }
         corpus = getStringParam("corpus", moduleParams);
         output = getStringParam("model", moduleParams);
-        topics = getIntParam("topics", moduleParams);
-        iter = getDefaultIntParam("iterations", moduleParams, 2000);
-        iterMax = getDefaultIntParam("maximisations", moduleParams, 50);
-        alphaSum = getDefaultDoubleParam("alphaSum", moduleParams, 1.0);
-        symmetricAlpha = getDefaultBooleanParam("symmetricAlpha", moduleParams, false);
-        beta = getDefaultDoubleParam("beta", moduleParams, 0.01);
-        optiInterval = getDefaultIntParam("optimisationInterval", moduleParams, 50);
-        seed = getDefaultIntParam("seed", moduleParams, 151);
+        ldaParams = new LDAParameters(getIntParam("topics", moduleParams));
+        ldaParams.samplingIterations = getDefaultIntParam("iterations", moduleParams, 2000);
+        ldaParams.maximisationIterations = getDefaultIntParam("maximisations", moduleParams, 50);
+        ldaParams.alphaSum = getDefaultDoubleParam("alphaSum", moduleParams, 1.0);
+        ldaParams.symmetricAlpha = getDefaultBooleanParam("symmetricAlpha", moduleParams, false);
+        ldaParams.beta = getDefaultDoubleParam("beta", moduleParams, 0.01);
+        ldaParams.optimisationInterval = getDefaultIntParam("optimisationInterval", moduleParams, 50);
+        ldaParams.seed = getDefaultIntParam("seed", moduleParams, 151);
+        minLemmas = getDefaultIntParam("minLemmas", moduleParams, 10);
         wordDistances = getDefaultBooleanParam("wordDistances", moduleParams, false);
         logDir = ProjectConfigParser.checkDirectory(getDefaultStringParam("logs", moduleParams, ""));
         serialised = getDefaultStringParam("serialised", moduleParams, null);
