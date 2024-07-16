@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides method for loading a typical corpus file.
  *
  * @author P. Le Bras
- * @version 2
+ * @version 1
  */
 public class Corpus {
 

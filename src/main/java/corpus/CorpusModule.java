@@ -37,29 +37,6 @@ public abstract class CorpusModule {
         corpus = new Corpus(corpusFile);
     }
 
-    // method for reading a corpus JSON file and generating a list of documents
-    // returns a pair containing the metadata and list of documents
-//    protected Pair<JSONObject, HashMap<String, Document>> loadCorpus(String filename) throws IOException, ParseException {
-//        try {
-//            JSONObject input = JSONHelper.loadJSON(filename);
-//            JSONObject meta = (JSONObject) input.get("metadata");
-//            JSONArray corpus = (JSONArray) input.get("corpus");
-//            HashMap<String, Document> documentList = new HashMap<>();
-//            for(JSONObject jsonDoc: (Iterable<JSONObject>) corpus){
-//                Document doc = new Document(jsonDoc);
-//                documentList.put(doc.getId(), doc);
-//            }
-//            Console.note("Loaded "+documentList.size()+" documents", 1);
-//            return new Pair<>(meta, documentList);
-//        } catch (IOException e) {
-//            Console.error("Loading corpus file "+filename+" failed");
-//            throw e;
-//        } catch (ParseException e) {
-//            Console.error("Parsing corpus file "+filename+" failed");
-//            throw e;
-//        }
-//    }
-
     // Method for filtering document data
     protected void filterDocumentFields(Document doc){
         List<String> fieldsFilter = docFields == null ? doc.getFieldsKey().stream().toList() : Arrays.stream(docFields).toList();
