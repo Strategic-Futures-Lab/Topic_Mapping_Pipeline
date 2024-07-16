@@ -1,7 +1,6 @@
 package model.ldacore;
 
 import IO.Console;
-import P3_TopicModelling.TopicModelCore.ModelledDocument;
 import cc.mallet.topics.*;
 import cc.mallet.types.*;
 import data.SparseVector;
@@ -16,7 +15,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class LDAModel implements Serializable {
+public class LDA implements Serializable {
 
     /**
      * Exception class for errors during the modelling process
@@ -77,13 +76,13 @@ public class LDAModel implements Serializable {
     /**
      * Empty constructor for inference, attributes loaded from serialised model
      */
-    public LDAModel(){}
+    public LDA(){}
 
     /**
      * Constructor taking a map of documents to model
      * @param docs Map of documents to model topics from
      */
-    public LDAModel(HashMap<String, LDADocument> docs){
+    public LDA(HashMap<String, LDADocument> docs){
         documents = docs;
     }
 
@@ -91,7 +90,7 @@ public class LDAModel implements Serializable {
      * Constructor taking a list of documents to model
      * @param docs List of documents to model topics from
      */
-    public LDAModel(List<LDADocument> docs){
+    public LDA(List<LDADocument> docs){
         setDocuments(docs);
     }
 

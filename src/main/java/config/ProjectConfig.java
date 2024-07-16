@@ -36,10 +36,10 @@ public class ProjectConfig {
         String sourceDir = "", dataDir = "", outputDir = "";
         if(projectParams.containsKey("directories")){
             HashMap<String, Object> directories = ProjectConfigParser.parseMap(projectParams.get("directories"), "project/directories");
-            projectDirectory = checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("project", ""), "project/directories/project"));
-            sourceDir = checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("sources", ""), "project/directories/sources"));
-            dataDir = checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("data", ""), "project/directories/data"));
-            outputDir = checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("output", ""), "project/directories/output"));
+            projectDirectory = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("project", ""), "project/directories/project"));
+            sourceDir = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("sources", ""), "project/directories/sources"));
+            dataDir = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("data", ""), "project/directories/data"));
+            outputDir = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("output", ""), "project/directories/output"));
         } else {
             projectDirectory = "";
         }
@@ -52,14 +52,6 @@ public class ProjectConfig {
         docFields = fields.isEmpty() ? null : fields.toArray(new String[0]);
 
         Console.tick();
-    }
-
-    // Ensures a directory names ends with "/"
-    private String checkDirectory(String dirName){
-        if(!dirName.isEmpty() && !dirName.endsWith("/")){
-            return dirName+"/";
-        }
-        return dirName;
     }
 
 }

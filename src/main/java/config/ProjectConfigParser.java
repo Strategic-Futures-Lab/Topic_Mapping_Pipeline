@@ -3,6 +3,7 @@ package config;
 import IO.Console;
 import IO.YAMLHelper;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,6 +153,19 @@ public class ProjectConfigParser {
         } catch (YAMLHelper.YAMLParseException e){
             throw new ParseException("Config \""+cfg+"\": "+e.getMessage());
         }
+    }
+
+    /**
+     * Processes a String and ensures it is a valid directory name (e.g., ends with "/" on Unix systems)
+     * @param dirName String to check
+     * @return Valid directory name
+     */
+    public static String checkDirectory(String dirName){
+        String sep = File.separator;
+        if(!dirName.isEmpty() && !dirName.endsWith(sep)){
+            return dirName+sep;
+        }
+        return dirName;
     }
 
     private static void parseConfig(HashMap<String, Object> configMap) throws ParseException{

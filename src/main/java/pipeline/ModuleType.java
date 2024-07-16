@@ -24,7 +24,9 @@ public enum ModuleType {
     MergeCorpus (corpus.MergeCorpus.class, MergeCorpusConfig.class),
     StopPhrases (corpus.StopPhrases.class, StopPhrasesConfig.class),
     Lemmatise (corpus.Lemmatise.class, LemmatiseConfig.class),
-    StopWords (corpus.StopPhrases.class, StopWordsConfig.class);
+    StopWords (corpus.StopPhrases.class, StopWordsConfig.class),
+    // Modelling modules
+    LDAModel (model.LDAModel.class, ModelConfigLDA.class);
 
     public final Class module;
     public final Class config;
@@ -55,6 +57,7 @@ public enum ModuleType {
             case "stopPhrases" -> StopPhrases;
             case "lemmatise" -> Lemmatise;
             case "stopWords" -> StopWords;
+            case "modelLDA" -> LDAModel;
             default ->
                     throw new ProjectConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
         };
