@@ -44,6 +44,12 @@ public class LDADocument implements Serializable {
     }
 
     /**
+     * Getter for the document id
+     * @return the document id
+     */
+    public String getId() { return docId; }
+
+    /**
      * Setter method for the document index (in model)
      * @param idx integer index
      */
@@ -113,4 +119,14 @@ public class LDADocument implements Serializable {
             }
         }
     }
+
+    /**
+     * @return The document id
+     */
+    public String id(){ return docId; }
+
+    /**
+     * @return The document text
+     */
+    public String text(){ return text; }
 }

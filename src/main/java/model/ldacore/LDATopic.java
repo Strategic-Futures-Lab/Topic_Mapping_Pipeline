@@ -1,6 +1,6 @@
 package model.ldacore;
 
-import PY_Helper.SparseVector;
+import data.SparseVector;
 import data.Pair;
 
 import java.io.Serializable;

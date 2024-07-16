@@ -7,4 +7,5 @@
  * It also capture logs from MALLET, using {@link P3_TopicModelling.TopicModelCore.MalletLogHandler} and stores
  * log-likelihood ({@link P3_TopicModelling.TopicModelCore.LogLikelihoodRecord}) and topics ({@link P3_TopicModelling.TopicModelCore.TopicRecord}) logs.
  */
+@Deprecated
 package P3_TopicModelling.TopicModelCore;

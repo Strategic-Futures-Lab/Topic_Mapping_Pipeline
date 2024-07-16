@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * @author S. Padilla, T. Methven, P. Le Bras, A. Vidal
  * @version 4
  */
+@Deprecated
 public class TopicModel implements Serializable {
 
     /** Number of threads to use for parallel topic modelling. */
