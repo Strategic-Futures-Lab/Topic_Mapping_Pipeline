@@ -2,6 +2,7 @@ package corpus;
 
 import IO.Console;
 import IO.JSONHelper;
+import data.Corpus;
 import data.Document;
 import data.Pair;
 import org.json.simple.JSONArray;
@@ -24,43 +25,40 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class CorpusModule {
 
     // corpus modules typically handle a list of documents and keep track of the corpus metadata
-    protected ConcurrentHashMap<String, Document> documents;
-    protected JSONObject metadata;
+    protected Corpus corpus;
 
     // typical corpus module parameters
-    protected String corpus;
-    protected String output;
+    protected String corpusFile;
+    protected String outputFile;
     protected String[] docFields;
 
     // method for reading a corpus JSON file and generating a list of documents using default properties
     protected void loadCorpus() throws IOException, ParseException {
-        Pair<JSONObject, HashMap<String, Document>> loaded = loadCorpus(corpus);
-        documents = new ConcurrentHashMap<> (loaded.getRight());
-        metadata = loaded.getLeft();
+        corpus = new Corpus(corpusFile);
     }
 
     // method for reading a corpus JSON file and generating a list of documents
     // returns a pair containing the metadata and list of documents
-    protected Pair<JSONObject, HashMap<String, Document>> loadCorpus(String filename) throws IOException, ParseException {
-        try {
-            JSONObject input = JSONHelper.loadJSON(filename);
-            JSONObject meta = (JSONObject) input.get("metadata");
-            JSONArray corpus = (JSONArray) input.get("corpus");
-            HashMap<String, Document> documentList = new HashMap<>();
-            for(JSONObject jsonDoc: (Iterable<JSONObject>) corpus){
-                Document doc = new Document(jsonDoc);
-                documentList.put(doc.getId(), doc);
-            }
-            Console.note("Loaded "+documentList.size()+" documents", 1);
-            return new Pair<>(meta, documentList);
-        } catch (IOException e) {
-            Console.error("Loading corpus file "+filename+" failed");
-            throw e;
-        } catch (ParseException e) {
-            Console.error("Parsing corpus file "+filename+" failed");
-            throw e;
-        }
-    }
+//    protected Pair<JSONObject, HashMap<String, Document>> loadCorpus(String filename) throws IOException, ParseException {
+//        try {
+//            JSONObject input = JSONHelper.loadJSON(filename);
+//            JSONObject meta = (JSONObject) input.get("metadata");
+//            JSONArray corpus = (JSONArray) input.get("corpus");
+//            HashMap<String, Document> documentList = new HashMap<>();
+//            for(JSONObject jsonDoc: (Iterable<JSONObject>) corpus){
+//                Document doc = new Document(jsonDoc);
+//                documentList.put(doc.getId(), doc);
+//            }
+//            Console.note("Loaded "+documentList.size()+" documents", 1);
+//            return new Pair<>(meta, documentList);
+//        } catch (IOException e) {
+//            Console.error("Loading corpus file "+filename+" failed");
+//            throw e;
+//        } catch (ParseException e) {
+//            Console.error("Parsing corpus file "+filename+" failed");
+//            throw e;
+//        }
+//    }
 
     // Method for filtering document data
     protected void filterDocumentFields(Document doc){
@@ -70,7 +68,7 @@ public abstract class CorpusModule {
 
     // method for writing the (transformed) corpus JSON file using default properties
     protected void writeCorpus() throws IOException {
-        writeCorpus(metadata, documents, output);
+        corpus.writeCorpus(outputFile);
     }
 
     // method for writing the (transformed) corpus JSON file

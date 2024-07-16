@@ -37,7 +37,7 @@ public class CSVInput extends InputModule {
         instance.processParameters((InputConfigCSV) moduleParameters, projectParameters);
         try {
             instance.loadCSV();
-            instance.writeJSON();
+            instance.writeCorpus();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -63,7 +63,7 @@ public class CSVInput extends InputModule {
             for(Map.Entry<String, String> entry: docFields.entrySet()){
                 doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
-            documents.put(doc.getId(), doc);
+            corpus.add(doc.getId(), doc);
         };
         try {
             CSVHelper.loadCSVFile(source, rowProcessor);
@@ -71,7 +71,7 @@ public class CSVInput extends InputModule {
             Console.error("Error while reading the CSV input");
             throw e;
         } finally {
-            Console.note("Number of documents loaded from file: "+documents.size());
+            Console.note("Number of documents loaded from file: "+corpus.size());
         }
     }
 }

@@ -56,7 +56,7 @@ public class GTRInput extends InputModule {
         try {
             instance.loadCSV();
             instance.crawlGTR();
-            instance.writeJSON();
+            instance.writeCorpus();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -85,7 +85,7 @@ public class GTRInput extends InputModule {
                 doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
             doc.addField("pid", row.getField(pidField));
-            documents.put(doc.getId(), doc);
+            corpus.add(doc.getId(), doc);
         };
         try {
             CSVHelper.loadCSVFile(source, rowProcessor);
@@ -93,7 +93,7 @@ public class GTRInput extends InputModule {
             Console.error("Error while reading the CSV input");
             throw e;
         } finally {
-            Console.note("Number of documents loaded from file: "+documents.size());
+            Console.note("Number of documents loaded from file: "+corpus.size());
         }
     }
 
@@ -102,8 +102,8 @@ public class GTRInput extends InputModule {
         Console.log("Fetching project data from GtR");
         crawlErrors = new ConcurrentHashMap<>();
         projectsCrawled = 0;
-        if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::getGTRData);
-        else documents.entrySet().forEach(this::getGTRData);
+        if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::getGTRData);
+        else corpus.documents.entrySet().forEach(this::getGTRData);
         if(crawlErrors.size() > 0) retryFailed();
         Console.note("Fetched "+projectsCrawled+" projects successfully", 1);
     }
@@ -210,11 +210,11 @@ public class GTRInput extends InputModule {
             Console.log(crawlErrors.size()+" failed retrieval - retrying ("+retries+"/"+MAX_RETRIES+")",1);
             ConcurrentHashMap<String, Document> missingRows = new ConcurrentHashMap<>();
             for(String id: crawlErrors.keySet()){
-                missingRows.put(id, documents.get(id));
+                missingRows.put(id, corpus.documents.get(id));
             }
             crawlErrors.clear();
-            if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::getGTRData);
-            else documents.entrySet().forEach(this::getGTRData);
+            if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::getGTRData);
+            else corpus.documents.entrySet().forEach(this::getGTRData);
         }
         if(!crawlErrors.isEmpty()){
             Console.error(crawlErrors.size()+" projects could not be fetched successfully", 1);

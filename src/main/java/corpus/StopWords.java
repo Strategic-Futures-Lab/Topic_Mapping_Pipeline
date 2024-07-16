@@ -56,11 +56,11 @@ public class StopWords extends CleaningModule {
     // processes project and module parameters
     private void processParameters(StopWordsConfig moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
-        corpus = projectParameters.dataDirectory+moduleParameters.corpus;
-        output = projectParameters.dataDirectory+moduleParameters.output;
+        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
+        outputFile = projectParameters.dataDirectory+moduleParameters.output;
         stopWordsFile = projectParameters.sourceDirectory+moduleParameters.stopWords;
         Console.tick();
-        String saveDiff = corpus.equals(output) ? "" : " and saving to "+output;
+        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
         Console.info("Removing stop words ("+stopWordsFile+") from corpus "+corpus+saveDiff, 1);
     }
 
@@ -77,8 +77,8 @@ public class StopWords extends CleaningModule {
     private void removeStopWords(){
         Console.log("Removing stop words");
         noLemmas = 0;
-        if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::removeStopWords);
-        else documents.entrySet().forEach(this::removeStopWords);
+        if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::removeStopWords);
+        else corpus.documents.entrySet().forEach(this::removeStopWords);
         if(noLemmas>0) Console.warning(noLemmas+" documents had no lemmatised text to remove stop words from");
         else Console.tick();
     }

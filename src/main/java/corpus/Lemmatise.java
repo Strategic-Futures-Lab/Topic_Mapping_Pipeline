@@ -70,14 +70,14 @@ public class Lemmatise extends CleaningModule {
     // processes project and module parameters
     private void processParameters(LemmatiseConfig moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
-        corpus = projectParameters.dataDirectory+moduleParameters.corpus;
-        output = projectParameters.dataDirectory+moduleParameters.output;
+        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
+        outputFile = projectParameters.dataDirectory+moduleParameters.output;
         stopPhrasesFile = moduleParameters.stopPhrases == null ? null : projectParameters.sourceDirectory+moduleParameters.stopPhrases;
         stopWordsFile = moduleParameters.stopWords == null ? null : projectParameters.sourceDirectory+moduleParameters.stopWords;
         keepWordsFile = moduleParameters.keepWords == null ? null : projectParameters.sourceDirectory+moduleParameters.keepWords;
         Console.tick();
-        String saveDiff = corpus.equals(output) ? "" : " and saving to "+output;
-        Console.info("Lemmatising texts from corpus "+corpus+saveDiff, 1);
+        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
+        Console.info("Lemmatising texts from corpus "+corpusFile+saveDiff, 1);
         if(stopPhrasesFile != null) Console.info("Removing stop phrases in "+stopPhrasesFile, 2);
         if(stopWordsFile != null) Console.info("Removing words in "+stopWordsFile, 2);
         if(keepWordsFile != null) Console.info("Keeping words in "+keepWordsFile, 2);
@@ -116,8 +116,8 @@ public class Lemmatise extends CleaningModule {
             stopWordsModule.loadStopWords(stopWordsFile);
         }
         // launching lemmatisation
-        if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::lemmatiseDocument);
-        else documents.entrySet().forEach(this::lemmatiseDocument);
+        if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::lemmatiseDocument);
+        else corpus.documents.entrySet().forEach(this::lemmatiseDocument);
         if(noText>0){
             Console.warning(noText+" documents had no text to lemmatise");
         }
@@ -128,8 +128,8 @@ public class Lemmatise extends CleaningModule {
     private void lemmatiseDocument(Map.Entry<String, Document> docEntry){
         if(documentsProcessed % UPDATE_FREQUENCY == 0 && documentsProcessed != 0) {
             long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
-            float lemTimeLeft = ((float) lemTimeTaken / (float) documentsProcessed) * (documents.size() - documentsProcessed);
-            float percentage = Math.round((((float) documentsProcessed / (float) documents.size()) * 100) * 100f) / 100f;
+            float lemTimeLeft = ((float) lemTimeTaken / (float) documentsProcessed) * (corpus.size() - documentsProcessed);
+            float percentage = Math.round((((float) documentsProcessed / (float) corpus.size()) * 100) * 100f) / 100f;
             Console.info("Lemmatised: "+documentsProcessed+" documents (" +percentage+ "%) - "+Timer.convert(lemTimeTaken)+" / "+Timer.convert(lemTimeLeft)+" (est.)", 1);
         }
 

@@ -50,7 +50,7 @@ public class HTMLInput extends InputModule {
         try {
             instance.loadCSV();
             instance.crawlHTML();
-            instance.writeJSON();
+            instance.writeCorpus();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -79,7 +79,7 @@ public class HTMLInput extends InputModule {
                 doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
             doc.addField("url", row.getField(urlField));
-            documents.put(doc.getId(), doc);
+            corpus.add(doc.getId(), doc);
         };
         try {
             CSVHelper.loadCSVFile(source, rowProcessor);
@@ -87,7 +87,7 @@ public class HTMLInput extends InputModule {
             Console.error("Error while reading the CSV input");
             throw e;
         } finally {
-            Console.note("Number of documents loaded from file: "+documents.size());
+            Console.note("Number of documents loaded from file: "+corpus.size());
         }
     }
 
@@ -96,8 +96,8 @@ public class HTMLInput extends InputModule {
         Console.log("Fetching text from HTML pages");
         crawlErrors = new ConcurrentHashMap<>();
         pagesCrawled = 0;
-        if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::fetchHTML);
-        else documents.entrySet().forEach(this::fetchHTML);
+        if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::fetchHTML);
+        else corpus.documents.entrySet().forEach(this::fetchHTML);
         if(crawlErrors.size() > 0) retryFailed();
         Console.note("Fetched "+pagesCrawled+" pages successfully", 1);
     }
@@ -128,11 +128,11 @@ public class HTMLInput extends InputModule {
             Console.log(crawlErrors.size()+" failed retrieval - retrying ("+retries+"/"+MAX_RETRIES+")",1);
             ConcurrentHashMap<String, Document> missingRows = new ConcurrentHashMap<>();
             for(String id: crawlErrors.keySet()){
-                missingRows.put(id, documents.get(id));
+                missingRows.put(id, corpus.documents.get(id));
             }
             crawlErrors.clear();
-            if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::fetchHTML);
-            else documents.entrySet().forEach(this::fetchHTML);
+            if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::fetchHTML);
+            else corpus.documents.entrySet().forEach(this::fetchHTML);
         }
         if(!crawlErrors.isEmpty()){
             Console.error(crawlErrors.size()+" pages could not be fetched successfully", 1);

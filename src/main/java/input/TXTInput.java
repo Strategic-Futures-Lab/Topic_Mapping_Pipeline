@@ -43,7 +43,7 @@ public class TXTInput extends FileInput {
         try {
             instance.findFiles();
             instance.loadFiles(instance::loadTXT, RUN_IN_PARALLEL);
-            instance.writeJSON();
+            instance.writeCorpus();
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;

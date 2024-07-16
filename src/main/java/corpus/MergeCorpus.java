@@ -5,6 +5,7 @@ import IO.Timer;
 import config.ModuleConfig;
 import config.ProjectConfig;
 import config.modules.MergeCorpusConfig;
+import data.Corpus;
 import data.Document;
 import data.Pair;
 import org.json.simple.JSONObject;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MergeCorpus extends CorpusModule {
 
     // module parameters
-    private List<String> corpora;
+    private List<String> corporaFiles;
 
     // TODO merge metadata properly
     private List<JSONObject> metadataList;
@@ -55,12 +56,12 @@ public class MergeCorpus extends CorpusModule {
     // processes project and module parameters
     private void processParameters(MergeCorpusConfig moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
-        corpora = Arrays.stream(moduleParameters.corpora).map(s -> projectParameters.dataDirectory+s).toList();
-        output = projectParameters.dataDirectory+moduleParameters.output;
+        corporaFiles = Arrays.stream(moduleParameters.corpora).map(s -> projectParameters.dataDirectory+s).toList();
+        outputFile = projectParameters.dataDirectory+moduleParameters.output;
         docFields = moduleParameters.docFields == null ? projectParameters.docFields : moduleParameters.docFields;
         Console.tick();
-        Console.info("Merging the following corpora into "+output+":", 1);
-        for(String corpus: corpora){
+        Console.info("Merging the following corpora into "+outputFile+":", 1);
+        for(String corpus: corporaFiles){
             Console.step(corpus, 2);
         }
     }
@@ -69,29 +70,28 @@ public class MergeCorpus extends CorpusModule {
     private void loadCorpora() throws IOException, ParseException {
         int corpusIndex = 0;
         int docIndex = 0;
-        documents = new ConcurrentHashMap<>();
+        corpus = new Corpus();
         metadataList = new ArrayList<>();
-        for(String filename: corpora){
-            Pair<JSONObject, HashMap<String, Document>> loadedCorpus = loadCorpus(filename);
-            metadataList.add(loadedCorpus.getLeft());
-            for(Map.Entry<String, Document> entry: loadedCorpus.getRight().entrySet()){
+        for(String filename: corporaFiles){
+            Corpus loadedCorpus = new Corpus(filename);
+            metadataList.add(loadedCorpus.metadata);
+            for(Map.Entry<String, Document> entry: loadedCorpus.documents.entrySet()){
                 Document doc = entry.getValue();
                 doc.prefixId(Integer.toString(corpusIndex));
                 doc.setIndex(docIndex);
                 filterDocumentFields(doc);
-                documents.put(doc.getId(), doc);
+                corpus.add(doc.getId(), doc);
                 docIndex++;
             }
             corpusIndex++;
         }
-        Console.info(corpusIndex+" copora loaded, "+docIndex+" documents in total");
+        Console.info(corpusIndex+" corpora loaded, "+docIndex+" documents in total");
     }
 
     // consolidate the new metadata object
     private void buildMetadata(){
         // TODO merge metadata properly
-        metadata = new JSONObject();
-        metadata.put("nDocs", documents.size());
+        corpus.metadata.put("nDocs", corpus.size());
     }
 
 

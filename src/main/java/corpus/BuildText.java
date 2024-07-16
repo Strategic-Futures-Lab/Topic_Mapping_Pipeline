@@ -56,20 +56,20 @@ public class BuildText extends CorpusModule {
     // processes project and module parameters
     private void processParameters(BuildTextConfig moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
-        corpus = projectParameters.dataDirectory+moduleParameters.corpus;
-        output = projectParameters.dataDirectory+moduleParameters.output;
+        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
+        outputFile = projectParameters.dataDirectory+moduleParameters.output;
         docFields = moduleParameters.docFields == null ? projectParameters.docFields : moduleParameters.docFields;
         textFields = Arrays.stream(moduleParameters.textFields).toList();
         Console.tick();
-        String saveDiff = corpus.equals(output) ? "" : " and saving to "+output;
-        Console.info("Building text for documents in corpus "+corpus+saveDiff, 1);
+        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
+        Console.info("Building text for documents in corpus "+corpusFile+saveDiff, 1);
     }
 
     // launches the build text process on all documents
     private void buildTexts(){
         Console.log("Building texts");
-        if(RUN_IN_PARALLEL) documents.entrySet().parallelStream().forEach(this::buildText);
-        else documents.entrySet().forEach(this::buildText);
+        if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::buildText);
+        else corpus.documents.entrySet().forEach(this::buildText);
         Console.tick();
         if(missingTextField > 0) Console.warning(missingTextField+" documents were missing one or more text fields", 1);
         if(emptyText > 0) Console.warning(emptyText+" documents have an empty text", 1);

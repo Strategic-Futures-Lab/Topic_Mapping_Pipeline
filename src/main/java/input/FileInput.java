@@ -66,7 +66,7 @@ public abstract class FileInput extends InputModule {
         Console.log("Loading "+extension+" files:");
         if(parallel) fileList.parallelStream().forEach(action);
         else fileList.forEach(action);
-        Console.note("Number of documents loaded: "+documents.size());
+        Console.note("Number of documents loaded: "+corpus.size());
     }
 
     protected synchronized void addDocument(HashMap<String, String> docFields){
@@ -74,7 +74,7 @@ public abstract class FileInput extends InputModule {
         for(Map.Entry<String, String> entry: docFields.entrySet()){
             doc.addField(entry.getKey(), entry.getValue());
         }
-        documents.put(doc.getId(), doc);
+        corpus.add(doc.getId(), doc);
         docFields.clear();
         docCount++;
     }
