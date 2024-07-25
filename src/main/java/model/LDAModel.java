@@ -1,6 +1,8 @@
 package model;
 
 import IO.Console;
+import IO.JSONHelper;
+import IO.SERHelper;
 import IO.Timer;
 import config.ModuleConfig;
 import config.ProjectConfig;
@@ -106,7 +108,7 @@ public class LDAModel extends ModelModule {
         }
     }
 
-    private void runModel() throws LDA.LDAModelException {
+    private void runModel() throws LDA.LDAModelException, IOException {
         Console.log("Running LDA model");
         Console.note("Following output from Mallet\n", 1);
 
@@ -118,6 +120,16 @@ public class LDAModel extends ModelModule {
         Console.log("LDA model");
         Console.tick();
 
-        // TODO
+        if(loglikelihoodLogFile != null) {
+            JSONHelper.saveJSON(tModel.logLikelihoodLogs.toJSON(), loglikelihoodLogFile, 1);
+        }
+        if(topicLogFile != null) {
+            JSONHelper.saveJSON(tModel.topicLogs.toJSON(), topicLogFile, 1);
+        }
+        if(serialisedFile != null) {
+            SERHelper.serialiseObject(tModel, serialisedFile, 1);
+        }
+
     }
+
 }
