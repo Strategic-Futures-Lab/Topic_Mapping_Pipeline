@@ -1,12 +1,18 @@
 package model.ldacore;
 
+import IO.JSONHelper;
 import data.SparseVector;
 import data.Pair;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.Serializable;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 /**
  * Wrapper class for topics modelled using LDA
@@ -156,6 +162,28 @@ public class LDATopic implements Serializable {
      */
     public String[] topDocuments(int maxDocuments){
         return Arrays.copyOfRange(documents, 0, maxDocuments);
+    }
+
+    /**
+     * @return The JSON formatted topic
+     */
+    public JSONObject toJSON(){
+        JSONObject topicJSON = new JSONObject();
+        topicJSON.put("id", number);
+        topicJSON.put("words", JSONHelper.toJSONArray(words));
+        topicJSON.put("wordWeights", JSONHelper.toJSONArray(formatArray(wordWeights)));
+        topicJSON.put("docs", JSONHelper.toJSONArray(documents));
+        topicJSON.put("docWeights", JSONHelper.toJSONArray(formatArray(docWeights)));
+        return topicJSON;
+    }
+
+    private double[] formatArray(double[] arr){
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return DoubleStream.of(arr)
+                .mapToObj(df::format)
+                .mapToDouble(Double::parseDouble)
+                .toArray();
     }
 
 }

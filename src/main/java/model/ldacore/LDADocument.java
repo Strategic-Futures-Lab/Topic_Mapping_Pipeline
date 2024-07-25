@@ -1,9 +1,17 @@
 package model.ldacore;
 
+import IO.JSONHelper;
 import data.SparseVector;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.Serializable;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 /**
  * Wrapper class for documents modelled using LDA
@@ -129,4 +137,33 @@ public class LDADocument implements Serializable {
      * @return The document text
      */
     public String text(){ return text; }
+
+    /**
+     * @return The JSON formatted document
+     */
+    public JSONObject toJSON(){
+        JSONObject docJSON = new JSONObject();
+        docJSON.put("id",docId);
+        docJSON.put("idx",docIndex);
+        docJSON.put("words", JSONHelper.toJSONArray(words));
+        docJSON.put("topicSeq", JSONHelper.toJSONArray(topicSequence));
+        docJSON.put("topicCount", JSONHelper.toJSONArray(topicCount));
+        docJSON.put("topicDistrib", JSONHelper.toJSONArray(formatArray(topicDistribution)));
+        if(topicDistances != null){
+            docJSON.put("topicDistances", JSONHelper.toJSONArray(formatArray(topicDistances)));
+        }
+        if(partialTopicDistances != null){
+            docJSON.put("partTopicDistances", JSONHelper.toJSONArray(formatArray(partialTopicDistances)));
+        }
+        return docJSON;
+    }
+
+    private double[] formatArray(double[] arr){
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return DoubleStream.of(arr)
+                .mapToObj(df::format)
+                .mapToDouble(Double::parseDouble)
+                .toArray();
+    }
 }

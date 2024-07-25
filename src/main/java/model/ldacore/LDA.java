@@ -109,6 +109,7 @@ public class LDA implements Serializable {
 //                stringIDtoNumID.put(doc.id(), count);
                 count++;
             }
+            writer.close();
         } catch (IOException e){
             throw new LDAModelException("Could not write MALLET corpus file ("+corpusFile+")");
         }
@@ -235,6 +236,9 @@ public class LDA implements Serializable {
                 docWeights[docCount] = doc.getWeight();
                 docCount++;
             }
+            // chop arrays to remove unallocated docs
+            docIds = Arrays.copyOf(docIds, docCount);
+            docWeights = Arrays.copyOf(docWeights,docCount);
 
             // update topic and add to list
             topic.setWordAssignments(labels, labelIds, labelWeights);

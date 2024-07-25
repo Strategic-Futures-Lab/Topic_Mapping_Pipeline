@@ -14,6 +14,7 @@ run:
   - mergeCorpus1
   - buildText1
   - lemmatise1
+  - ldaModel1
 #  - pdfInput1
 #  - txtInput1
 #  - htmlInput1
@@ -93,6 +94,13 @@ gtrInput1:
 
 
 # Modelling module
-#ldaModel:
-#  run: false
-#  type: LDAModel
+ldaModel1:
+  type: modelLDA
+  corpus: corpus_csv.json
+  model: model.json
+  topics: 10
+  iterations: 100
+  minLemmas: 2
+  wordDistances: true
+  logs: modelLogs
+  topicLogs: topicLogs.json

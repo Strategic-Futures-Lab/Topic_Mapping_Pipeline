@@ -11,6 +11,9 @@ import data.Document;
 import model.ldacore.LDA;
 import model.ldacore.LDADocument;
 import model.ldacore.LDAParameters;
+import model.ldacore.LDATopic;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -58,6 +61,7 @@ public class LDAModel extends ModelModule {
         try{
             instance.loadDocuments();
             instance.runModel();
+            instance.writeModel();
 //            instance.writeCorpus();
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
@@ -75,15 +79,17 @@ public class LDAModel extends ModelModule {
         minLemmas = moduleParameters.minLemmas;
         wordDistances = moduleParameters.wordDistances;
         logDir = projectParameters.dataDirectory+moduleParameters.logDir;
+        // keep the following as is for now
+        // module will check for null if they need to be skipped
         serialisedFile = moduleParameters.serialised;
         loglikelihoodLogFile = moduleParameters.loglikelihoodLogs;
         topicLogFile = moduleParameters.topicLogs;
         Console.tick();
         Console.info("Modelling "+ldaParameters.nTopics+" from corpus "+corpusFile, 1);
         Console.info("Saving model onto "+outputFile);
-        if(serialisedFile != null) Console.info("Serialising model to "+serialisedFile, 2);
-        if(loglikelihoodLogFile != null) Console.info("Saving log-likelihoods to "+loglikelihoodLogFile, 2);
-        if(topicLogFile != null) Console.info("Saving topic logs to "+topicLogFile, 2);
+        if(serialisedFile != null) Console.info("Serialising model to "+logDir+serialisedFile, 2);
+        if(loglikelihoodLogFile != null) Console.info("Saving log-likelihoods to "+logDir+loglikelihoodLogFile, 2);
+        if(topicLogFile != null) Console.info("Saving topic logs to "+logDir+topicLogFile, 2);
     }
 
     private void loadDocuments() throws IOException, ParseException {
@@ -110,26 +116,57 @@ public class LDAModel extends ModelModule {
 
     private void runModel() throws LDA.LDAModelException, IOException {
         Console.log("Running LDA model");
-        Console.note("Following output from Mallet\n", 1);
+        try {
+            Console.note("Following output from Mallet\n", 1);
 
-        tModel = new LDA(modelInput, ldaParameters);
-        tModel.getWordDistances = wordDistances;
-        tModel.model(logDir);
+            tModel = new LDA(modelInput, ldaParameters);
+            tModel.getWordDistances = wordDistances;
+            tModel.model(logDir);
 
-        Console.note("Model completed", 1);
-        Console.log("LDA model");
-        Console.tick();
-
-        if(loglikelihoodLogFile != null) {
-            JSONHelper.saveJSON(tModel.logLikelihoodLogs.toJSON(), loglikelihoodLogFile, 1);
-        }
-        if(topicLogFile != null) {
-            JSONHelper.saveJSON(tModel.topicLogs.toJSON(), topicLogFile, 1);
-        }
-        if(serialisedFile != null) {
-            SERHelper.serialiseObject(tModel, serialisedFile, 1);
+            Console.note("Model completed", 1);
+            Console.log("LDA model");
+            Console.tick();
+        } catch (LDA.LDAModelException e){
+            Console.error("LDA modelling failed");
+            throw e;
         }
 
+        try {
+            if (loglikelihoodLogFile != null) {
+                JSONHelper.saveJSON(tModel.logLikelihoodLogs.toJSON(), logDir+loglikelihoodLogFile, 1);
+            }
+            if (topicLogFile != null) {
+                JSONHelper.saveJSON(tModel.topicLogs.toJSON(), logDir+topicLogFile, 1);
+            }
+            if (serialisedFile != null) {
+                SERHelper.serialiseObject(tModel, logDir+serialisedFile, 1);
+            }
+        } catch (IOException e){
+            Console.error("Saving LDA model logs or serialisation");
+            throw e;
+        }
+
+    }
+
+    private void writeModel() throws IOException {
+        Console.log("Saving model");
+        try{
+            JSONObject root = new JSONObject();
+            JSONArray topics = new JSONArray();
+            JSONArray documents = new JSONArray();
+            for(LDATopic t: tModel.getTopics()){
+                topics.add(t.toJSON());
+            }
+            for(LDADocument d: modelInput){
+                documents.add(d.toJSON());
+            }
+            root.put("topics", topics);
+            root.put("documents",documents);
+            JSONHelper.saveJSON(root, outputFile, 1);
+        } catch (IOException e){
+            Console.error("Saving model failed");
+            throw e;
+        }
     }
 
 }

@@ -7,6 +7,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Helper class for reading and writing JSON files;
@@ -255,5 +256,68 @@ public class JSONHelper {
         Console.log("Saving "+filename, depth);
         saveArray(obj, filename);
         Console.tick();
+    }
+
+    /**
+     * Transforms an array of doubles into an JSONArray
+     * @param array Array to transform
+     * @return JSONArray version of the array
+     */
+    public static JSONArray toJSONArray(double[] array){
+        JSONArray arr = new JSONArray();
+        for(double d: array){
+            arr.add(d);
+        }
+        return arr;
+    }
+
+    /**
+     * Transforms an array of integers into an JSONArray
+     * @param array Array to transform
+     * @return JSONArray version of the array
+     */
+    public static JSONArray toJSONArray(int[] array){
+        JSONArray arr = new JSONArray();
+        for(int i: array){
+            arr.add(i);
+        }
+        return arr;
+    }
+
+    /**
+     * Transforms an array of Strings into an JSONArray
+     * @param array Array to transform
+     * @return JSONArray version of the array
+     */
+    public static JSONArray toJSONArray(String[] array){
+        JSONArray arr = new JSONArray();
+        for(String s: array){
+            arr.add(s);
+        }
+        return arr;
+    }
+
+    /**
+     * Transforms an array of booleans into an JSONArray
+     * @param array Array to transform
+     * @return JSONArray version of the array
+     */
+    public static JSONArray toJSONArray(boolean[] array){
+        JSONArray arr = new JSONArray();
+        for(boolean b: array){
+            arr.add(b);
+        }
+        return arr;
+    }
+
+    /**
+     * Transforms a list of Objects into an JSONArray
+     * @param list List to transform
+     * @return JSONArray version of the list
+     */
+    public static JSONArray toJSONArray(List<Object> list){
+        JSONArray arr = new JSONArray();
+        arr.addAll(list);
+        return arr;
     }
 }
