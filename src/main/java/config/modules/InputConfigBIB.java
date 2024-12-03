@@ -1,0 +1,46 @@
+package config.modules;
+
+import config.ModuleConfig;
+import config.ProjectConfigParser;
+import pipeline.ModuleType;
+
+import java.util.HashMap;
+
+/**
+ * Configuration class for BibTex Input module
+ *
+ * @author P. Le Bras
+ * @version 1
+ */
+public class InputConfigBIB extends ModuleConfig {
+
+    private static final String[] MANDATORY_PARAMS = new String[]{"source","output","fields"};
+
+    /** Filename of the source BibTex file */
+    public final String source;
+    /** Filename of the output corpus JSON file */
+    public final String output;
+    /** List of BibTex fields to store in the  corpus JSON file; key is the name stored in the corpus JSON file,
+     * value is the name found in the source BibTex file */
+    public final HashMap<String, String> fields;
+
+    /**
+     * Constructor, parses and stores module parameters
+     * @param name Module name as described in the YAML config file
+     * @param moduleParams Map of unparsed YAML parameters
+     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     */
+    public InputConfigBIB(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+        super(name, type);
+        for(String p: MANDATORY_PARAMS){
+            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+        }
+        source = getStringParam("source", moduleParams);
+        output = getStringParam("output", moduleParams);
+        HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
+        fields = new HashMap<>();
+        for(String k: fieldsMap.keySet()){
+            fields.put(k, ProjectConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
+        }
+    }
+}

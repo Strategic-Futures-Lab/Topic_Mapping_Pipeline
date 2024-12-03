@@ -5,6 +5,7 @@ import config.ModuleConfig;
 import config.ProjectConfig;
 import config.ProjectConfigParser;
 import config.modules.*;
+import input.BIBInput;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -19,6 +20,7 @@ public enum ModuleType {
     PDFInput (input.PDFInput.class, InputConfigPDF.class),
     HTMLInput (input.HTMLInput.class, InputConfigHTML.class),
     GTRInput (input.GTRInput.class, InputConfigGTR.class),
+    BIBInput (input.BIBInput.class, InputConfigBIB.class),
     // Corpus management modules
     BuildText (corpus.BuildText.class, BuildTextConfig.class),
     MergeCorpus (corpus.MergeCorpus.class, MergeCorpusConfig.class),
@@ -39,7 +41,7 @@ public enum ModuleType {
     public void runModule(ModuleConfig moduleParams, ProjectConfig projectParams) throws RuntimeException {
         try {
             module.getMethod("run", ModuleConfig.class, ProjectConfig.class ).invoke(null, moduleParams, projectParams );
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (Exception e) {
             Console.error("Error while trying to execute the module " + this);
             throw new RuntimeException(e);
         }
@@ -52,6 +54,7 @@ public enum ModuleType {
             case "inputPDF" -> PDFInput;
             case "inputHTML" -> HTMLInput;
             case "inputGTR" -> GTRInput;
+            case "inputBIB" -> BIBInput;
             case "buildText" -> BuildText;
             case "mergeCorpus" -> MergeCorpus;
             case "stopPhrases" -> StopPhrases;
