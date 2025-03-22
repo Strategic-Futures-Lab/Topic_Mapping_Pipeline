@@ -10,12 +10,12 @@ project:
 # run order
 run:
   - bibInput1
-  - buildText1
-  - lemmatise1
-  - ldaModel1
 #  - csvInput1
 #  - csvInput2
 #  - mergeCorpus1
+  - buildText1
+  - lemmatise1
+#  - ldaModel1
 #  - pdfInput1
 #  - txtInput1
 #  - htmlInput1
@@ -24,7 +24,7 @@ run:
 # BiBTex input module
 bibInput1:
   type: inputBIB
-  source: bib_input_1.bib
+  source: bib_input.bib
   output: corpus_bib.json
   fields:
     authors: author
@@ -43,6 +43,7 @@ buildText1:
 lemmatise1:
   type: lemmatise
   corpus: corpus_bib.json
+  stopWords: stopwords.txt
 
 ldaModel1:
   type: modelLDA
