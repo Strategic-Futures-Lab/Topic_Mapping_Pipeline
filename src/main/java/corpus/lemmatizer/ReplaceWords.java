@@ -12,6 +12,7 @@ import java.util.stream.Stream;
  */
 public class ReplaceWords {
     public static final Map<String, String> REPLACEWORDS = Stream.of(new String[][] {
-            { "datum", "data"},
+            { "datum", "data" },
+            { "corpora", "corpus" }
     }).collect(Collectors.toMap(d -> d[0], d -> d[1]));
 }

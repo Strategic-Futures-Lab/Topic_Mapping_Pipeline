@@ -3,9 +3,9 @@ package input;
 import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.modules.InputConfigHTML;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.modules.InputConfigHTML;
 import data.Document;
 import org.jsoup.Jsoup;
 

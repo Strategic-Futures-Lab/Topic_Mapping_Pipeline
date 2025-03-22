@@ -1,4 +1,4 @@
 /**
  * Contains all specialised module configuration classes.
  */
-package config.modules;
+package pipeline.config.modules;

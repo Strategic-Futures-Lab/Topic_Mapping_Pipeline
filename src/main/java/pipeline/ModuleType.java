@@ -1,13 +1,10 @@
 package pipeline;
 
 import IO.Console;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.ProjectConfigParser;
-import config.modules.*;
-import input.BIBInput;
-
-import java.lang.reflect.InvocationTargetException;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.ConfigParser;
+import pipeline.config.modules.*;
 
 /**
  * Enumeration of all modules in the pipeline, with associated classes (inc. configuration)
@@ -47,7 +44,7 @@ public enum ModuleType {
         }
     }
 
-    public static ModuleType getType(String typeName) throws ProjectConfigParser.ParseException {
+    public static ModuleType getType(String typeName) throws ConfigParser.ParseException {
         return switch (typeName) {
             case "inputCSV" -> CSVInput;
             case "inputTXT" -> TXTInput;
@@ -62,7 +59,7 @@ public enum ModuleType {
             case "stopWords" -> StopWords;
             case "modelLDA" -> LDAModel;
             default ->
-                    throw new ProjectConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
+                    throw new ConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
         };
     }
 }

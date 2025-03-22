@@ -1,7 +1,7 @@
-package config.modules;
+package pipeline.config.modules;
 
-import config.ModuleConfig;
-import config.ProjectConfigParser;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ConfigParser;
 import model.ldacore.LDAParameters;
 import pipeline.ModuleType;
 
@@ -30,13 +30,13 @@ public class ModelConfigLDA extends ModuleConfig {
     /** Filename of topic logs */
     public final String topicLogs;
 
-    public ModelConfigLDA(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+    public ModelConfigLDA(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException{
         super(moduleName, type);
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        corpus = getStringParam("corpus", moduleParams);
-        output = getStringParam("model", moduleParams);
+        corpus = getPathParam("corpus", moduleParams);
+        output = getPathParam("model", moduleParams);
         ldaParams = new LDAParameters(getIntParam("topics", moduleParams));
         ldaParams.samplingIterations = getDefaultIntParam("iterations", moduleParams, 2000);
         ldaParams.maximisationIterations = getDefaultIntParam("maximisations", moduleParams, 50);
@@ -47,10 +47,10 @@ public class ModelConfigLDA extends ModuleConfig {
         ldaParams.seed = getDefaultIntParam("seed", moduleParams, 151);
         minLemmas = getDefaultIntParam("minLemmas", moduleParams, 10);
         wordDistances = getDefaultBooleanParam("wordDistances", moduleParams, false);
-        logDir = ProjectConfigParser.checkDirectory(getDefaultStringParam("logs", moduleParams, ""));
-        serialised = getDefaultStringParam("serialised", moduleParams, null);
-        loglikelihoodLogs = getDefaultStringParam("loglikelihoodLogs", moduleParams, null);
-        topicLogs = getDefaultStringParam("topicLogs", moduleParams, null);
+        logDir = ConfigParser.checkDirectory(getDefaultPathParam("logs", moduleParams, ""));
+        serialised = getDefaultPathParam("serialised", moduleParams, null);
+        loglikelihoodLogs = getDefaultPathParam("loglikelihoodLogs", moduleParams, null);
+        topicLogs = getDefaultPathParam("topicLogs", moduleParams, null);
     }
 
 }

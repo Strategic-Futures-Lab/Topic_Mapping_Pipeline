@@ -1,7 +1,7 @@
-package config.modules;
+package pipeline.config.modules;
 
-import config.ProjectConfigParser;
-import config.ModuleConfig;
+import pipeline.config.ConfigParser;
+import pipeline.config.ModuleConfig;
 import pipeline.ModuleType;
 
 import java.util.HashMap;
@@ -32,22 +32,22 @@ public class InputConfigHTML extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param moduleName Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
-     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public InputConfigHTML(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+    public InputConfigHTML(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException{
         super(moduleName, type);
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        source = getStringParam("source", moduleParams);
-        output = getStringParam("output", moduleParams);
+        source = getPathParam("source", moduleParams);
+        output = getPathParam("output", moduleParams);
         urlField = getStringParam("urlField", moduleParams);
         domSelector = getDefaultStringParam("domSelector", moduleParams, "body");
         fields = new HashMap<>();
         if(moduleParams.containsKey("fields")){
             HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
             for(String k: fieldsMap.keySet()){
-                fields.put(k, ProjectConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
+                fields.put(k, ConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
             }
         }
     }

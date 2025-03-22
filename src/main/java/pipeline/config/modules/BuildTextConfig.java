@@ -1,7 +1,7 @@
-package config.modules;
+package pipeline.config.modules;
 
-import config.ModuleConfig;
-import config.ProjectConfigParser;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ConfigParser;
 import pipeline.ModuleType;
 
 import java.util.HashMap;
@@ -29,18 +29,18 @@ public class BuildTextConfig extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param name Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
-     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public BuildTextConfig(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException {
+    public BuildTextConfig(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException {
         super(name, type);
         // mandatory parameters
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        corpus = getStringParam("corpus", moduleParams);
+        corpus = getPathParam("corpus", moduleParams);
         textFields = getStringListParam("textFields", moduleParams).toArray(new String[0]);
         // optional parameters
-        output = getDefaultStringParam("output", moduleParams, corpus);
+        output = getDefaultPathParam("output", moduleParams, corpus);
         if(moduleParams.containsKey("docFields")){
             docFields = getStringListParam("docFields", moduleParams).toArray(new String[0]);
         } else {

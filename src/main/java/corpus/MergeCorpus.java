@@ -2,18 +2,16 @@ package corpus;
 
 import IO.Console;
 import IO.Timer;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.modules.MergeCorpusConfig;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.modules.MergeCorpusConfig;
 import data.Corpus;
 import data.Document;
-import data.Pair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Module loading several corpus JSON files and merging them into a single corpus

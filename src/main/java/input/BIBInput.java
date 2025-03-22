@@ -3,12 +3,10 @@ package input;
 import IO.BIBHelper;
 import IO.Console;
 import IO.Timer;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.modules.InputConfigBIB;
-import config.modules.InputConfigCSV;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.modules.InputConfigBIB;
 import data.Document;
-import org.jbibtex.ParseException;
 
 import java.io.IOException;
 import java.util.HashMap;

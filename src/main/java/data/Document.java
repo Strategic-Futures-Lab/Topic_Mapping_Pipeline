@@ -168,7 +168,7 @@ public class Document {
     public void addText(String key){
         if(fields.containsKey(key)) {
             initText();
-            text += (text.isEmpty() ? "" : " ---- ") + fields.get(key);
+            text += (text.isEmpty() ? "" : " \n\n ") + fields.get(key);
         }
     }
 

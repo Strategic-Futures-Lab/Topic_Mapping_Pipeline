@@ -2,9 +2,9 @@ package input;
 
 import IO.Console;
 import IO.Timer;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.modules.InputConfigPDF;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.modules.InputConfigPDF;
 import data.Pair;
 
 import org.apache.pdfbox.pdmodel.PDDocument;

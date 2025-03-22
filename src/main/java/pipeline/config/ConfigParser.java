@@ -1,4 +1,4 @@
-package config;
+package pipeline.config;
 
 import IO.Console;
 import IO.YAMLHelper;
@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Class for reading and parsing a Topic Map project configuration.
+ * Class for reading and parsing a Topic Map YAML configuration file.
  * Reading (and parsing) is provided as a static method, and returns a singleton instance containing parameters.
  */
-public class ProjectConfigParser {
+public class ConfigParser {
 
     /**
      * Exception class for parsing errors on the ProjectConfig
@@ -21,12 +21,12 @@ public class ProjectConfigParser {
         public ParseException(String msg){ super(msg); }
     }
 
-    private static ProjectConfigParser PROJECT_CONFIG;
+    private static ConfigParser PROJECT_CONFIG;
     private HashMap<String, Object> projectParameters;
     private ArrayList<String> workflow;
     private HashMap<String, Object> modulesParameters;
 
-    private ProjectConfigParser(){
+    private ConfigParser(){
         projectParameters = new HashMap<>();
         workflow = new ArrayList<>();
         modulesParameters = new HashMap<>();
@@ -60,8 +60,8 @@ public class ProjectConfigParser {
         return parseMap(modulesParameters.get(moduleName), moduleName);
     }
 
-    private static ProjectConfigParser getInstance(){
-        if(PROJECT_CONFIG == null) PROJECT_CONFIG = new ProjectConfigParser();
+    private static ConfigParser getInstance(){
+        if(PROJECT_CONFIG == null) PROJECT_CONFIG = new ConfigParser();
         return PROJECT_CONFIG;
     }
 
@@ -157,20 +157,31 @@ public class ProjectConfigParser {
 
     /**
      * Processes a String and ensures it is a valid directory name (e.g., ends with "/" on Unix systems)
-     * @param dirName String to check
+     * @param directory String to check
      * @return Valid directory name
      */
-    public static String checkDirectory(String dirName){
+    public static String checkDirectory(String directory){
         String sep = File.separator;
-        if(!dirName.isEmpty() && !dirName.endsWith(sep)){
-            return dirName+sep;
+        String dir = checkOSPath(directory);
+        if(!dir.isEmpty() && !dir.endsWith(sep)){
+            return dir+sep;
         }
-        return dirName;
+        return dir;
+    }
+
+    /**
+     * Processes a String and ensures it is a valid OS path (e.g., "/" separators on Unix systems, "\" on Windows)
+     * @param path String to check
+     * @return Valid path name
+     */
+    public static String checkOSPath(String path){
+        String sep = File.separator;
+        return path.replace("\\",sep).replace("/",sep);
     }
 
     private static void parseConfig(HashMap<String, Object> configMap) throws ParseException{
         Console.log("Parsing configuration file");
-        ProjectConfigParser config = getInstance();
+        ConfigParser config = getInstance();
         if(configMap.containsKey("run")){
             Console.log("Retrieving run workflow", 1);
             config.workflow = parseStringList(configMap.get("run"), "run");
@@ -203,8 +214,8 @@ public class ProjectConfigParser {
      * @throws ParseException If the configuration file doesn't conform to expectations
      * @throws FileNotFoundException If the filename provided doesn't refer to an existing file
      */
-    public static ProjectConfigParser readConfigFromYAML(String filename) throws ParseException, FileNotFoundException, ClassCastException{
-        ProjectConfigParser config = ProjectConfigParser.getInstance();
+    public static ConfigParser readConfigFromYAML(String filename) throws ParseException, FileNotFoundException, ClassCastException{
+        ConfigParser config = ConfigParser.getInstance();
         try {
             Console.info("Reading project configurations from "+filename);
             HashMap<String,Object> yamlMap = YAMLHelper.loadYAMLFile(filename);

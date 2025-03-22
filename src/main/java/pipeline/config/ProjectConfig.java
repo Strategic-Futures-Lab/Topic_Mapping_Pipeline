@@ -1,4 +1,4 @@
-package config;
+package pipeline.config;
 
 import IO.Console;
 
@@ -27,19 +27,19 @@ public class ProjectConfig {
     /**
      * 
      * @param projectParams
-     * @throws ProjectConfigParser.ParseException
+     * @throws ConfigParser.ParseException
      */
-    public ProjectConfig(HashMap<String, Object> projectParams) throws ProjectConfigParser.ParseException {
+    public ProjectConfig(HashMap<String, Object> projectParams) throws ConfigParser.ParseException {
         Console.log("Loading project parameters");
 
         // getting directories
         String sourceDir = "", dataDir = "", outputDir = "";
         if(projectParams.containsKey("directories")){
-            HashMap<String, Object> directories = ProjectConfigParser.parseMap(projectParams.get("directories"), "project/directories");
-            projectDirectory = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("project", ""), "project/directories/project"));
-            sourceDir = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("sources", ""), "project/directories/sources"));
-            dataDir = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("data", ""), "project/directories/data"));
-            outputDir = ProjectConfigParser.checkDirectory(ProjectConfigParser.parseString(directories.getOrDefault("output", ""), "project/directories/output"));
+            HashMap<String, Object> directories = ConfigParser.parseMap(projectParams.get("directories"), "project/directories");
+            projectDirectory = ConfigParser.checkDirectory(ConfigParser.parseString(directories.getOrDefault("project", ""), "project/directories/project"));
+            sourceDir = ConfigParser.checkDirectory(ConfigParser.parseString(directories.getOrDefault("sources", ""), "project/directories/sources"));
+            dataDir = ConfigParser.checkDirectory(ConfigParser.parseString(directories.getOrDefault("data", ""), "project/directories/data"));
+            outputDir = ConfigParser.checkDirectory(ConfigParser.parseString(directories.getOrDefault("output", ""), "project/directories/output"));
         } else {
             projectDirectory = "";
         }
@@ -48,7 +48,7 @@ public class ProjectConfig {
         outputDirectory = projectDirectory + outputDir;
 
         // getting document fields
-        ArrayList<String> fields = ProjectConfigParser.parseStringList(projectParams.getOrDefault("docFields", new ArrayList<String>()), "project/docFields");
+        ArrayList<String> fields = ConfigParser.parseStringList(projectParams.getOrDefault("docFields", new ArrayList<String>()), "project/docFields");
         docFields = fields.isEmpty() ? null : fields.toArray(new String[0]);
 
         Console.tick();

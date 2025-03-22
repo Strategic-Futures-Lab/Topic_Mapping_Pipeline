@@ -1,11 +1,9 @@
 package pipeline;
 
 import IO.Console;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.ProjectConfigParser;
-import config.modules.*;
-import input.*;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.ConfigParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,12 +35,12 @@ public class Pipeline {
         String MODULE_NAME = "Pipeline Configuration";
         Console.moduleStart(MODULE_NAME);
         try {
-            ProjectConfigParser config = ProjectConfigParser.readConfigFromYAML(configFilename);
+            ConfigParser config = ConfigParser.readConfigFromYAML(configFilename);
             projectConfig = new ProjectConfig(config.getProjectParameters());
             Console.log("Loading modules parameters");
             for(String module: config.getWorkflow()){
                 HashMap<String, Object> moduleParams = config.getModuleParameters(module);
-                if(moduleParams.containsKey("run") && !ProjectConfigParser.parseBoolean(moduleParams.get("run"), module+"/run")){
+                if(moduleParams.containsKey("run") && !ConfigParser.parseBoolean(moduleParams.get("run"), module+"/run")){
                     Console.warning("Skipping module "+module+" - run set to false", 1);
                 } else {
                     Console.log("Configuring module "+module, 1);

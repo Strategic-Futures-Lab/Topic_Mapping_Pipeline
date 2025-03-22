@@ -1,7 +1,7 @@
-package config.modules;
+package pipeline.config.modules;
 
-import config.ModuleConfig;
-import config.ProjectConfigParser;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ConfigParser;
 import pipeline.ModuleType;
 
 import java.util.HashMap;
@@ -33,26 +33,26 @@ public class InputConfigGTR extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param moduleName Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
-     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public InputConfigGTR(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+    public InputConfigGTR(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException{
         super(moduleName, type);
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        source = getStringParam("source", moduleParams);
-        output = getStringParam("output", moduleParams);
+        source = getPathParam("source", moduleParams);
+        output = getPathParam("output", moduleParams);
         pidField = getStringParam("pidField", moduleParams);
         gtrFields = new HashMap<>();
         HashMap<String, Object> gtrFieldsMap = getMapParam("gtrFields", moduleParams);
         for(String k: gtrFieldsMap.keySet()){
-            gtrFields.put(k, ProjectConfigParser.parseString(gtrFieldsMap.get(k), moduleName+"/gtrFields/"+k));
+            gtrFields.put(k, ConfigParser.parseString(gtrFieldsMap.get(k), moduleName+"/gtrFields/"+k));
         }
         fields = new HashMap<>();
         if(moduleParams.containsKey("fields")){
             HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
             for(String k: fieldsMap.keySet()){
-                fields.put(k, ProjectConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
+                fields.put(k, ConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
             }
         }
     }

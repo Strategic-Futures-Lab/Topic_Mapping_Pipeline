@@ -2,9 +2,9 @@ package corpus;
 
 import IO.Console;
 import IO.Timer;
-import config.ModuleConfig;
-import config.ProjectConfig;
-import config.modules.LemmatiseConfig;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ProjectConfig;
+import pipeline.config.modules.LemmatiseConfig;
 import corpus.lemmatizer.StanfordLemmatizer;
 import data.Document;
 
@@ -85,7 +85,7 @@ public class Lemmatise extends CleaningModule {
 
     // launches lemmatisation process
     private void lemmatise(){
-        Console.log("Loading lemmatiser, following input from Stanford CoreNLP");
+        Console.log("Loading lemmatiser, following output from Stanford CoreNLP");
         slem = new StanfordLemmatizer();
         Console.log("Lemmatiser loaded");
         Console.tick();

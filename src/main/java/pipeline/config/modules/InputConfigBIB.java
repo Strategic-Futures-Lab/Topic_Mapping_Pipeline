@@ -1,7 +1,7 @@
-package config.modules;
+package pipeline.config.modules;
 
-import config.ModuleConfig;
-import config.ProjectConfigParser;
+import pipeline.config.ModuleConfig;
+import pipeline.config.ConfigParser;
 import pipeline.ModuleType;
 
 import java.util.HashMap;
@@ -28,19 +28,19 @@ public class InputConfigBIB extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param name Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
-     * @throws ProjectConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
+     * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public InputConfigBIB(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ProjectConfigParser.ParseException{
+    public InputConfigBIB(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException{
         super(name, type);
         for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ProjectConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        source = getStringParam("source", moduleParams);
-        output = getStringParam("output", moduleParams);
+        source = getPathParam("source", moduleParams);
+        output = getPathParam("output", moduleParams);
         HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
         fields = new HashMap<>();
         for(String k: fieldsMap.keySet()){
-            fields.put(k, ProjectConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
+            fields.put(k, ConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
         }
     }
 }
