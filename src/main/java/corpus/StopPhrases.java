@@ -75,11 +75,11 @@ public class StopPhrases extends CleaningModule {
 
     // launches the stop phrase removal process
     private void removeStopPhrases(){
-        Console.log("Removing stop words");
+        Console.log("Removing stop phrases");
         noText = 0;
         if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::removeStopPhrases);
         else corpus.documents.entrySet().forEach(this::removeStopPhrases);
-        if(noText>0) Console.warning(noText+" documents had no lemmatised text to remove stop words from");
+        if(noText>0) Console.warning(noText+" documents had no lemmatised text to remove stop phrases from");
         else Console.tick();
     }
 
