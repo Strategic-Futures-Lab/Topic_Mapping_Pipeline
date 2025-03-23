@@ -7,8 +7,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class representing a corpus (collection of documents).
@@ -21,12 +23,12 @@ public class Corpus {
 
     /** List of documents in the corpus, identified with a String */
     public ConcurrentHashMap<String, Document> documents;
-    /** Metadata attached to the corpus */
-    public JSONObject metadata;
+    /** Stats attached to the corpus */
+    public JSONObject stats;
 
     /** Basic constructor, creates empty corpus */
     public Corpus(){
-        metadata = new JSONObject();
+        stats = new JSONObject();
         documents = new ConcurrentHashMap<>();
     }
 
@@ -67,7 +69,7 @@ public class Corpus {
     public void loadCorpus(String filename) throws IOException, ParseException {
         try {
             JSONObject input = JSONHelper.loadJSON(filename);
-            metadata = (JSONObject) input.get("metadata");
+            stats = (JSONObject) input.getOrDefault("stats", new JSONObject());
             JSONArray corpus = (JSONArray) input.get("corpus");
             for(JSONObject jsonDoc: (Iterable<JSONObject>) corpus){
                 Document doc = new Document(jsonDoc);
@@ -92,7 +94,8 @@ public class Corpus {
         try {
             JSONObject root = new JSONObject();
             JSONArray corpus = new JSONArray();
-            root.put("metadata", metadata);
+            buildStats();
+            root.put("stats", stats);
             for (Map.Entry<String, Document> doc : documents.entrySet()) {
                 corpus.add(doc.getValue().toJSON());
             }
@@ -101,6 +104,29 @@ public class Corpus {
         } catch (IOException e){
             Console.error("Saving corpus file "+filename+" failed");
             throw e;
+        }
+    }
+
+    private void buildStats(){
+        // TODO: improve stats method
+        int nDocs = documents.size();
+        long nLemmatised = documents.entrySet().parallelStream().filter(d->d.getValue().hasLemmas()).count();
+        long nEmpty = documents.entrySet().parallelStream().filter(d->d.getValue().emptyText()).count();
+        stats.put("n",nDocs);
+        stats.put("empty",nEmpty);
+        stats.put("lemmatised",nLemmatised);
+        if(nLemmatised > 0) {
+            JSONObject lemmaStats = new JSONObject();
+            IntSummaryStatistics summaryStats = documents.entrySet().parallelStream().collect(Collectors.summarizingInt(d->d.getValue().getNumLemmas()));
+            lemmaStats.put("min",summaryStats.getMin());
+            lemmaStats.put("max",summaryStats.getMax());
+            lemmaStats.put("avg",summaryStats.getAverage());
+            int[] thresholds = new int[]{10,20,30,40,50};
+            for(int t: thresholds){
+                long lemmaBelowT = documents.entrySet().parallelStream().filter(d->d.getValue().getNumLemmas()<t).count();
+                lemmaStats.put("<"+t,lemmaBelowT);
+            }
+            stats.put("lemmas",lemmaStats);
         }
     }
 

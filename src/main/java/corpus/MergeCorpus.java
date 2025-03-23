@@ -24,9 +24,6 @@ public class MergeCorpus extends CorpusModule {
     // module parameters
     private List<String> corporaFiles;
 
-    // TODO merge metadata properly
-    private List<JSONObject> metadataList;
-
     /**
      * Main module method - processes parameters, loads corpora in one document list, save in one corpus output
      * @param moduleParameters module parameters
@@ -41,7 +38,6 @@ public class MergeCorpus extends CorpusModule {
         instance.processParameters((MergeCorpusConfig) moduleParameters, projectParameters);
         try{
             instance.loadCorpora();
-            instance.buildMetadata();
             instance.writeCorpus();
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
@@ -69,10 +65,8 @@ public class MergeCorpus extends CorpusModule {
         int corpusIndex = 0;
         int docIndex = 0;
         corpus = new Corpus();
-        metadataList = new ArrayList<>();
         for(String filename: corporaFiles){
             Corpus loadedCorpus = new Corpus(filename);
-            metadataList.add(loadedCorpus.metadata);
             for(Map.Entry<String, Document> entry: loadedCorpus.documents.entrySet()){
                 Document doc = entry.getValue();
                 doc.prefixId(Integer.toString(corpusIndex));
@@ -85,12 +79,5 @@ public class MergeCorpus extends CorpusModule {
         }
         Console.info(corpusIndex+" corpora loaded, "+docIndex+" documents in total");
     }
-
-    // consolidate the new metadata object
-    private void buildMetadata(){
-        // TODO merge metadata properly
-        corpus.metadata.put("nDocs", corpus.size());
-    }
-
 
 }
