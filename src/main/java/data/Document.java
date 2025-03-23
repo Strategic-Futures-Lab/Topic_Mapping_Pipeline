@@ -15,6 +15,16 @@ import java.util.*;
  */
 public class Document {
 
+    /**
+     * List of static fields used when reading/writing JSON files
+     */
+    private static String JSON_ID = "id";
+    private static String JSON_IDX = "i";
+    private static String JSON_DATA = "d";
+    private static String JSON_TEXT = "t";
+    private static String JSON_LEMMAS = "l";
+
+
     private String id;
     private int idx;
     private final HashMap<String, String> fields;
@@ -39,13 +49,13 @@ public class Document {
      * @param doc Document to parse
      */
     public Document(JSONObject doc){
-        id = (String) doc.get("id");
-        idx = Math.toIntExact((long) doc.get("index"));
-        fields = JSONHelper.getStringMap((JSONObject) doc.get("data"));
+        id = (String) doc.get(JSON_ID);
+        idx = Math.toIntExact((long) doc.get(JSON_IDX));
+        fields = JSONHelper.getStringMap((JSONObject) doc.get(JSON_DATA));
         // set by text builder module
-        text = (String) doc.get("text");
+        text = (String) doc.get(JSON_TEXT);
         // set by lemmatise module
-        parseLemmas((String) doc.get("lemmas"));
+        parseLemmas((String) doc.get(JSON_LEMMAS));
     }
 
     /**
@@ -266,19 +276,19 @@ public class Document {
     public JSONObject toJSON(){
         JSONObject root = new JSONObject();
         // Saving id and index
-        root.put("id", id);
-        root.put("index", idx);
+        root.put(JSON_ID, id);
+        root.put(JSON_IDX, idx);
         // Saving fields
         JSONObject data = new JSONObject();
         data.putAll(fields);
-        root.put("data", data);
+        root.put(JSON_DATA, data);
         // Saving text
         if(text!=null && !text.isEmpty()){
-            root.put("text", text);
+            root.put(JSON_TEXT, text);
         }
         // Saving Lemmas
         if(lemmasList!=null){
-            root.put("lemmas", getLemmasString());
+            root.put(JSON_LEMMAS, getLemmasString());
         }
         return root;
     }
