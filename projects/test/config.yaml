@@ -9,12 +9,13 @@ project:
 
 # run order
 run:
-#  - bibInput1
-  - csvInput1
-  - csvInput2
-  - mergeCorpus1
+  - bibInput1
+#  - csvInput1
+#  - csvInput2
+#  - mergeCorpus1
   - buildText1
   - lemmatise1
+  - ngrams1
 #  - ldaModel1
 #  - pdfInput1
 #  - txtInput1
@@ -36,22 +37,26 @@ bibInput1:
 
 buildText1:
   type: buildText
-  corpus: corpus_csv.json
-  textFields: [ title, abstract ]
+  corpus: corpus_bib.json
+  textFields: [ title, abstract, keywords ]
   docFields: [ authors ]
 
 lemmatise1:
   type: lemmatise
-  corpus: corpus_csv.json
+  corpus: corpus_bib.json
   stopWords: stopwords.txt
   stopPhrases: stopphrases.txt
+
+ngrams1:
+  type: nGrams
+  corpus: corpus_bib.json
 
 ldaModel1:
   type: modelLDA
   corpus: corpus_bib.json
   model: model.json
-  topics: 50
-  iterations: 1000
+  topics: 2
+  iterations: 500
   wordDistances: true
   logs: modelLogs
 

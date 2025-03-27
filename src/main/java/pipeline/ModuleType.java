@@ -24,6 +24,7 @@ public enum ModuleType {
     StopPhrases (corpus.StopPhrases.class, StopPhrasesConfig.class),
     Lemmatise (corpus.Lemmatise.class, LemmatiseConfig.class),
     StopWords (corpus.StopPhrases.class, StopWordsConfig.class),
+    NGrams (corpus.NGrams.class, NGramsConfig.class),
     // Modelling modules
     LDAModel (model.LDAModel.class, ModelConfigLDA.class);
 
@@ -57,6 +58,7 @@ public enum ModuleType {
             case "stopPhrases" -> StopPhrases;
             case "lemmatise" -> Lemmatise;
             case "stopWords" -> StopWords;
+            case "nGrams" -> NGrams;
             case "modelLDA" -> LDAModel;
             default ->
                     throw new ConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
