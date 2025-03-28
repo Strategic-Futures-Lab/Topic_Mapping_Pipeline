@@ -5,25 +5,49 @@ project:
     sources: sources
     data: out/tmp
     output: out
-  docFields: [ authors, organisation, value ]
+#  docFields: [ authors, organisation, value ]
 
 # run order
 run:
-  - bibInput1
-#  - csvInput1
-#  - csvInput2
-#  - mergeCorpus1
+  - txtInput1
   - buildText1
   - lemmatise1
   - ngrams1
+#  - bibInput2
+#  - buildText2
+#  - lemmatise2
+#  - ngrams2
+#  - csvInput1
+#  - csvInput2
+#  - mergeCorpus1
 #  - ldaModel1
 #  - pdfInput1
-#  - txtInput1
 #  - htmlInput1
 #  - gtrInput1
 
+# Text file input
+txtInput1:
+  type: inputTXT
+  source: bbc-fulltext/bbc
+  output: corpus_txt.json
+  emptyLineSplit: false
+
+buildText1:
+  type: buildText
+  corpus: corpus_txt.json
+  textFields: [ text ]
+  docFields: [ folder, file ]
+
+lemmatise1:
+  type: lemmatise
+  corpus: corpus_txt.json
+
+ngrams1:
+  type: nGrams
+  corpus: corpus_txt.json
+
 # BiBTex input module
-bibInput1:
+bibInput2:
   type: inputBIB
   source: bib_input.bib
   output: corpus_bib.json
@@ -35,25 +59,23 @@ bibInput1:
     year: year
     doi: doi
 
-buildText1:
+buildText2:
   type: buildText
   corpus: corpus_bib.json
   textFields: [ title, abstract, keywords ]
-  docFields: [ authors ]
+  docFields: [ author, year ]
 
-lemmatise1:
+lemmatise2:
   type: lemmatise
   corpus: corpus_bib.json
-  stopWords: stopwords.txt
-  stopPhrases: stopphrases.txt
 
-ngrams1:
+ngrams2:
   type: nGrams
   corpus: corpus_bib.json
 
 ldaModel1:
   type: modelLDA
-  corpus: corpus_bib.json
+  corpus: corpus_csv.json
   model: model.json
   topics: 2
   iterations: 500
@@ -106,11 +128,7 @@ pdfInput1:
   output: corpus_pdf.json
 #  splitPages: 2
 
-txtInput1:
-  type: inputTXT
-  source: texts
-  output: corpus_txt.json
-  emptyLineSplit: false
+
 
 htmlInput1:
   type: inputHTML

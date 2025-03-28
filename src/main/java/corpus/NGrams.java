@@ -3,13 +3,12 @@ package corpus;
 import IO.Console;
 import IO.Timer;
 import data.Document;
+import data.Pair;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
 import pipeline.config.modules.NGramsConfig;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -30,6 +29,7 @@ public class NGrams extends CleaningModule {
     ConcurrentHashMap<String, Integer> bigrams;
     ConcurrentHashMap<String, Integer> trigrams;
     ConcurrentHashMap<String, Double> bigramsPMI;
+    ConcurrentHashMap<String, Double> bigramsProbabilities;
     ConcurrentHashMap<String, Double> trigramsPMI;
     int nUnigrams;
     int nBigrams;
@@ -57,7 +57,7 @@ public class NGrams extends CleaningModule {
             instance.loadCorpus();
             //TODO
             instance.getNGrams();
-            instance.calculatePMI();
+            instance.calculateProbabilities();
             instance.writeCorpus();
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
@@ -91,11 +91,15 @@ public class NGrams extends CleaningModule {
         else corpus.documents.entrySet().forEach(this::getNGrams);
         if(noLemmas>0) Console.warning(noLemmas+" documents had no lemmatised text to get nGrams from");
         else Console.tick();
-        nUnigrams = unigrams.values().stream().mapToInt(i->i).sum();
-        nBigrams = bigrams.values().stream().mapToInt(i->i).sum();
-        nTrigrams = trigrams.values().stream().mapToInt(i->i).sum();
-        bigrams.entrySet().removeIf(entry -> entry.getValue() <= 1);
-        trigrams.entrySet().removeIf(entry -> entry.getValue() <= 1);
+//        nUnigrams = unigrams.values().stream().mapToInt(i->i).sum();
+//        nBigrams = bigrams.values().stream().mapToInt(i->i).sum();
+//        nTrigrams = trigrams.values().stream().mapToInt(i->i).sum();
+
+//        nUnigrams = unigrams.size();
+//        nBigrams = bigrams.size();
+//        nTrigrams = trigrams.size();
+//        bigrams.entrySet().removeIf(entry -> entry.getValue() <= 1);
+//        trigrams.entrySet().removeIf(entry -> entry.getValue() <= 1);
     }
 
     private void getNGrams(Map.Entry<String, Document> docEntry){
@@ -121,37 +125,66 @@ public class NGrams extends CleaningModule {
         else noLemmas++;
     }
 
-    private void calculatePMI(){
+    private void calculateProbabilities(){
         Console.log("Calculating PMI");
         bigramsPMI = new ConcurrentHashMap<>();
-        trigramsPMI = new ConcurrentHashMap<>();
+        bigramsProbabilities = new ConcurrentHashMap<>();
+//        trigramsPMI = new ConcurrentHashMap<>();
         if(RUN_IN_PARALLEL) {
-            bigrams.entrySet().parallelStream().forEach(this::calculatePMI);
-            trigrams.entrySet().parallelStream().forEach(this::calculatePMI);
+            bigrams.entrySet().parallelStream().forEach(this::calculateProbabilities);
+//            trigrams.entrySet().parallelStream().forEach(this::calculateProbabilities);
         }
         else {
-            bigrams.entrySet().forEach(this::calculatePMI);
-            trigrams.entrySet().forEach(this::calculatePMI);
+            bigrams.entrySet().forEach(this::calculateProbabilities);
+//            trigrams.entrySet().forEach(this::calculateProbabilities);
         }
         Console.tick();
+//        LinkedList<Pair<String, Double>> bigramsPMISorted = new LinkedList<>();
+//        bigramsPMI.entrySet().stream().forEach(e->bigramsPMISorted.add(new Pair<>(e.getKey(),e.getValue())));
+//        bigramsPMISorted.sort(new Comparator<Pair<String, Double>>() {
+//            @Override
+//            public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
+//                return -Double.compare(o1.getRight(),o2.getRight());
+//            }
+//        });
+//        bigramsPMI.entrySet().removeIf(entry -> entry.getValue() <= 10);
+//        trigramsPMI.entrySet().removeIf(entry -> entry.getValue() <= 20);
+        bigramsProbabilities.entrySet().removeIf(e -> e.getValue() <= 0.001);
+        LinkedList<Pair<String, Double>> bigramsPSorted = new LinkedList<>();
+        bigramsProbabilities.entrySet().stream().forEach(e->bigramsPSorted.add(new Pair<>(e.getKey(),e.getValue())));
+        bigramsPSorted.sort(new Comparator<Pair<String, Double>>() {
+            @Override
+            public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
+                return -Double.compare(o1.getRight(),o2.getRight());
+            }
+        });
+        System.out.println("test");
     }
 
-    private void calculatePMI(Map.Entry<String,Integer> nGram){
+//    private void calculatePMI(Map.Entry<String,Integer> nGram){
+//        String[] terms = nGram.getKey().split("-");
+//        if(terms.length == 2){
+//            double pBigram = (double) nGram.getValue() /nUnigrams;
+//            double pUnigram1 = (double) unigrams.get(terms[0]) /nUnigrams;
+//            double pUnigram2 = (double) unigrams.get(terms[1]) /nUnigrams;
+//            double pmi = Math.log(pBigram/(pUnigram1*pUnigram2))/Math.log(2);
+//            bigramsPMI.put(nGram.getKey(),pmi);
+//        }
+//        if(terms.length == 3){
+//            double pTrigram = (double) nGram.getValue() /nUnigrams;
+//            double pUnigram1 = (double) unigrams.get(terms[0]) /nUnigrams;
+//            double pUnigram2 = (double) unigrams.get(terms[1]) /nUnigrams;
+//            double pUnigram3 = (double) unigrams.get(terms[2]) /nUnigrams;
+//            double pmi = Math.log(pTrigram/(pUnigram1*pUnigram2*pUnigram3)) / Math.log(2);
+//            trigramsPMI.put(nGram.getKey(),pmi);
+//        }
+//    }
+
+    private void calculateProbabilities(Map.Entry<String, Integer> nGram){
         String[] terms = nGram.getKey().split("-");
         if(terms.length == 2){
-            double pBigram = (double) nGram.getValue() /nBigrams;
-            double pUnigram1 = (double) unigrams.get(terms[0]) /nUnigrams;
-            double pUnigram2 = (double) unigrams.get(terms[1]) /nUnigrams;
-            double pmi = Math.log(pBigram/(pUnigram1*pUnigram2)) / Math.log(2);
-            bigramsPMI.put(nGram.getKey(),pmi);
-        }
-        if(terms.length == 3){
-            double pTrigram = (double) nGram.getValue() /nTrigrams;
-            double pUnigram1 = (double) unigrams.get(terms[0]) /nUnigrams;
-            double pUnigram2 = (double) unigrams.get(terms[1]) /nUnigrams;
-            double pUnigram3 = (double) unigrams.get(terms[2]) /nUnigrams;
-            double pmi = Math.log(pTrigram/(pUnigram1*pUnigram2*pUnigram3)) / Math.log(2);
-            trigramsPMI.put(nGram.getKey(),pmi);
+            // bigram
+            bigramsProbabilities.put(nGram.getKey(), ((double)(nGram.getValue()+1)/(double)(unigrams.get(terms[0])+unigrams.size())));
         }
     }
 
