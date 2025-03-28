@@ -17,7 +17,7 @@ public class StopWords {
         "again","against","all","allow","allows","almost","alone","along","already","also","although","always",
         "am","among","amongst","an","and","another","any","anybody","anyhow","anyone","anything","anyway",
         "anyways","anywhere","apart","appear","appreciate","appropriate","are","around","as","aside","ask",
-        "asking","associated","at","available","away","awfully",
+        "asking","associated","at","available","away","awfully","ago",
         // B
         "b","be","became","because","become","becomes","becoming","been","before","beforehand","behind","being",
         "believe","below","beside","besides","best","better","between","beyond","both","brief","but","by",
@@ -27,7 +27,7 @@ public class StopWords {
         "corresponding","could","course","currently",
         // D
         "d","definitely","described","despite","did","different","div","do","does","doing","done","down",
-        "downwards","during",
+        "downwards","during","don",
         // E
         "e","each","edu","eg","eight","either","else","elsewhere","enough","entirely","especially","et","etc",
         "even","ever","every","everybody","everyone","everything","everywhere","ex","exactly","example","except",
@@ -42,7 +42,7 @@ public class StopWords {
         "how","howbeit","however","http","https",
         // I
         "i","ie","if","ignored","immediate","in","inasmuch","inc","indeed","indicate","indicated","indicates",
-        "inner","insofar","instead","into","inward","is","it","its","itself",
+        "inner","insofar","instead","into","inward","is","it","its","itself","I",
         // J
         "j","just",
         // K

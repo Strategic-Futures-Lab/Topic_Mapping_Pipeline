@@ -1,7 +1,5 @@
 package corpus.lemmatizer;
 
-import P2_Lemmatise.Lemmatizer.ReplaceWords;
-import P2_Lemmatise.Lemmatizer.StopWords;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -87,6 +85,7 @@ public class StanfordLemmatizer {
         List<String> newWords = new LinkedList<String>();
 
         for(String word: words){
+            word = word.toLowerCase();
             // Remove tokenised words where the dash is still there.
             word = word.startsWith("-") ? word.substring(1) : word;
             word = word.endsWith("-") ? word.substring(word.length()-1) : word;
