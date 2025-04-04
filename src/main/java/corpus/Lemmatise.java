@@ -85,7 +85,7 @@ public class Lemmatise extends CleaningModule {
 
     // launches lemmatisation process
     private void lemmatise(){
-        Console.log("Loading lemmatiser, following output from Stanford CoreNLP");
+        Console.log("Loading lemmatiser, following output from Stanford CoreNLP\n");
         slem = new StanfordLemmatizer();
         Console.log("Lemmatiser loaded");
         Console.tick();
