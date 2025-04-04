@@ -44,7 +44,9 @@ lemmatise1:
 
 ngrams1:
   type: nGrams
+  size: 2
   corpus: corpus_txt.json
+  nGramsOutput: nGrams.csv
 
 # BiBTex input module
 bibInput2:
@@ -71,6 +73,7 @@ lemmatise2:
 
 ngrams2:
   type: nGrams
+  size: 2
   corpus: corpus_bib.json
 
 ldaModel1:

@@ -22,8 +22,12 @@ public class NGramsConfig extends ModuleConfig {
     public final String output;
     /** Frequency threshold for considering a nGram */
     public final double threshold;
+    /** Maximum size of nGrams */
+    public final int maxSize;
     /** Filename of known nGrams file */
     public final String nGrams;
+    /** Filename of nGrams analysis output */
+    public final String nGramsOutput;
 
     /**
      * Constructor, parses and stores module parameters
@@ -42,6 +46,9 @@ public class NGramsConfig extends ModuleConfig {
         output = getDefaultPathParam("output", moduleParams, corpus);
         // TODO: check default threshold
         threshold = getDefaultDoubleParam("threshold", moduleParams, 0.9);
+        maxSize = getDefaultIntParam("size", moduleParams, 3);
+        if(maxSize < 2) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have ngram size of 2 or more");
         nGrams = getDefaultPathParam("nGrams", moduleParams, null);
+        nGramsOutput = getDefaultPathParam("nGramsOutput", moduleParams, null);
     }
 }

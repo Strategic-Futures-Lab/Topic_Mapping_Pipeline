@@ -1,5 +1,6 @@
 package corpus;
 
+import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
 import data.Document;
@@ -10,7 +11,6 @@ import pipeline.config.modules.NGramsConfig;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Module loading a lemmatised corpus JSON file and running a nGram analysis on lemmas
@@ -23,18 +23,17 @@ public class NGrams extends CleaningModule {
     // module parameters
     private String nGramsFile;
     private double threshold;
+    private int maxSize;
+    private String nGramsOutputFile;
+    private boolean analysing;
 
     // nGrams
     ConcurrentHashMap<String, Integer> unigrams;
-    ConcurrentHashMap<String, Integer> bigrams;
-    ConcurrentHashMap<String, Integer> trigrams;
-    ConcurrentHashMap<String, Double> bigramsPMI;
-    ConcurrentHashMap<String, Double> bigramsProbabilities;
-    ConcurrentHashMap<String, Double> trigramsPMI;
-    int nUnigrams;
-    int nBigrams;
-    int nTrigrams;
-
+    ConcurrentHashMap<String, Integer> ngrams;
+    // using concurrent hashmap for parallel computation
+    ConcurrentHashMap<String, Double> ngramsProbabilities;
+    // using linked list to sort by probabilities
+    LinkedList<Pair<String,Double>> sortedProbabilities;
 
     // for logging purposes
     int noLemmas;
@@ -55,10 +54,14 @@ public class NGrams extends CleaningModule {
         instance.processParameters((NGramsConfig) moduleParameters, projectParameters);
         try{
             instance.loadCorpus();
-            //TODO
-            instance.getNGrams();
-            instance.calculateProbabilities();
-            instance.writeCorpus();
+            if(instance.analysing) {
+                instance.getNGrams();
+                instance.calculateNGramsProbabilities();
+                instance.saveNGramsProbabilities();
+            } else {
+                //TODO: add other pathway - save given ngrams in corpus
+                instance.writeCorpus();
+            }
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -73,119 +76,101 @@ public class NGrams extends CleaningModule {
         corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;
         nGramsFile = moduleParameters.nGrams == null ? null : projectParameters.sourceDirectory+moduleParameters.nGrams;
+        nGramsOutputFile = moduleParameters.nGramsOutput == null ? null : projectParameters.dataDirectory+moduleParameters.nGramsOutput;
         threshold = moduleParameters.threshold;
+        maxSize = moduleParameters.maxSize;
+        analysing = nGramsOutputFile != null;
         Console.tick();
-        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
-        Console.info("Analysing nGrams in corpus "+corpusFile+saveDiff, 1);
-        Console.info("Building nGrams with frequency greater that "+threshold*100+" %", 2);
-        if(nGramsFile != null) Console.info("Building nGrams in "+nGramsFile, 2);
+        String task = analysing ? "Analysing" : "Building";
+        String saveDiff = corpusFile.equals(outputFile)||analysing ? "" : " and saving to "+outputFile;
+        Console.info(task+" nGrams in corpus "+corpusFile+saveDiff, 1);
+        if(analysing){
+            Console.info("Analysing nGrams up to "+maxSize+" terms", 2);
+            Console.info("Saving analysis in "+nGramsOutputFile, 2);
+        }
+        // TODO
+//        Console.info("Building nGrams with frequency greater that "+threshold*100+" %", 2);
+//        if(nGramsFile != null) Console.info("Building nGrams in "+nGramsFile, 2);
     }
 
     private void getNGrams(){
         Console.log("Getting nGrams");
         noLemmas = 0;
         unigrams = new ConcurrentHashMap<>();
-        bigrams = new ConcurrentHashMap<>();
-        trigrams = new ConcurrentHashMap<>();
+        ngrams = new ConcurrentHashMap<>();
         if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::getNGrams);
         else corpus.documents.entrySet().forEach(this::getNGrams);
         if(noLemmas>0) Console.warning(noLemmas+" documents had no lemmatised text to get nGrams from");
         else Console.tick();
-//        nUnigrams = unigrams.values().stream().mapToInt(i->i).sum();
-//        nBigrams = bigrams.values().stream().mapToInt(i->i).sum();
-//        nTrigrams = trigrams.values().stream().mapToInt(i->i).sum();
 
-//        nUnigrams = unigrams.size();
-//        nBigrams = bigrams.size();
-//        nTrigrams = trigrams.size();
-//        bigrams.entrySet().removeIf(entry -> entry.getValue() <= 1);
-//        trigrams.entrySet().removeIf(entry -> entry.getValue() <= 1);
+        // Below removes unique nGrams: TODO check if should be kept or not
+//        int ngramsSizeTotal = ngrams.size();
+//        ngrams.entrySet().removeIf(e -> e.getValue() <= 1);
+//        int ngramsSizeFiltered = ngrams.size();
+//        Console.info("Found "+ngramsSizeTotal+" nGrams in total, removed "+(ngramsSizeTotal-ngramsSizeFiltered)+" unique nGrams ("+ngramsSizeFiltered+" left)",1);
     }
 
     private void getNGrams(Map.Entry<String, Document> docEntry){
         Document doc = docEntry.getValue();
+        StringBuilder term = new StringBuilder();
         if(doc.hasLemmas()) {
             List<String> lemmas = doc.getLemmas();
             for(int i = 0; i < lemmas.size(); i++) {
-                String unigram = lemmas.get(i);
-                if(unigrams.containsKey(unigram)) unigrams.put(unigram, unigrams.get(unigram)+1);
-                else unigrams.put(unigram, 1);
-                if(i<lemmas.size()-1){
-                    String bigram = lemmas.get(i)+"-"+lemmas.get(i+1);
-                    if(bigrams.containsKey(bigram)) bigrams.put(bigram, bigrams.get(bigram)+1);
-                    else bigrams.put(bigram, 1);
+                term.append(lemmas.get(i));
+                if (unigrams.containsKey(term.toString())) unigrams.put(term.toString(), unigrams.get(term.toString()) + 1);
+                else unigrams.put(term.toString(), 1);
+                for(int n = 1; n < maxSize; n++){
+                    if(i+n<lemmas.size()) {
+                        term.append("-").append(lemmas.get(i + n));
+                        if (ngrams.containsKey(term.toString())) ngrams.put(term.toString(), ngrams.get(term.toString()) + 1);
+                        else ngrams.put(term.toString(), 1);
+                    }
                 }
-                if(i<lemmas.size()-2){
-                    String trigram = lemmas.get(i)+"-"+lemmas.get(i+1)+"-"+lemmas.get(i+2);
-                    if(trigrams.containsKey(trigram)) trigrams.put(trigram, trigrams.get(trigram)+1);
-                    else trigrams.put(trigram, 1);
-                }
+                term.setLength(0);
             }
         }
         else noLemmas++;
     }
 
-    private void calculateProbabilities(){
-        Console.log("Calculating PMI");
-        bigramsPMI = new ConcurrentHashMap<>();
-        bigramsProbabilities = new ConcurrentHashMap<>();
-//        trigramsPMI = new ConcurrentHashMap<>();
-        if(RUN_IN_PARALLEL) {
-            bigrams.entrySet().parallelStream().forEach(this::calculateProbabilities);
-//            trigrams.entrySet().parallelStream().forEach(this::calculateProbabilities);
-        }
-        else {
-            bigrams.entrySet().forEach(this::calculateProbabilities);
-//            trigrams.entrySet().forEach(this::calculateProbabilities);
+    private void calculateNGramsProbabilities() throws Exception {
+        Console.log("Calculating Probabilities");
+        ngramsProbabilities = new ConcurrentHashMap<>();
+        if (RUN_IN_PARALLEL) {
+            ngrams.entrySet().parallelStream().forEach(this::calculateNGramProbabilities);
+        } else {
+            ngrams.entrySet().forEach(this::calculateNGramProbabilities);
         }
         Console.tick();
-//        LinkedList<Pair<String, Double>> bigramsPMISorted = new LinkedList<>();
-//        bigramsPMI.entrySet().stream().forEach(e->bigramsPMISorted.add(new Pair<>(e.getKey(),e.getValue())));
-//        bigramsPMISorted.sort(new Comparator<Pair<String, Double>>() {
-//            @Override
-//            public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
-//                return -Double.compare(o1.getRight(),o2.getRight());
-//            }
-//        });
-//        bigramsPMI.entrySet().removeIf(entry -> entry.getValue() <= 10);
-//        trigramsPMI.entrySet().removeIf(entry -> entry.getValue() <= 20);
-        bigramsProbabilities.entrySet().removeIf(e -> e.getValue() <= 0.001);
-        LinkedList<Pair<String, Double>> bigramsPSorted = new LinkedList<>();
-        bigramsProbabilities.entrySet().stream().forEach(e->bigramsPSorted.add(new Pair<>(e.getKey(),e.getValue())));
-        bigramsPSorted.sort(new Comparator<Pair<String, Double>>() {
+        Console.log("Sorting");
+//        ngramsProbabilities.entrySet().removeIf(e -> e.getValue() <= 0.001);
+        sortedProbabilities = new LinkedList<>();
+        ngramsProbabilities.entrySet().stream().forEach(e->sortedProbabilities.add(new Pair<>(e.getKey(),e.getValue())));
+        sortedProbabilities.sort(new Comparator<Pair<String, Double>>() {
             @Override
             public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
                 return -Double.compare(o1.getRight(),o2.getRight());
             }
         });
-        System.out.println("test");
+        Console.tick();
     }
 
-//    private void calculatePMI(Map.Entry<String,Integer> nGram){
-//        String[] terms = nGram.getKey().split("-");
-//        if(terms.length == 2){
-//            double pBigram = (double) nGram.getValue() /nUnigrams;
-//            double pUnigram1 = (double) unigrams.get(terms[0]) /nUnigrams;
-//            double pUnigram2 = (double) unigrams.get(terms[1]) /nUnigrams;
-//            double pmi = Math.log(pBigram/(pUnigram1*pUnigram2))/Math.log(2);
-//            bigramsPMI.put(nGram.getKey(),pmi);
-//        }
-//        if(terms.length == 3){
-//            double pTrigram = (double) nGram.getValue() /nUnigrams;
-//            double pUnigram1 = (double) unigrams.get(terms[0]) /nUnigrams;
-//            double pUnigram2 = (double) unigrams.get(terms[1]) /nUnigrams;
-//            double pUnigram3 = (double) unigrams.get(terms[2]) /nUnigrams;
-//            double pmi = Math.log(pTrigram/(pUnigram1*pUnigram2*pUnigram3)) / Math.log(2);
-//            trigramsPMI.put(nGram.getKey(),pmi);
-//        }
-//    }
+    /** Calculates the probabilities of a ngram using Laplace Smoothing */
+    private void calculateNGramProbabilities(Map.Entry<String, Integer> ngram){
+        byte k = 1;
+        int i = ngram.getKey().lastIndexOf("-");
+        String full = ngram.getKey();
+        String start =  full.substring(0, i);
+        double numerator = (double)(ngram.getValue()+k);
+        double denominator = start.contains("-") ? (double)(ngrams.get(start)+k*unigrams.size()) : (double)(unigrams.get(start)+k*unigrams.size());
+        ngramsProbabilities.put(full, (numerator/denominator));
+    }
 
-    private void calculateProbabilities(Map.Entry<String, Integer> nGram){
-        String[] terms = nGram.getKey().split("-");
-        if(terms.length == 2){
-            // bigram
-            bigramsProbabilities.put(nGram.getKey(), ((double)(nGram.getValue()+1)/(double)(unigrams.get(terms[0])+unigrams.size())));
+    private void saveNGramsProbabilities() throws Exception {
+        String[] headers = new String[]{"ngram","probability","count"};
+        LinkedList<String[]> rows = new LinkedList<>();
+        for(Pair<String, Double> p: sortedProbabilities){
+            rows.add(new String[]{p.getLeft(),String.valueOf(p.getRight()),String.valueOf(ngrams.get(p.getLeft()))});
         }
+        CSVHelper.saveCSVFile(nGramsOutputFile, headers, rows, 0);
     }
-
 }
