@@ -23,11 +23,8 @@ public class Lemmatise extends CleaningModule {
     // module parameters
     private String stopPhrasesFile;
     private String stopWordsFile;
-    private String keepWordsFile;
 
     // cleaning options
-    private boolean protectWords = false;
-    private HashMap<String, String> keepWords;
     private boolean removeStopPhrases = false;
     private StopPhrases stopPhrasesModule;
     private boolean removeStopWords = false;
@@ -74,13 +71,11 @@ public class Lemmatise extends CleaningModule {
         outputFile = projectParameters.dataDirectory+moduleParameters.output;
         stopPhrasesFile = moduleParameters.stopPhrases == null ? null : projectParameters.sourceDirectory+moduleParameters.stopPhrases;
         stopWordsFile = moduleParameters.stopWords == null ? null : projectParameters.sourceDirectory+moduleParameters.stopWords;
-        keepWordsFile = moduleParameters.keepWords == null ? null : projectParameters.sourceDirectory+moduleParameters.keepWords;
         Console.tick();
         String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
         Console.info("Lemmatising texts from corpus "+corpusFile+saveDiff, 1);
         if(stopPhrasesFile != null) Console.info("Removing stop phrases in "+stopPhrasesFile, 2);
         if(stopWordsFile != null) Console.info("Removing words in "+stopWordsFile, 2);
-        if(keepWordsFile != null) Console.info("Keeping words in "+keepWordsFile, 2);
     }
 
     // launches lemmatisation process
@@ -93,16 +88,6 @@ public class Lemmatise extends CleaningModule {
         documentsProcessed = 0;
         noText = 0;
         lemStartTime = System.currentTimeMillis();
-        // set up word protection from lemmatiser
-        if(keepWordsFile!=null){
-            protectWords = true;
-            keepWords = new HashMap<>();
-            for(String o: readTextFile(keepWordsFile, "kept word(s)")){
-                String original = o.toLowerCase().trim();
-                String processed = original.replaceAll("\\W", " ");
-                keepWords.put(processed, original);
-            }
-        }
         // set up stop phrase removal
         if(stopPhrasesFile!=null){
             removeStopPhrases = true;
@@ -146,15 +131,6 @@ public class Lemmatise extends CleaningModule {
             // removing special characters
             text = text.replaceAll("\\n", " "); // returns
             text = text.replaceAll("\\r", " "); // carriage returns
-            text = text.replaceAll("\\W", " "); // non word characters
-            // reverting changes from kept words
-            if(protectWords){
-                for(Map.Entry<String, String> p: keepWords.entrySet()){
-                    String processed = p.getKey();
-                    String original = p.getValue();
-                    text = text.replaceAll("(^|\\s)"+processed+"($|\\s)", " "+original+" ");
-                }
-            }
             text = text.trim().replaceAll(" +"," "); // Trim all white space to single space
             // lemmatising
             List<String> lemmas = StanfordLemmatizer.removeCommonStopWords(slem.lemmatise(text));

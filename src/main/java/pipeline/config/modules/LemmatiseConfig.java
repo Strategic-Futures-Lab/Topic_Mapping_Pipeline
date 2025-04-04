@@ -24,8 +24,6 @@ public class LemmatiseConfig extends ModuleConfig {
     public final String stopPhrases;
     /** Filename of the stop words file */
     public final String stopWords;
-    /** Filename of the keep word file */
-    public final String keepWords;
 
     /**
      * Constructor, parses and stores module parameters
@@ -44,6 +42,5 @@ public class LemmatiseConfig extends ModuleConfig {
         output = getDefaultPathParam("output", moduleParams, corpus);
         stopPhrases = getDefaultPathParam("stopPhrases", moduleParams, null);
         stopWords = getDefaultPathParam("stopWords", moduleParams, null);
-        keepWords = getDefaultPathParam("protectWords", moduleParams, null);
     }
 }
