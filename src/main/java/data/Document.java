@@ -1,6 +1,7 @@
 package data;
 
 import IO.JSONHelper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public class Document {
     // created by text builder module
     private String text;
     // created by lemmatise module
-    private List<String> lemmasList;
+    private List<List<String>> lemmasList;
 
     /**
      * Initial constructor, used by input modules
@@ -55,7 +56,7 @@ public class Document {
         // set by text builder module
         text = (String) doc.get(JSON_TEXT);
         // set by lemmatise module
-        parseLemmas((String) doc.get(JSON_LEMMAS));
+        parseLemmas((JSONArray) doc.get(JSON_LEMMAS));
     }
 
     /**
@@ -201,9 +202,12 @@ public class Document {
     public boolean emptyText(){ return text == null || text.isEmpty(); }
 
     // Parses a string of lemmas (separated by space) and saves into the list of lemmas
-    private void parseLemmas(String lemmas){
+    private void parseLemmas(JSONArray lemmas){
         if(lemmas != null && !lemmas.isEmpty()){
-            lemmasList = List.of(lemmas.split(" "));
+            lemmasList = new LinkedList<>();
+            for(Object sentence: lemmas){
+                lemmasList.add(List.of(sentence.toString().split(" ")));
+            }
         }
     }
 
@@ -213,11 +217,14 @@ public class Document {
      * @return The lemma String
      */
     public String getLemmasString(){
-        String lemmas = "";
+        StringBuilder lemmas = new StringBuilder();
         if(lemmasList!=null){
-            lemmas = String.join(" ", lemmasList);
+            for(List<String> sentence: lemmasList){
+                lemmas.append(String.join(" ", sentence));
+                lemmas.append(" ");
+            }
         }
-        return lemmas;
+        return lemmas.toString();
     }
 
     /**
@@ -230,7 +237,7 @@ public class Document {
      * Setter for the list of lemmas
      * @param lemmas List of lemmas to set
      */
-    public void setLemmas(List<String> lemmas){
+    public void setLemmas(List<List<String>> lemmas){
         lemmasList = lemmas;
     }
 
@@ -238,7 +245,7 @@ public class Document {
      * Getter for the list of lemmas
      * @return The lemmas list
      */
-    public List<String> getLemmas(){
+    public List<List<String>> getLemmas(){
         if(lemmasList != null) return lemmasList;
         return new ArrayList<>();
     }
@@ -249,7 +256,9 @@ public class Document {
      */
     public void removeLemma(String lemma){
         if(lemmasList!=null){
-            lemmasList.removeIf(lemma::equals);
+            for(List<String> sentence: lemmasList){
+                sentence.removeIf(lemma::equals);
+            }
         }
     }
 
@@ -259,7 +268,9 @@ public class Document {
      */
     public void removeLemmas(List<String> lemmas){
         if(lemmasList!=null){
-            lemmasList.removeIf(lemmas::contains);
+            for(List<String> sentence: lemmasList){
+                sentence.removeIf(lemmas::contains);
+            }
         }
     }
 
@@ -288,7 +299,11 @@ public class Document {
         }
         // Saving Lemmas
         if(lemmasList!=null){
-            root.put(JSON_LEMMAS, getLemmasString());
+            JSONArray lemmas = new JSONArray();
+            for(List<String> sentence: lemmasList){
+                lemmas.add(String.join(" ", sentence));
+            }
+            root.put(JSON_LEMMAS, lemmas);
         }
         return root;
     }

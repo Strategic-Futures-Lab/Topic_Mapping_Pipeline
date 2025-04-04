@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NGrams extends CleaningModule {
 
+    private static final char JOINCHAR = '+';
+
     // module parameters
     private String nGramsFile;
     private double threshold;
@@ -114,19 +116,23 @@ public class NGrams extends CleaningModule {
         Document doc = docEntry.getValue();
         StringBuilder term = new StringBuilder();
         if(doc.hasLemmas()) {
-            List<String> lemmas = doc.getLemmas();
-            for(int i = 0; i < lemmas.size(); i++) {
-                term.append(lemmas.get(i));
-                if (unigrams.containsKey(term.toString())) unigrams.put(term.toString(), unigrams.get(term.toString()) + 1);
-                else unigrams.put(term.toString(), 1);
-                for(int n = 1; n < maxSize; n++){
-                    if(i+n<lemmas.size()) {
-                        term.append("-").append(lemmas.get(i + n));
-                        if (ngrams.containsKey(term.toString())) ngrams.put(term.toString(), ngrams.get(term.toString()) + 1);
-                        else ngrams.put(term.toString(), 1);
+            List<List<String>> lemmas = doc.getLemmas();
+            for(List<String> sentence: lemmas) {
+                for (int i = 0; i < sentence.size(); i++) {
+                    term.append(sentence.get(i));
+                    if (unigrams.containsKey(term.toString()))
+                        unigrams.put(term.toString(), unigrams.get(term.toString()) + 1);
+                    else unigrams.put(term.toString(), 1);
+                    for (int n = 1; n < maxSize; n++) {
+                        if (i + n < sentence.size()) {
+                            term.append(JOINCHAR).append(sentence.get(i + n));
+                            if (ngrams.containsKey(term.toString()))
+                                ngrams.put(term.toString(), ngrams.get(term.toString()) + 1);
+                            else ngrams.put(term.toString(), 1);
+                        }
                     }
+                    term.setLength(0);
                 }
-                term.setLength(0);
             }
         }
         else noLemmas++;
@@ -157,19 +163,20 @@ public class NGrams extends CleaningModule {
     /** Calculates the probabilities of a ngram using Laplace Smoothing */
     private void calculateNGramProbabilities(Map.Entry<String, Integer> ngram){
         byte k = 1;
-        int i = ngram.getKey().lastIndexOf("-");
+        int i = ngram.getKey().lastIndexOf(JOINCHAR);
         String full = ngram.getKey();
-        String start =  full.substring(0, i);
-        double numerator = (double)(ngram.getValue()+k);
-        double denominator = start.contains("-") ? (double)(ngrams.get(start)+k*unigrams.size()) : (double)(unigrams.get(start)+k*unigrams.size());
-        ngramsProbabilities.put(full, (numerator/denominator));
+        String start = full.substring(0, i);
+        double numerator = (double) (ngram.getValue() + k);
+        double denominator = start.contains(Character.toString(JOINCHAR)) ? (double) (ngrams.get(start) + k * unigrams.size()) : (double) (unigrams.get(start) + k * unigrams.size());
+        ngramsProbabilities.put(full, (numerator / denominator));
+
     }
 
     private void saveNGramsProbabilities() throws Exception {
         String[] headers = new String[]{"ngram","probability","count"};
         LinkedList<String[]> rows = new LinkedList<>();
         for(Pair<String, Double> p: sortedProbabilities){
-            rows.add(new String[]{p.getLeft(),String.valueOf(p.getRight()),String.valueOf(ngrams.get(p.getLeft()))});
+            rows.add(new String[]{p.getLeft().replace(JOINCHAR, '_'),String.valueOf(p.getRight()),String.valueOf(ngrams.get(p.getLeft()))});
         }
         CSVHelper.saveCSVFile(nGramsOutputFile, headers, rows, 0);
     }

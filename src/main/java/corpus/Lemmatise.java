@@ -8,7 +8,6 @@ import pipeline.config.modules.LemmatiseConfig;
 import corpus.lemmatizer.StanfordLemmatizer;
 import data.Document;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,12 +110,7 @@ public class Lemmatise extends CleaningModule {
 
     // lemmatises one document
     private void lemmatiseDocument(Map.Entry<String, Document> docEntry){
-        if(documentsProcessed % UPDATE_FREQUENCY == 0 && documentsProcessed != 0) {
-            long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
-            float lemTimeLeft = ((float) lemTimeTaken / (float) documentsProcessed) * (corpus.size() - documentsProcessed);
-            float percentage = Math.round((((float) documentsProcessed / (float) corpus.size()) * 100) * 100f) / 100f;
-            Console.info("Lemmatised: "+documentsProcessed+" documents (" +percentage+ "%) - "+Timer.convert(lemTimeTaken)+" / "+Timer.convert(lemTimeLeft)+" (est.)", 1);
-        }
+        log();
 
         Document doc = docEntry.getValue();
         if(doc.emptyText()){
@@ -133,7 +127,7 @@ public class Lemmatise extends CleaningModule {
             text = text.replaceAll("\\r", " "); // carriage returns
             text = text.trim().replaceAll(" +"," "); // Trim all white space to single space
             // lemmatising
-            List<String> lemmas = StanfordLemmatizer.removeCommonStopWords(slem.lemmatise(text));
+            List<List<String>> lemmas = StanfordLemmatizer.removeCommonStopWords(slem.lemmatise(text));
             // remove stop words
             if(removeStopWords){
                 stopWordsModule.removeStopWords(lemmas);
@@ -141,5 +135,14 @@ public class Lemmatise extends CleaningModule {
             doc.setLemmas(lemmas);
         }
         documentsProcessed++;
+    }
+
+    private void log(){
+        if(documentsProcessed % UPDATE_FREQUENCY == 0 && documentsProcessed != 0) {
+            long lemTimeTaken = (System.currentTimeMillis() - lemStartTime) / (long)1000;
+            float lemTimeLeft = ((float) lemTimeTaken / (float) documentsProcessed) * (corpus.size() - documentsProcessed);
+            float percentage = Math.round((((float) documentsProcessed / (float) corpus.size()) * 100) * 100f) / 100f;
+            Console.info("Lemmatised: "+documentsProcessed+" documents (" +percentage+ "%) - "+Timer.convert(lemTimeTaken)+" / "+Timer.convert(lemTimeLeft)+" (est.)", 1);
+        }
     }
 }

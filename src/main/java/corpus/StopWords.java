@@ -94,7 +94,9 @@ public class StopWords extends CleaningModule {
      * Removes the stop words from the given list of lemmas
      * @param lemmas List of the lemmas to clean
      */
-    public void removeStopWords(List<String> lemmas){
-        lemmas.removeAll(stopWords);
+    public void removeStopWords(List<List<String>> lemmas){
+        for(List<String> sentence: lemmas){
+            sentence.removeAll(stopWords);
+        }
     }
 }
