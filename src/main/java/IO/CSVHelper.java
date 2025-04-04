@@ -3,10 +3,15 @@ package IO;
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.writer.CsvAppender;
+import de.siegmar.fastcsv.writer.CsvWriter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Helper class for reading and writing CSV files
@@ -83,4 +88,65 @@ public class CSVHelper {
         }
         return rowNum;
     }
+
+    /**
+     * Method writing a CSV file, with headers
+     * @param filename Filename of the CSV file to save
+     * @param headers List of headers
+     * @param rows List of rows
+     * @param depth Depth level for logs
+     */
+    public static void saveCSVFile(String filename, String[] headers, List<String[]> rows, int depth) throws Exception {
+        Console.log("Saving "+filename, depth);
+        File file = new File(filename);
+        file.getParentFile().mkdirs();
+        // this will erase the content of the file before appending data to it.
+        new FileWriter(file.getPath(), false).close();
+        CsvWriter csvWriter = new CsvWriter();
+        csvWriter.setAlwaysDelimitText(true);
+        CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8);
+        if(headers != null) {
+            for (String h : headers) {
+                csvAppender.appendField(h);
+            }
+            csvAppender.endLine();
+        }
+        for(String[] row: rows) {
+            for(String v: row) {
+                csvAppender.appendField(v);
+            }
+            csvAppender.endLine();
+        }
+        Console.tick();
+    }
+
+    /**
+     * Method writing a CSV file
+     * @param filename Filename of the CSV file to save
+     * @param rows List of rows
+     * @param depth Depth level for logs
+     */
+    public static void saveCSVFile(String filename, List<String[]> rows, int depth) throws Exception{
+        saveCSVFile(filename, null, rows, depth);
+    }
+
+    /**
+     * Method writing a CSV file, with headers
+     * @param filename Filename of the CSV file to save
+     * @param headers List of headers
+     * @param rows List of rows
+     */
+    public static void saveCSVFile(String filename, String[] headers, List<String[]> rows) throws Exception {
+        saveCSVFile(filename, headers, rows, 0);
+    }
+
+    /**
+     * Method writing a CSV file
+     * @param filename Filename of the CSV file to save
+     * @param rows List of rows
+     */
+    public static void saveCSVFile(String filename, List<String[]> rows) throws Exception{
+        saveCSVFile(filename, rows, 0);
+    }
+
 }
