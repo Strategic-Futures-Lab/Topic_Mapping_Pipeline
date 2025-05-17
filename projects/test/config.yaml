@@ -9,10 +9,12 @@ project:
 
 # run order
 run:
-  - txtInput1
-  - buildText1
-  - lemmatise1
-  - ngrams1
+#  - txtInput1
+#  - buildText1
+#  - lemmatise1
+#  - ngrams1
+#  - ngramsBuild1
+  - ldaModel1
 #  - bibInput2
 #  - buildText2
 #  - lemmatise2
@@ -46,7 +48,24 @@ ngrams1:
   type: nGrams
   size: 2
   corpus: corpus_txt.json
-  nGramsOutput: nGrams.csv
+  nGrams: nGrams.csv
+  analysis: true
+
+ngramsBuild1:
+  type: nGrams
+  corpus: corpus_txt.json
+  nGrams: nGrams.txt
+  analysis: false
+
+ldaModel1:
+  type: modelLDA
+  corpus: corpus_txt.json
+  topics: model_topics_txt.json
+  documents: model_documents_txt.json
+  nTopics: 5
+  iterations: 500
+  wordDistances: true
+  logs: modelLogs
 
 # BiBTex input module
 bibInput2:
@@ -76,7 +95,7 @@ ngrams2:
   size: 2
   corpus: corpus_bib.json
 
-ldaModel1:
+ldaModel2:
   type: modelLDA
   corpus: corpus_csv.json
   model: model.json
