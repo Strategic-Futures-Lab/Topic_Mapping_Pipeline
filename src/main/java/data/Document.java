@@ -231,7 +231,14 @@ public class Document {
      * Returns the number of lemmas
      * @return The number of lemmas
      */
-    public int getNumLemmas(){ return lemmasList==null ? 0 : lemmasList.size(); }
+    public int getNumLemmas(){
+        if (lemmasList==null) return 0;
+        else{
+            int count = 0;
+            for(List<String> sentence: lemmasList) count += sentence.size();
+            return count;
+        }
+    }
 
     /**
      * Setter for the list of lemmas
@@ -247,6 +254,23 @@ public class Document {
      */
     public List<List<String>> getLemmas(){
         if(lemmasList != null) return lemmasList;
+        return new ArrayList<>();
+    }
+
+    /**
+     * Setter for the list of lemmas sentences
+     * @param sentences List of lemmas sentences to set
+     */
+    public void setLemmaSentences(List<String> sentences){
+        lemmasList = sentences.stream().map(s -> List.of(s.split(" "))).toList();
+    }
+
+    /**
+     * Getter for the list of lemmas sentences
+     * @return The list of lemmas sentences
+     */
+    public List<String> getLemmaSentences(){
+        if(lemmasList != null) return lemmasList.stream().map(l -> String.join(" ", l)).toList();
         return new ArrayList<>();
     }
 
