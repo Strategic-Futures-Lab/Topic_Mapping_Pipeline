@@ -14,20 +14,18 @@ import java.util.HashMap;
  */
 public class NGramsConfig extends ModuleConfig {
 
-    private static final String[] MANDATORY_PARAMS = new String[]{"corpus"};
+    private static final String[] MANDATORY_PARAMS = new String[]{"corpus", "nGrams", "analysis"};
 
     /** Filenames of the source corpus files */
     public final String corpus;
     /** Filename of the output corpus file */
     public final String output;
     /** Frequency threshold for considering a nGram */
-    public final double threshold;
+    public final boolean analysis;
     /** Maximum size of nGrams */
     public final int maxSize;
-    /** Filename of known nGrams file */
+    /** Filename of nGrams file (build input or analysis output) */
     public final String nGrams;
-    /** Filename of nGrams analysis output */
-    public final String nGramsOutput;
 
     /**
      * Constructor, parses and stores module parameters
@@ -42,13 +40,11 @@ public class NGramsConfig extends ModuleConfig {
             if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
         corpus = getPathParam("corpus", moduleParams);
+        nGrams = getPathParam("nGrams", moduleParams);
+        analysis = getBooleanParam("analysis", moduleParams);
         // optional parameters
         output = getDefaultPathParam("output", moduleParams, corpus);
-        // TODO: check default threshold
-        threshold = getDefaultDoubleParam("threshold", moduleParams, 0.9);
         maxSize = getDefaultIntParam("size", moduleParams, 3);
         if(maxSize < 2) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have ngram size of 2 or more");
-        nGrams = getDefaultPathParam("nGrams", moduleParams, null);
-        nGramsOutput = getDefaultPathParam("nGramsOutput", moduleParams, null);
     }
 }

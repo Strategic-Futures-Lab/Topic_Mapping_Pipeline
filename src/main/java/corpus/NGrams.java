@@ -21,26 +21,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NGrams extends CleaningModule {
 
     private static final char JOINCHAR = '+';
+    private static final char SAVECHAR = '_';
 
     // module parameters
     private String nGramsFile;
-    private double threshold;
     private int maxSize;
-    private String nGramsOutputFile;
-    private boolean analysing;
+    private boolean analysis;
 
     // nGrams
-    ConcurrentHashMap<String, Integer> unigrams;
-    ConcurrentHashMap<String, Integer> ngrams;
+    ConcurrentHashMap<String, Integer> unigramsFound;
+    ConcurrentHashMap<String, Integer> ngramsFound;
     // using concurrent hashmap for parallel computation
     ConcurrentHashMap<String, Double> ngramsProbabilities;
     // using linked list to sort by probabilities
     LinkedList<Pair<String,Double>> sortedProbabilities;
+    List<String> ngramsRead;
 
     // for logging purposes
     int noLemmas;
     // Flag for processing documents in parallel
-    private final static boolean RUN_IN_PARALLEL = true;
+    private final static boolean RUN_IN_PARALLEL = false;
 
     /**
      * Main module method - processes parameters, loads corpus, build nGrams, calculate frequency, joins n grams and save corpus again
@@ -56,12 +56,14 @@ public class NGrams extends CleaningModule {
         instance.processParameters((NGramsConfig) moduleParameters, projectParameters);
         try{
             instance.loadCorpus();
-            if(instance.analysing) {
+            if(instance.analysis) {
                 instance.getNGrams();
                 instance.calculateNGramsProbabilities();
                 instance.saveNGramsProbabilities();
             } else {
                 //TODO: add other pathway - save given ngrams in corpus
+                instance.loadNGrams();
+                instance.combineNGrams();
                 instance.writeCorpus();
             }
         } catch (Exception e){
@@ -77,32 +79,29 @@ public class NGrams extends CleaningModule {
         Console.log("Processing parameters");
         corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
         outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        nGramsFile = moduleParameters.nGrams == null ? null : projectParameters.sourceDirectory+moduleParameters.nGrams;
-        nGramsOutputFile = moduleParameters.nGramsOutput == null ? null : projectParameters.dataDirectory+moduleParameters.nGramsOutput;
-        threshold = moduleParameters.threshold;
+        analysis = moduleParameters.analysis;
+        nGramsFile = (analysis? projectParameters.outputDirectory : projectParameters.sourceDirectory)+moduleParameters.nGrams;
         maxSize = moduleParameters.maxSize;
-        analysing = nGramsOutputFile != null;
         Console.tick();
-        String task = analysing ? "Analysing" : "Building";
-        String saveDiff = corpusFile.equals(outputFile)||analysing ? "" : " and saving to "+outputFile;
-        Console.info(task+" nGrams in corpus "+corpusFile+saveDiff, 1);
-        if(analysing){
-            Console.info("Analysing nGrams up to "+maxSize+" terms", 2);
-            Console.info("Saving analysis in "+nGramsOutputFile, 2);
+        String task = analysis ? "Analysing" : "Building";
+        String saveDiff = corpusFile.equals(outputFile)||analysis ? "" : " and saving to "+outputFile;
+        Console.info(task+" n-grams in corpus "+corpusFile+saveDiff, 1);
+        if(analysis){
+            Console.info("Analysing n-grams up to "+maxSize+" terms", 2);
+            Console.info("Saving analysis in "+nGramsFile, 2);
+        } else {
+            Console.info("Reading n-grams from "+nGramsFile, 2);
         }
-        // TODO
-//        Console.info("Building nGrams with frequency greater that "+threshold*100+" %", 2);
-//        if(nGramsFile != null) Console.info("Building nGrams in "+nGramsFile, 2);
     }
 
     private void getNGrams(){
-        Console.log("Getting nGrams");
+        Console.log("Getting n-grams");
         noLemmas = 0;
-        unigrams = new ConcurrentHashMap<>();
-        ngrams = new ConcurrentHashMap<>();
+        unigramsFound = new ConcurrentHashMap<>();
+        ngramsFound = new ConcurrentHashMap<>();
         if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::getNGrams);
         else corpus.documents.entrySet().forEach(this::getNGrams);
-        if(noLemmas>0) Console.warning(noLemmas+" documents had no lemmatised text to get nGrams from");
+        if(noLemmas>0) Console.warning(noLemmas+" documents had no lemmatised text to get n-grams from");
         else Console.tick();
 
         // Below removes unique nGrams: TODO check if should be kept or not
@@ -120,15 +119,15 @@ public class NGrams extends CleaningModule {
             for(List<String> sentence: lemmas) {
                 for (int i = 0; i < sentence.size(); i++) {
                     term.append(sentence.get(i));
-                    if (unigrams.containsKey(term.toString()))
-                        unigrams.put(term.toString(), unigrams.get(term.toString()) + 1);
-                    else unigrams.put(term.toString(), 1);
+                    if (unigramsFound.containsKey(term.toString()))
+                        unigramsFound.put(term.toString(), unigramsFound.get(term.toString()) + 1);
+                    else unigramsFound.put(term.toString(), 1);
                     for (int n = 1; n < maxSize; n++) {
                         if (i + n < sentence.size()) {
                             term.append(JOINCHAR).append(sentence.get(i + n));
-                            if (ngrams.containsKey(term.toString()))
-                                ngrams.put(term.toString(), ngrams.get(term.toString()) + 1);
-                            else ngrams.put(term.toString(), 1);
+                            if (ngramsFound.containsKey(term.toString()))
+                                ngramsFound.put(term.toString(), ngramsFound.get(term.toString()) + 1);
+                            else ngramsFound.put(term.toString(), 1);
                         }
                     }
                     term.setLength(0);
@@ -142,9 +141,9 @@ public class NGrams extends CleaningModule {
         Console.log("Calculating Probabilities");
         ngramsProbabilities = new ConcurrentHashMap<>();
         if (RUN_IN_PARALLEL) {
-            ngrams.entrySet().parallelStream().forEach(this::calculateNGramProbabilities);
+            ngramsFound.entrySet().parallelStream().forEach(this::calculateNGramProbabilities);
         } else {
-            ngrams.entrySet().forEach(this::calculateNGramProbabilities);
+            ngramsFound.entrySet().forEach(this::calculateNGramProbabilities);
         }
         Console.tick();
         Console.log("Sorting");
@@ -167,7 +166,7 @@ public class NGrams extends CleaningModule {
         String full = ngram.getKey();
         String start = full.substring(0, i);
         double numerator = (double) (ngram.getValue() + k);
-        double denominator = start.contains(Character.toString(JOINCHAR)) ? (double) (ngrams.get(start) + k * unigrams.size()) : (double) (unigrams.get(start) + k * unigrams.size());
+        double denominator = start.contains(Character.toString(JOINCHAR)) ? (double) (ngramsFound.get(start) + k * unigramsFound.size()) : (double) (unigramsFound.get(start) + k * unigramsFound.size());
         ngramsProbabilities.put(full, (numerator / denominator));
 
     }
@@ -176,8 +175,39 @@ public class NGrams extends CleaningModule {
         String[] headers = new String[]{"ngram","probability","count"};
         LinkedList<String[]> rows = new LinkedList<>();
         for(Pair<String, Double> p: sortedProbabilities){
-            rows.add(new String[]{p.getLeft().replace(JOINCHAR, '_'),String.valueOf(p.getRight()),String.valueOf(ngrams.get(p.getLeft()))});
+            rows.add(new String[]{p.getLeft().replace(JOINCHAR, SAVECHAR),String.valueOf(p.getRight()),String.valueOf(ngramsFound.get(p.getLeft()))});
         }
-        CSVHelper.saveCSVFile(nGramsOutputFile, headers, rows, 0);
+        CSVHelper.saveCSVFile(nGramsFile, headers, rows, 0);
+    }
+
+    private void loadNGrams(){
+        ngramsRead = readTextFile(nGramsFile, "n-grams");
+        ngramsRead = ngramsRead.stream().map(s -> s.trim().toLowerCase()).toList();
+    }
+
+    private void combineNGrams(){
+        Console.log("Combining n-grams");
+        noLemmas = 0;
+        if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::combineNGrams);
+        else corpus.documents.entrySet().forEach(this::combineNGrams);
+        if(noLemmas>0) Console.warning(noLemmas+" documents had no lemmatised text to combine n-grams from");
+        else Console.tick();
+    }
+
+    private void combineNGrams(Map.Entry<String, Document> docEntry){
+        Document doc = docEntry.getValue();
+        if(doc.hasLemmas()) {
+            List<String> sentences = doc.getLemmaSentences();
+            List<String> newSentences = new ArrayList<>();
+            for(String sentence: sentences) {
+                String newSentence = sentence;
+                for(String ngram: ngramsRead){
+                    newSentence = newSentence.replaceAll(ngram.replace(SAVECHAR, ' '), ngram);
+                }
+                newSentences.add(newSentence);
+            }
+            doc.setLemmaSentences(newSentences);
+        }
+        else noLemmas++;
     }
 }
