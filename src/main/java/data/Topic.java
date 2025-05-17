@@ -1,11 +1,12 @@
-package model.ldacore;
+package data;
 
+import IO.Console;
 import IO.JSONHelper;
-import data.SparseVector;
-import data.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -15,38 +16,49 @@ import java.util.List;
 import java.util.stream.DoubleStream;
 
 /**
- * Wrapper class for topics modelled using LDA
+ * Class representing a topic.
+ * Provides method for loading a typical model topic file.
  *
- * @author S. Padilla, T. Methven, P. Le Bras
- * @version 2
+ * @author P. Le Bras
+ * @version 1
  */
-public class LDATopic implements Serializable {
+public class Topic implements Serializable {
 
     // Serialisation ID
     private static final long serialVersionUID = -1048734038308190794L;
 
-    // topic index or number
+    // Topic id
     private int number;
-
     // Sorted list (by assignment count) of unique labels (lemmas) assigned to this topic
     private String[] words;
-    // labelsID might be irrelevant
-    // Sorted list (by assignment count) of unique labels (lemmas) identifiers assigned to this topic
-    private int [] wordIds;
     // List of assignment counts (in order) for each unique label (lemma) assigned to this topic
     private double[] wordWeights;
-
+    // Sorted list (by assignment count) of unique labels (lemmas) identifiers assigned to this topic
+    private int [] wordIds;
     // Sorted list (by weight) of documents ids where this topic is present
     private String[] documents;
     // List of weights (in order) for each document where this topic is present
     private double[] docWeights;
 
     /**
-     * Constructor
+     * Initial constructor
      * @param topicNumber topic number used in the model
      */
-    public LDATopic(int topicNumber){
+    public Topic(int topicNumber){
         number = topicNumber;
+    }
+
+    /**
+     * JSON constructor
+     * @param topicObj JSON object representing the topic
+     */
+    public Topic(JSONObject topicObj){
+        number = (int) topicObj.get("id");
+        words = JSONHelper.getStringArray((JSONArray) topicObj.get("words"));
+        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get("wordWeights"));
+        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get("wordIds"));
+        documents = JSONHelper.getStringArray((JSONArray) topicObj.get("docs"));
+        docWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get("docWeights"));
     }
 
     /**
@@ -172,11 +184,13 @@ public class LDATopic implements Serializable {
         topicJSON.put("id", number);
         topicJSON.put("words", JSONHelper.toJSONArray(words));
         topicJSON.put("wordWeights", JSONHelper.toJSONArray(formatArray(wordWeights)));
+        topicJSON.put("wordIds", JSONHelper.toJSONArray(formatArray(wordWeights)));
         topicJSON.put("docs", JSONHelper.toJSONArray(documents));
         topicJSON.put("docWeights", JSONHelper.toJSONArray(formatArray(docWeights)));
         return topicJSON;
     }
 
+    // used to format an array of doubles into 4 decimals max
     private double[] formatArray(double[] arr){
         DecimalFormat df = new DecimalFormat("#.#####");
         df.setRoundingMode(RoundingMode.HALF_UP);
@@ -186,4 +200,50 @@ public class LDATopic implements Serializable {
                 .toArray();
     }
 
+    /**
+     * Method to load a list of topics from a JSON file
+     * @param filename Name of topic JSON file
+     * @return The list of topics
+     * @throws IOException If reading the file fails
+     * @throws ParseException If parsing JSON fails
+     */
+    public static List<Topic> loadTopics(String filename) throws IOException, ParseException {
+        ArrayList<Topic> topics = new ArrayList<>();
+        try {
+            JSONArray input = JSONHelper.loadJSONArray(filename);
+            for(int i = 0; i<input.size(); i++){
+                JSONObject t = (JSONObject) input.get(i);
+                topics.add(new Topic(t));
+            }
+            Console.note("Loaded "+topics.size()+" topics", 1);
+        } catch (IOException e) {
+            Console.error("Loading model topic file "+filename+" failed");
+            throw e;
+        } catch (ParseException e) {
+            Console.error("Parsing model topic file "+filename+" failed");
+            throw e;
+        }
+
+        return topics;
+    }
+
+    /**
+     * Method to write a list of topics on a JSON file
+     * @param filename Name of topic JSON file
+     * @param topics The list of topics to save
+     * @throws IOException If writing the file fails
+     */
+    public static void writeTopics(String filename, List<Topic> topics) throws IOException {
+        Console.log("Saving topics");
+        try{
+            JSONArray topicsArray = new JSONArray();
+            for(Topic t: topics){
+                topicsArray.add(t.toJSON());
+            }
+            JSONHelper.saveJSONArray(topicsArray, filename, 1);
+        } catch (IOException e){
+            Console.error("Saving topics failed");
+            throw e;
+        }
+    }
 }

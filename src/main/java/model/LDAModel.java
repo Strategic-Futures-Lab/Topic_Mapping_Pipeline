@@ -4,6 +4,7 @@ import IO.Console;
 import IO.JSONHelper;
 import IO.SERHelper;
 import IO.Timer;
+import data.Topic;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
 import pipeline.config.modules.ModelConfigLDA;
@@ -11,9 +12,7 @@ import data.Document;
 import model.ldacore.LDA;
 import model.ldacore.LDADocument;
 import model.ldacore.LDAParameters;
-import model.ldacore.LDATopic;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -74,7 +73,8 @@ public class LDAModel extends ModelModule {
     private void processParameters(ModelConfigLDA moduleParameters, ProjectConfig projectParameters){
         Console.log("Processing parameters");
         corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
+        topicsFile = projectParameters.dataDirectory+moduleParameters.topics;
+        documentsFile = projectParameters.dataDirectory+moduleParameters.documents;
         ldaParameters = moduleParameters.ldaParams;
         minLemmas = moduleParameters.minLemmas;
         wordDistances = moduleParameters.wordDistances;
@@ -85,8 +85,9 @@ public class LDAModel extends ModelModule {
         loglikelihoodLogFile = moduleParameters.loglikelihoodLogs;
         topicLogFile = moduleParameters.topicLogs;
         Console.tick();
-        Console.info("Modelling "+ldaParameters.nTopics+" from corpus "+corpusFile, 1);
-        Console.info("Saving model onto "+outputFile);
+        Console.info("Modelling "+ldaParameters.nTopics+" topics from corpus "+corpusFile, 1);
+        Console.info("Saving topics in "+topicsFile, 1);
+        Console.info("Saving documents in "+documentsFile, 1);
         if(serialisedFile != null) Console.info("Serialising model to "+logDir+serialisedFile, 2);
         if(loglikelihoodLogFile != null) Console.info("Saving log-likelihoods to "+logDir+loglikelihoodLogFile, 2);
         if(topicLogFile != null) Console.info("Saving topic logs to "+logDir+topicLogFile, 2);
@@ -151,18 +152,14 @@ public class LDAModel extends ModelModule {
     private void writeModel() throws IOException {
         Console.log("Saving model");
         try{
-            JSONObject root = new JSONObject();
-            JSONArray topics = new JSONArray();
+            Topic.writeTopics(topicsFile, tModel.getTopics());
             JSONArray documents = new JSONArray();
-            for(LDATopic t: tModel.getTopics()){
-                topics.add(t.toJSON());
-            }
             for(LDADocument d: modelInput){
                 documents.add(d.toJSON());
             }
-            root.put("topics", topics);
-            root.put("documents",documents);
-            JSONHelper.saveJSON(root, outputFile, 1);
+//            root.put("topics", topics);
+//            root.put("documents",documents);
+            JSONHelper.saveJSONArray(documents, documentsFile, 1);
         } catch (IOException e){
             Console.error("Saving model failed");
             throw e;

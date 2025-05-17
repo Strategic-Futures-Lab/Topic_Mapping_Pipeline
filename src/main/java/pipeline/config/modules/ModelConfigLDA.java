@@ -9,12 +9,14 @@ import java.util.HashMap;
 
 public class ModelConfigLDA extends ModuleConfig {
 
-    private static final String[] MANDATORY_PARAMS = new String[]{"corpus", "model", "topics"};
+    private static final String[] MANDATORY_PARAMS = new String[]{"corpus", "topics", "documents", "nTopics"};
 
     /** Filename of the source corpus file */
     public final String corpus;
-    /** Filename of the output model file */
-    public final String output;
+    /** Filename of the output topic file */
+    public final String topics;
+    /** Filename of the output document file */
+    public final String documents;
     /** LDA parameters */
     public final LDAParameters ldaParams;
     /** Minimum number of lemmas for a document to be included in the model */
@@ -36,8 +38,9 @@ public class ModelConfigLDA extends ModuleConfig {
             if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
         corpus = getPathParam("corpus", moduleParams);
-        output = getPathParam("model", moduleParams);
-        ldaParams = new LDAParameters(getIntParam("topics", moduleParams));
+        topics = getPathParam("topics", moduleParams);
+        documents = getPathParam("documents", moduleParams);
+        ldaParams = new LDAParameters(getIntParam("nTopics", moduleParams));
         ldaParams.samplingIterations = getDefaultIntParam("iterations", moduleParams, 2000);
         ldaParams.maximisationIterations = getDefaultIntParam("maximisations", moduleParams, 50);
         ldaParams.alphaSum = getDefaultDoubleParam("alphaSum", moduleParams, 1.0);

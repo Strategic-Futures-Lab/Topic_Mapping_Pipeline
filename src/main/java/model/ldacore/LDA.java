@@ -9,6 +9,7 @@ import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.TokenSequence2FeatureSequence;
 import cc.mallet.pipe.iterator.CsvIterator;
+import data.Topic;
 
 import java.io.*;
 import java.util.*;
@@ -46,7 +47,7 @@ public class LDA implements Serializable {
     /** Model object */
     private ParallelTopicModel model;
     /** List of modelled topic, with ID and lemmas sorted by weight */
-    public List<LDATopic> topics;
+    public List<Topic> topics;
 
     /** Un-serialised record of log-likelihood throughout the modelling process */
     public transient LikelihoodLogs logLikelihoodLogs;
@@ -203,7 +204,7 @@ public class LDA implements Serializable {
         ArrayList<TreeSet<IDSorter>> topicSortedDocs = model.getTopicDocuments(0);
         // For each topic
         for(int idx = 0; idx < model.numTopics; idx++){
-            LDATopic topic = new LDATopic(idx);
+            Topic topic = new Topic(idx);
 
             // instantiate lists of labels, ids and weights
             int labelNum = topicSortedWords.get(idx).size();
@@ -261,7 +262,7 @@ public class LDA implements Serializable {
      * Getter for the list of topics
      * @return The list of modelled topics
      */
-    public List<LDATopic> getTopics() { return topics; }
+    public List<Topic> getTopics() { return topics; }
 
     /**
      * Method inferring the topic distribution for the given text

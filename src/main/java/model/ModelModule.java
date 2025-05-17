@@ -18,7 +18,8 @@ public class ModelModule {
 
     // typical model module parameters
     protected String corpusFile;
-    protected String outputFile;
+    protected String topicsFile;
+    protected String documentsFile;
     protected String logDirectory;
 
     // method for reading a corpus JSON file and generating a list of documents using default properties
