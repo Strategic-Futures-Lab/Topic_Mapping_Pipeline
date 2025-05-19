@@ -24,6 +24,7 @@ public class JSONHelper {
      * @return The array containing integers
      */
     public static int[] getIntArray(JSONArray array){
+        if (array == null) return null;
         int[] res = new int[array.size()];
         for(int i = 0; i < array.size(); i++)
             res[i] = Math.toIntExact((long) array.get(i));
@@ -36,6 +37,7 @@ public class JSONHelper {
      * @return The array containing doubles
      */
     public static double[] getDoubleArray(JSONArray array){
+        if (array == null) return null;
         double[] res = new double[array.size()];
         for(int i = 0; i < array.size(); i++)
             res[i] = (double) array.get(i);
@@ -48,6 +50,7 @@ public class JSONHelper {
      * @return The array containing Strings
      */
     public static String[] getStringArray(JSONArray array){
+        if (array == null) return null;
         String[] res = new String[array.size()];
         for(int i = 0; i < array.size(); i++)
             res[i] = (String) array.get(i);
@@ -60,6 +63,7 @@ public class JSONHelper {
      * @return The array containing JSONArrays
      */
     public static JSONArray[] getJSONArrayArray(JSONArray array){
+        if (array == null) return null;
         JSONArray[] res = new JSONArray[array.size()];
         for(int i = 0; i < array.size(); i++)
             res[i] = (JSONArray) array.get(i);
@@ -72,6 +76,7 @@ public class JSONHelper {
      * @return The array containing JSONObjects
      */
     public static JSONObject[] getJSONObjectArray(JSONArray array){
+        if (array == null) return null;
         JSONObject[] res = new JSONObject[array.size()];
         for(int i = 0; i < array.size(); i++)
             res[i] = (JSONObject) array.get(i);
@@ -84,6 +89,7 @@ public class JSONHelper {
      * @return The [String, Integer] HashMap
      */
     public static HashMap<String, Integer> getIntMap(JSONObject map){
+        if (map == null) return null;
         HashMap<String, Integer> res = new HashMap<String, Integer>();
         for(String key: (Iterable<String>) map.keySet()){
             res.put(key, (int) map.get(key));
@@ -97,6 +103,7 @@ public class JSONHelper {
      * @return The [String, Double] HashMap
      */
     public static HashMap<String, Double> getDoubleMap(JSONObject map){
+        if (map == null) return null;
         HashMap<String, Double> res = new HashMap<String, Double>();
         for(String key: (Iterable<String>) map.keySet()){
             res.put(key, (double) map.get(key));
@@ -110,6 +117,7 @@ public class JSONHelper {
      * @return The [String, String] HashMap
      */
     public static HashMap<String, String> getStringMap(JSONObject map){
+        if (map == null) return null;
         HashMap<String, String> res = new HashMap<String, String>();
         for(String key: (Iterable<String>) map.keySet()){
             res.put(key, (String) map.get(key));
@@ -123,6 +131,7 @@ public class JSONHelper {
      * @return The [String, Object] HashMap (Object can then be cast as JSONObject or JSONArray)
      */
     public static HashMap<String, Object> getJSONObjectMap(JSONObject map){
+        if (map == null) return null;
         HashMap<String, Object> res = new HashMap<String, Object>();
         for(String key: (Iterable<String>) map.keySet()){
             res.put(key, map.get(key));
