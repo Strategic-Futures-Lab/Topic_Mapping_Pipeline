@@ -4,7 +4,10 @@ import IO.JSONHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.DoubleStream;
 
 /**
  * Class representing a document.
@@ -16,32 +19,50 @@ import java.util.*;
  */
 public class Document {
 
-    /**
-     * List of static fields used when reading/writing JSON files
-     */
-    private static String JSON_ID = "id";
-    private static String JSON_IDX = "i";
-    private static String JSON_DATA = "d";
-    private static String JSON_TEXT = "t";
-    private static String JSON_LEMMAS = "l";
+    // Serialisation ID
+    private static final long serialVersionUID = 2244011647262167470L;
 
+    // List of static fields used when reading/writing JSON files
+    private static final String JSON_ID = "id";
+    private static final String JSON_IDX = "i";
+    private static final String JSON_DATA = "d";
+    private static final String JSON_TEXT = "t";
+    private static final String JSON_LEMMAS = "l";
+    private static final String JSON_WORDS = "w";
+    private static final String JSON_TOPIC_SEQ = "ts";
+    private static final String JSON_TOPIC_CNT = "tc";
+    private static final String JSON_TOPIC_WEIGHTS = "tw";
+    private static final String JSON_TOPIC_DIST = "td";
+    private static final String JSON_PART_TOPIC_DIST = "ptd";
 
+    // Document  id and index
     private String id;
-    private int idx;
+    private int index;
+    // Document data
     private final HashMap<String, String> fields;
     // created by text builder module
     private String text;
     // created by lemmatise module
     private List<List<String>> lemmasList;
+    // created by model module
+    private String[] words;
+    private int[] wordIds;
+    private int[] topicSequence;
+    private int[] topicCount;
+    private double[] topicDistribution;
+    // analytics
+    // TODO see about moving to dedicated module
+    private double[] topicDistances;
+    private double[] partialTopicDistances;
 
     /**
      * Initial constructor, used by input modules
      * @param id Document id
-     * @param idx Document index
+     * @param index Document index
      */
-    public Document(String id, int idx){
+    public Document(String id, int index){
         this.id = id;
-        this.idx = idx;
+        this.index = index;
         this.fields = new HashMap<>();
     }
 
@@ -51,12 +72,29 @@ public class Document {
      */
     public Document(JSONObject doc){
         id = (String) doc.get(JSON_ID);
-        idx = Math.toIntExact((long) doc.get(JSON_IDX));
+        index = Math.toIntExact((long) doc.get(JSON_IDX));
         fields = JSONHelper.getStringMap((JSONObject) doc.get(JSON_DATA));
         // set by text builder module
         text = (String) doc.get(JSON_TEXT);
         // set by lemmatise module
         parseLemmas((JSONArray) doc.get(JSON_LEMMAS));
+        // set by model
+        words = JSONHelper.getStringArray((JSONArray) doc.get(JSON_WORDS));
+        topicSequence = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_SEQ));
+        topicCount = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_CNT));
+        topicDistribution = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_TOPIC_WEIGHTS));
+        topicDistances = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_TOPIC_DIST));
+        partialTopicDistances = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_PART_TOPIC_DIST));
+    }
+
+    // Parses a string of lemmas (separated by space) and saves into the list of lemmas
+    private void parseLemmas(JSONArray lemmas){
+        if(lemmas != null && !lemmas.isEmpty()){
+            lemmasList = new LinkedList<>();
+            for(Object sentence: lemmas){
+                lemmasList.add(List.of(sentence.toString().split(" ")));
+            }
+        }
     }
 
     /**
@@ -66,7 +104,7 @@ public class Document {
      */
     public Document(Document doc){
         id = doc.id;
-        idx = doc.idx;
+        index = doc.index;
         fields = doc.fields;
         // set by text builder module
         text = doc.text;
@@ -103,14 +141,18 @@ public class Document {
      * Getter method for the document index
      * @return The document index
      */
-    public int getIndex(){ return idx; }
+    public int getIndex(){ return index; }
 
     /**
      * Setter method for the document index
      * **WARNING**: USE WITH CAUTION, IDEALLY ONLY BEFORE SAVING ON FILE
      * @param index The new index
      */
-    public void setIndex(int index){ idx = index; }
+    public void setIndex(int index){ this.index = index; }
+
+    /*******************************************************************
+     * FIELDS OPERATIONS
+     *******************************************************************/
 
     /**
      * Adds a new data entry to the document
@@ -159,6 +201,10 @@ public class Document {
      */
     public void filterFields(List<String> keys){ fields.entrySet().removeIf(e -> !keys.contains(e.getKey())); }
 
+    /*******************************************************************
+     * TEXT OPERATIONS
+     *******************************************************************/
+
     private void initText(){ if(text==null) text = ""; }
 
     /**
@@ -201,15 +247,9 @@ public class Document {
      */
     public boolean emptyText(){ return text == null || text.isEmpty(); }
 
-    // Parses a string of lemmas (separated by space) and saves into the list of lemmas
-    private void parseLemmas(JSONArray lemmas){
-        if(lemmas != null && !lemmas.isEmpty()){
-            lemmasList = new LinkedList<>();
-            for(Object sentence: lemmas){
-                lemmasList.add(List.of(sentence.toString().split(" ")));
-            }
-        }
-    }
+    /*******************************************************************
+     * LEMMAS OPERATIONS
+     *******************************************************************/
 
     /**
      * Returns the list of lemmas as one String, concatenated with a space;
@@ -275,7 +315,7 @@ public class Document {
     }
 
     /**
-     * Removes a single lemma from the lemmas list
+     * Removes a single lemma sentence from the lemmas list
      * @param lemma Lemma to remove
      */
     public void removeLemma(String lemma){
@@ -304,6 +344,73 @@ public class Document {
      */
     public boolean hasLemmas() { return lemmasList != null; }
 
+    /*******************************************************************
+     * MODEL OPERATIONS
+     *******************************************************************/
+
+    /**
+     * Setter method for the document's words
+     * @param labels list of words as they appear in the document (may differ from text)
+     * @param ids list of word ids, in order of appearance in the document (set by model)
+     */
+    public void setWords(String[] labels, int[] ids){
+        words = labels;
+        wordIds = ids;
+    }
+
+    /**
+     * Setter method for the document's topic assignment
+     * @param sequence topic assignment for each word
+     * @param count number of assignments for each topic
+     * @param distribution topic weights in the document
+     */
+    public void setTopicAssignment(int[] sequence, int[] count, double[] distribution){
+        topicSequence = sequence;
+        topicCount = count;
+        topicDistribution = distribution;
+    }
+
+    private SparseVector getWordDistribution(int size){
+        SparseVector wordVec = new SparseVector(size);
+        for(int i=0; i < wordIds.length; i++){
+            wordVec.put(wordIds[i], wordVec.get(wordIds[i])+1.0);
+        }
+        return wordVec.normalise();
+    }
+
+    private SparseVector getPartialWordDistribution(int size, int topic){
+        SparseVector wordVec = new SparseVector(size);
+        for(int i = 0; i < topicSequence.length; i++){
+            if(topicSequence[i] == topic){
+                wordVec.put(wordIds[i], wordVec.get(wordIds[i])+1.0);
+            }
+        }
+        return wordVec.normalise();
+    }
+
+    /**
+     * Setter method for the document to topic distance
+     * Used for analytics, TODO: export to dedicated module
+     * @param topicVectors List of topic vector to calculate distances against
+     */
+    public void setDistancesFromTopics(List<SparseVector> topicVectors){
+        SparseVector fullDocVector = getWordDistribution(topicVectors.get(0).size());
+        int nTopics = topicDistribution.length;
+        topicDistances = new double[nTopics];
+        partialTopicDistances = new double[nTopics];
+        for(int t = 0; t < nTopics; t++){
+            SparseVector topicVec = topicVectors.get(t);
+            topicDistances[t] = SparseVector.HellingerDistance(topicVec, fullDocVector);
+            if(topicCount[t] > 0) {
+                SparseVector compDocVector = getPartialWordDistribution(topicVec.size(), t);
+                partialTopicDistances[t] = SparseVector.HellingerDistance(topicVec, compDocVector);
+            } else {
+                // the document component will be empty, so distance is 1
+                partialTopicDistances[t] = 1;
+            }
+        }
+    }
+
     /**
      * Formats the document into a JSON object to write on file
      * @return The JSON formatted document
@@ -312,7 +419,7 @@ public class Document {
         JSONObject root = new JSONObject();
         // Saving id and index
         root.put(JSON_ID, id);
-        root.put(JSON_IDX, idx);
+        root.put(JSON_IDX, index);
         // Saving fields
         JSONObject data = new JSONObject();
         data.putAll(fields);
@@ -329,7 +436,36 @@ public class Document {
             }
             root.put(JSON_LEMMAS, lemmas);
         }
+        // saving model data
+        if(words!=null){
+            root.put(JSON_WORDS, JSONHelper.toJSONArray(words));
+        }
+        if(topicSequence!=null){
+            root.put(JSON_TOPIC_SEQ, JSONHelper.toJSONArray(topicSequence));
+        }
+        if(topicCount!=null){
+            root.put(JSON_TOPIC_CNT, JSONHelper.toJSONArray(topicCount));
+        }
+        if(topicDistribution!=null) {
+            root.put(JSON_TOPIC_WEIGHTS, JSONHelper.toJSONArray(formatArray(topicDistribution)));
+        }
+        if(topicDistances != null){
+            root.put(JSON_TOPIC_DIST, JSONHelper.toJSONArray(formatArray(topicDistances)));
+        }
+        if(partialTopicDistances != null){
+            root.put(JSON_PART_TOPIC_DIST, JSONHelper.toJSONArray(formatArray(partialTopicDistances)));
+        }
         return root;
+    }
+
+    // private method for formating double array
+    private double[] formatArray(double[] arr){
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return DoubleStream.of(arr)
+                .mapToObj(df::format)
+                .mapToDouble(Double::parseDouble)
+                .toArray();
     }
 
 }

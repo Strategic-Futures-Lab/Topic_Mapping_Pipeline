@@ -62,10 +62,10 @@ ldaModel1:
   corpus: corpus_txt.json
   topics: model_topics_txt.json
   documents: model_documents_txt.json
-  nTopics: 5
-  iterations: 500
-  wordDistances: true
-  logs: modelLogs
+  nTopics: 10
+  iterations: 1000
+#  wordDistances: true
+#  logs: modelLogs
 
 # BiBTex input module
 bibInput2:

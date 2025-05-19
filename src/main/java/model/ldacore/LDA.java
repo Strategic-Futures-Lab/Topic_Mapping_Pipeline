@@ -3,6 +3,7 @@ package model.ldacore;
 import IO.Console;
 import cc.mallet.topics.*;
 import cc.mallet.types.*;
+import data.Document;
 import data.SparseVector;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.Pipe;
@@ -37,7 +38,7 @@ public class LDA implements Serializable {
     public boolean getWordDistances = false;
 
     /** List of documents */
-    public HashMap<String, LDADocument> documents;
+    public HashMap<String, Document> documents;
     /** Map of document index (in the model) to document ID */
     private List<String> numIDtoStringID = new ArrayList<>();
 //    /** Map of document ID to document index (in the model) */
@@ -63,7 +64,7 @@ public class LDA implements Serializable {
      * Constructor taking a map of documents to model
      * @param docs Map of documents to model topics from
      */
-    public LDA(HashMap<String, LDADocument> docs){
+    public LDA(HashMap<String, Document> docs){
         documents = docs;
     }
 
@@ -71,7 +72,7 @@ public class LDA implements Serializable {
      * Constructor taking a list of documents to model
      * @param docs List of documents to model topics from
      */
-    public LDA(List<LDADocument> docs, LDAParameters ldaParams){
+    public LDA(List<Document> docs, LDAParameters ldaParams){
         ldaParameters = ldaParams;
         setDocuments(docs);
     }
@@ -80,9 +81,9 @@ public class LDA implements Serializable {
      * Method loading a list of documents
      * @param docs List of documents to load
      */
-    public void setDocuments(List<LDADocument> docs){
+    public void setDocuments(List<Document> docs){
         documents = new HashMap<>();
-        for(LDADocument doc: docs){
+        for(Document doc: docs){
             documents.put(doc.getId(), doc);
         }
     }
@@ -103,10 +104,10 @@ public class LDA implements Serializable {
             file.getParentFile().mkdirs();
             FileWriter writer = new FileWriter(file);
             int count = 0;
-            for(Map.Entry<String, LDADocument> entry: documents.entrySet()){
-                LDADocument doc = entry.getValue();
-                writer.write(doc.id() + "\ten\t" + doc.text() +"\r\n");
-                numIDtoStringID.add(doc.id());
+            for(Map.Entry<String, Document> entry: documents.entrySet()){
+                Document doc = entry.getValue();
+                writer.write(doc.getId() + "\ten\t" + doc.getLemmasString() +"\r\n");
+                numIDtoStringID.add(doc.getId());
 //                stringIDtoNumID.put(doc.id(), count);
                 count++;
             }
@@ -178,7 +179,7 @@ public class LDA implements Serializable {
             // get model instance of the document
             TopicAssignment modelDoc = model.data.get(idx);
             // retrieve original document
-            LDADocument doc = documents.get(modelDoc.instance.getName().toString());
+            Document doc = documents.get(modelDoc.instance.getName().toString());
             // extract document features (word index in vocabulary), some words might be gone (MALLET stop-words)
             int[] docFeatures = ((FeatureSequence) modelDoc.instance.getData()).getFeatures();
             // find words for each features
@@ -252,7 +253,7 @@ public class LDA implements Serializable {
             List<SparseVector> topicVectors = topics.stream()
                     .map(t->t.getWordDistribution(vocabulary.size()))
                     .collect(Collectors.toList());
-            for(LDADocument doc: documents.values()){
+            for(Document doc: documents.values()){
                 doc.setDistancesFromTopics(topicVectors);
             }
         }

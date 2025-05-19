@@ -5,14 +5,12 @@ import IO.JSONHelper;
 import IO.SERHelper;
 import IO.Timer;
 import data.Topic;
+import data.Document;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
 import pipeline.config.modules.ModelConfigLDA;
-import data.Document;
 import model.ldacore.LDA;
-import model.ldacore.LDADocument;
 import model.ldacore.LDAParameters;
-import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -35,7 +33,8 @@ public class LDAModel extends ModelModule {
     private int skipCount = 0;
 
     // list of documents given to the model
-    private List<LDADocument> modelInput;
+    private List<Document> modelInput;
+    private List<Document> skippedDocs;
     // instance of lda topic model
     private LDA tModel;
 
@@ -96,21 +95,26 @@ public class LDAModel extends ModelModule {
     private void loadDocuments() throws IOException, ParseException {
         Console.log("Loading corpus");
         modelInput = new ArrayList<>();
+        skippedDocs = new ArrayList<>();
         loadCorpus();
         if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::loadDocument);
         else corpus.documents.entrySet().forEach(this::loadDocument);
         Console.tick();
         if(skipCount > 0){
             Console.warning(skipCount+" documents skipped - not lemmatised or too few lemmas ("+minLemmas+")", 1);
+            // resting index of skipped documents
+            int nDocs = modelInput.size();
+            for(int i = 0; i<skippedDocs.size(); i++) skippedDocs.get(i).setIndex(nDocs+i);
         }
     }
 
     private void loadDocument(Map.Entry<String, Document> docEntry){
         Document doc = docEntry.getValue();
         if(doc.hasLemmas() && doc.getLemmas().size() > minLemmas){
-            LDADocument inputDoc = new LDADocument(doc.getId(), doc.getLemmasString());
-            modelInput.add(inputDoc);
+//            LDADocument inputDoc = new LDADocument(doc.getId(), doc.getLemmasString());
+            modelInput.add(doc);
         } else {
+            skippedDocs.add(doc);
             skipCount++;
         }
     }
@@ -153,13 +157,14 @@ public class LDAModel extends ModelModule {
         Console.log("Saving model");
         try{
             Topic.writeTopics(topicsFile, tModel.getTopics());
-            JSONArray documents = new JSONArray();
-            for(LDADocument d: modelInput){
-                documents.add(d.toJSON());
-            }
-//            root.put("topics", topics);
-//            root.put("documents",documents);
-            JSONHelper.saveJSONArray(documents, documentsFile, 1);
+            corpus.writeCorpus(documentsFile);
+//            JSONArray documents = new JSONArray();
+//            for(Document d: modelInput){
+//                documents.add(d.toJSON());
+//            }
+////            root.put("topics", topics);
+////            root.put("documents",documents);
+//            JSONHelper.saveJSONArray(documents, documentsFile, 1);
         } catch (IOException e){
             Console.error("Saving model failed");
             throw e;
