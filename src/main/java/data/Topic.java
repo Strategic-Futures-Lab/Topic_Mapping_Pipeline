@@ -27,6 +27,14 @@ public class Topic implements Serializable {
     // Serialisation ID
     private static final long serialVersionUID = -1048734038308190794L;
 
+    // List of static fields used when reading/writing JSON files
+    private static final String JSON_NUM = "id";
+    private static final String JSON_WORDS = "w";
+    private static final String JSON_WORD_WEIGHTS = "ww";
+    private static final String JSON_WORD_IDS = "wi";
+    private static final String JSON_DOCS = "d";
+    private static final String JSON_DOC_WEIGHTS = "dw";
+
     // Topic id
     private int number;
     // Sorted list (by assignment count) of unique labels (lemmas) assigned to this topic
@@ -53,12 +61,12 @@ public class Topic implements Serializable {
      * @param topicObj JSON object representing the topic
      */
     public Topic(JSONObject topicObj){
-        number = (int) topicObj.get("id");
-        words = JSONHelper.getStringArray((JSONArray) topicObj.get("words"));
-        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get("wordWeights"));
-        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get("wordIds"));
-        documents = JSONHelper.getStringArray((JSONArray) topicObj.get("docs"));
-        docWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get("docWeights"));
+        number = (int) topicObj.get(JSON_NUM);
+        words = JSONHelper.getStringArray((JSONArray) topicObj.get(JSON_WORDS));
+        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_WEIGHTS));
+        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_IDS));
+        documents = JSONHelper.getStringArray((JSONArray) topicObj.get(JSON_DOCS));
+        docWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_DOC_WEIGHTS));
     }
 
     /**
@@ -181,12 +189,12 @@ public class Topic implements Serializable {
      */
     public JSONObject toJSON(){
         JSONObject topicJSON = new JSONObject();
-        topicJSON.put("id", number);
-        topicJSON.put("words", JSONHelper.toJSONArray(words));
-        topicJSON.put("wordWeights", JSONHelper.toJSONArray(formatArray(wordWeights)));
-        topicJSON.put("wordIds", JSONHelper.toJSONArray(formatArray(wordWeights)));
-        topicJSON.put("docs", JSONHelper.toJSONArray(documents));
-        topicJSON.put("docWeights", JSONHelper.toJSONArray(formatArray(docWeights)));
+        topicJSON.put(JSON_NUM, number);
+        topicJSON.put(JSON_WORDS, JSONHelper.toJSONArray(words));
+        topicJSON.put(JSON_WORD_WEIGHTS, JSONHelper.toJSONArray(formatArray(wordWeights)));
+        topicJSON.put(JSON_WORD_IDS, JSONHelper.toJSONArray(formatArray(wordWeights)));
+        topicJSON.put(JSON_DOCS, JSONHelper.toJSONArray(documents));
+        topicJSON.put(JSON_DOC_WEIGHTS, JSONHelper.toJSONArray(formatArray(docWeights)));
         return topicJSON;
     }
 
