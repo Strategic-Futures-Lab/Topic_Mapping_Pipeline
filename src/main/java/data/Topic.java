@@ -158,7 +158,8 @@ public class Topic implements Serializable {
         for(int i = 0; i < words.length; i++){
             wordVec.put(words[i].getIndex(), words[i].getWeight());
         }
-        return wordVec.normalise();
+        wordVec.normalise();
+        return wordVec;
     }
 
     /**
