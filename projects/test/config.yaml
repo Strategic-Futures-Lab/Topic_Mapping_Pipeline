@@ -63,7 +63,7 @@ ldaModel1:
   topics: model_topics_txt.json
   documents: model_documents_txt.json
   nTopics: 10
-  iterations: 1000
+  iterations: 200
 #  wordDistances: true
 #  logs: modelLogs
 
