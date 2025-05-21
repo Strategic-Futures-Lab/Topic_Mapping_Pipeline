@@ -184,17 +184,17 @@ public class LDA implements Serializable {
             int[] docFeatures = ((FeatureSequence) modelDoc.instance.getData()).getFeatures();
             // find words for each features
             String[] docLabels = Arrays.stream(docFeatures).mapToObj(i -> vocabulary.lookupObject(i).toString()).toArray(String[]::new);
-            // get topic assignment sequence
-            int[] topicSequence = modelDoc.topicSequence.getFeatures();
-            // get assignment count per topic
-            int[] topicCount = new int[model.numTopics];
-            for(int t: topicSequence) topicCount[t]++;
+//            // get topic assignment sequence
+//            int[] topicSequence = modelDoc.topicSequence.getFeatures();
+//            // get assignment count per topic
+//            int[] topicCount = new int[model.numTopics];
+//            for(int t: topicSequence) topicCount[t]++;
             // get topic distribution in document
             double[] topicDistrib = model.getTopicProbabilities(idx);
             // update original document
             doc.setIndex(idx);
             doc.setWords(docLabels, docFeatures);
-            doc.setTopicAssignment(topicSequence, topicCount, topicDistrib);
+            doc.setTopics(topicDistrib);
         }
 
         // initialise topics
@@ -207,7 +207,7 @@ public class LDA implements Serializable {
         for(int idx = 0; idx < model.numTopics; idx++){
             Topic topic = new Topic(idx);
 
-            // instantiate lists of labels, ids and weights
+            // instantiate lists of labels, indices and weights
             int labelNum = topicSortedWords.get(idx).size();
             String[] labels = new String[labelNum];
             int[] labelIds = new int[labelNum];
@@ -224,9 +224,10 @@ public class LDA implements Serializable {
                 labelCount++;
             }
 
-            // instantiate lists of docs ids and weights
+            // instantiate lists of docs ids, indices and weights
             int docNum = topicSortedDocs.get(idx).size();
             String[] docIds = new String[docNum];
+            int[] docIndices = new int[docNum];
             double[] docWeights = new double[docNum];
             // setup iteration
             int docCount = 0;
@@ -235,28 +236,30 @@ public class LDA implements Serializable {
                 IDSorter doc = docIterator.next();
                 if(doc.getWeight() <= 0.0) break;
                 docIds[docCount] = numIDtoStringID.get(doc.getID());
+                docIndices[docCount] = doc.getID();
                 docWeights[docCount] = doc.getWeight();
                 docCount++;
             }
             // chop arrays to remove unallocated docs
             docIds = Arrays.copyOf(docIds, docCount);
+            docIndices = Arrays.copyOf(docIndices, docCount);
             docWeights = Arrays.copyOf(docWeights,docCount);
 
             // update topic and add to list
             topic.setWordAssignments(labels, labelIds, labelWeights);
-            topic.setDocumentAssignments(docIds, docWeights);
+            topic.setDocumentAssignments(docIds, docIndices, docWeights);
             topics.add(topic);
         }
 
-        if(getWordDistances){
-            // Getting the topics-label distributions as sparse vectors
-            List<SparseVector> topicVectors = topics.stream()
-                    .map(t->t.getWordDistribution(vocabulary.size()))
-                    .collect(Collectors.toList());
-            for(Document doc: documents.values()){
-                doc.setDistancesFromTopics(topicVectors);
-            }
-        }
+//        if(getWordDistances){
+//            // Getting the topics-label distributions as sparse vectors
+//            List<SparseVector> topicVectors = topics.stream()
+//                    .map(t->t.getWordDistribution(vocabulary.size()))
+//                    .collect(Collectors.toList());
+//            for(Document doc: documents.values()){
+//                doc.setDistancesFromTopics(topicVectors);
+//            }
+//        }
     }
 
     /**

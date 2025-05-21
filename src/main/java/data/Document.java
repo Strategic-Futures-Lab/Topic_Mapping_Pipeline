@@ -4,6 +4,8 @@ import IO.JSONHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -17,23 +19,24 @@ import java.util.stream.DoubleStream;
  * @author P. Le Bras
  * @version 2
  */
-public class Document {
+public class Document implements Serializable {
 
-    // Serialisation ID
+    @Serial
     private static final long serialVersionUID = 2244011647262167470L;
 
     // List of static fields used when reading/writing JSON files
     private static final String JSON_ID = "id";
     private static final String JSON_IDX = "i";
     private static final String JSON_DATA = "d";
-    private static final String JSON_TEXT = "t";
+    private static final String JSON_TEXT = "txt";
     private static final String JSON_LEMMAS = "l";
     private static final String JSON_WORDS = "w";
-    private static final String JSON_TOPIC_SEQ = "ts";
-    private static final String JSON_TOPIC_CNT = "tc";
-    private static final String JSON_TOPIC_WEIGHTS = "tw";
-    private static final String JSON_TOPIC_DIST = "td";
-    private static final String JSON_PART_TOPIC_DIST = "ptd";
+    private static final String JSON_TOPICS = "t";
+//    private static final String JSON_TOPIC_SEQ = "ts";
+//    private static final String JSON_TOPIC_CNT = "tc";
+//    private static final String JSON_TOPIC_WEIGHTS = "tw";
+//    private static final String JSON_TOPIC_DIST = "td";
+//    private static final String JSON_PART_TOPIC_DIST = "ptd";
 
     // Document  id and index
     private String id;
@@ -45,15 +48,16 @@ public class Document {
     // created by lemmatise module
     private List<List<String>> lemmasList;
     // created by model module
-    private String[] words;
-    private int[] wordIds;
-    private int[] topicSequence;
-    private int[] topicCount;
-    private double[] topicDistribution;
+    private ModelFeature[] words;
+    private ModelFeature[] topics;
+//    private int[] topicCount;
+//    private double[] topicDistribution;
+    // TODO might not be needed
+//    private int[] topicSequence;
     // analytics
     // TODO see about moving to dedicated module
-    private double[] topicDistances;
-    private double[] partialTopicDistances;
+//    private double[] topicDistances;
+//    private double[] partialTopicDistances;
 
     /**
      * Initial constructor, used by input modules
@@ -79,12 +83,25 @@ public class Document {
         // set by lemmatise module
         parseLemmas((JSONArray) doc.get(JSON_LEMMAS));
         // set by model
-        words = JSONHelper.getStringArray((JSONArray) doc.get(JSON_WORDS));
-        topicSequence = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_SEQ));
-        topicCount = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_CNT));
-        topicDistribution = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_TOPIC_WEIGHTS));
-        topicDistances = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_TOPIC_DIST));
-        partialTopicDistances = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_PART_TOPIC_DIST));
+        JSONObject[] wordsJSON = JSONHelper.getJSONObjectArray((JSONArray) doc.get(JSON_WORDS));
+        if(wordsJSON != null) {
+            words = new ModelFeature[wordsJSON.length];
+            for (int i = 0; i < words.length; i++) {
+                words[i] = new ModelFeature(wordsJSON[i]);
+            }
+        }
+        JSONObject[] topicsJSON = JSONHelper.getJSONObjectArray((JSONArray) doc.get(JSON_TOPICS));
+        if(topicsJSON != null) {
+            topics = new ModelFeature[topicsJSON.length];
+            for (int i = 0; i < topics.length; i++) {
+                topics[i] = new ModelFeature(topicsJSON[i]);
+            }
+        }
+//        topicSequence = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_SEQ));
+//        topicCount = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_CNT));
+//        topicDistribution = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_TOPIC_WEIGHTS));
+//        topicDistances = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_TOPIC_DIST));
+//        partialTopicDistances = JSONHelper.getDoubleArray((JSONArray) doc.get(JSON_PART_TOPIC_DIST));
     }
 
     // Parses a string of lemmas (separated by space) and saves into the list of lemmas
@@ -110,6 +127,9 @@ public class Document {
         text = doc.text;
         // set by lemmatise module
         lemmasList = doc.lemmasList;
+        // set by model
+        words = doc.words;
+        topics = doc.topics;
     }
 
     /**
@@ -354,62 +374,121 @@ public class Document {
      * @param ids list of word ids, in order of appearance in the document (set by model)
      */
     public void setWords(String[] labels, int[] ids){
-        words = labels;
-        wordIds = ids;
-    }
-
-    /**
-     * Setter method for the document's topic assignment
-     * @param sequence topic assignment for each word
-     * @param count number of assignments for each topic
-     * @param distribution topic weights in the document
-     */
-    public void setTopicAssignment(int[] sequence, int[] count, double[] distribution){
-        topicSequence = sequence;
-        topicCount = count;
-        topicDistribution = distribution;
-    }
-
-    private SparseVector getWordDistribution(int size){
-        SparseVector wordVec = new SparseVector(size);
-        for(int i=0; i < wordIds.length; i++){
-            wordVec.put(wordIds[i], wordVec.get(wordIds[i])+1.0);
-        }
-        return wordVec.normalise();
-    }
-
-    private SparseVector getPartialWordDistribution(int size, int topic){
-        SparseVector wordVec = new SparseVector(size);
-        for(int i = 0; i < topicSequence.length; i++){
-            if(topicSequence[i] == topic){
-                wordVec.put(wordIds[i], wordVec.get(wordIds[i])+1.0);
-            }
-        }
-        return wordVec.normalise();
-    }
-
-    /**
-     * Setter method for the document to topic distance
-     * Used for analytics, TODO: export to dedicated module
-     * @param topicVectors List of topic vector to calculate distances against
-     */
-    public void setDistancesFromTopics(List<SparseVector> topicVectors){
-        SparseVector fullDocVector = getWordDistribution(topicVectors.get(0).size());
-        int nTopics = topicDistribution.length;
-        topicDistances = new double[nTopics];
-        partialTopicDistances = new double[nTopics];
-        for(int t = 0; t < nTopics; t++){
-            SparseVector topicVec = topicVectors.get(t);
-            topicDistances[t] = SparseVector.HellingerDistance(topicVec, fullDocVector);
-            if(topicCount[t] > 0) {
-                SparseVector compDocVector = getPartialWordDistribution(topicVec.size(), t);
-                partialTopicDistances[t] = SparseVector.HellingerDistance(topicVec, compDocVector);
+        Map<String, Integer> labelIds = new HashMap<>();
+        Map<String, Integer> labelCounts = new HashMap<>();
+        for(int i=0; i<labels.length; i++) {
+            if (!labelIds.containsKey(labels[i])) {
+                labelIds.put(labels[i], ids[i]);
+                labelCounts.put(labels[i], 1);
             } else {
-                // the document component will be empty, so distance is 1
-                partialTopicDistances[t] = 1;
+                labelCounts.put(labels[i], labelCounts.get(labels[i]) + 1);
             }
         }
+        words = new ModelFeature[labelIds.size()];
+        int i = 0;
+        for(String label: labelIds.keySet()){
+            words[i] = new ModelFeature(label, labelIds.get(label), labelCounts.get(label));
+            i++;
+        }
     }
+
+    /**
+     * Setter method for the document's topic distribution
+     * @param distribution list of topic weights
+     */
+    public void setTopics(double[] distribution){
+        topics = new ModelFeature[distribution.length];
+        for(int i=0; i<distribution.length; i++){
+            topics[i] = new ModelFeature(Integer.toString(i), i, distribution[i]);
+        }
+    }
+
+    /**
+     * Getter for vector representation of word distribution
+     * @param size SparseVector theoretical size (vocabulary size)
+     * @return SparseVector of word distribution
+     */
+    public SparseVector getWordsVector(int size){
+        SparseVector wordVec = new SparseVector(size);
+        for(ModelFeature w: words){
+            wordVec.put(w.getIndex(), w.getWeight());
+        }
+        return wordVec;
+    }
+
+    /**
+     * Getter for vector representation of topic distribution.
+     * The SparseVector theoretical size is automatically derived from the number of topics.
+     * @return SparseVector of topic distribution
+     */
+    public SparseVector getTopicsVector(){
+        SparseVector topicVec = new SparseVector(topics.length);
+        for(ModelFeature t: topics){
+            topicVec.put(t.getIndex(), t.getWeight());
+        }
+        return topicVec;
+    }
+
+    /**
+     * Method checking if the document was part of the model, i.e., has a topic distribution
+     * @return True if a topic distribution is present
+     */
+    public boolean isModelled(){
+        return topics != null;
+    }
+
+//    /**
+//     * Setter method for the document's topic assignment
+//     * @param sequence topic assignment for each word
+//     * @param count number of assignments for each topic
+//     * @param distribution topic weights in the document
+//     */
+//    public void setTopicAssignment(int[] sequence, int[] count, double[] distribution){
+//        topicSequence = sequence;
+//        topicCount = count;
+//        topicDistribution = distribution;
+//    }
+
+//    private SparseVector getWordDistribution(int size){
+//        SparseVector wordVec = new SparseVector(size);
+//        for(int i=0; i < wordIds.length; i++){
+//            wordVec.put(wordIds[i], wordVec.get(wordIds[i])+1.0);
+//        }
+//        return wordVec.normalise();
+//    }
+
+//    private SparseVector getPartialWordDistribution(int size, int topic){
+//        SparseVector wordVec = new SparseVector(size);
+//        for(int i = 0; i < topicSequence.length; i++){
+//            if(topicSequence[i] == topic){
+//                wordVec.put(wordIds[i], wordVec.get(wordIds[i])+1.0);
+//            }
+//        }
+//        return wordVec.normalise();
+//    }
+
+//    /**
+//     * Setter method for the document to topic distance
+//     * Used for analytics, TODO: export to dedicated module
+//     * @param topicVectors List of topic vector to calculate distances against
+//     */
+//    public void setDistancesFromTopics(List<SparseVector> topicVectors){
+//        SparseVector fullDocVector = getWordDistribution(topicVectors.get(0).size());
+//        int nTopics = topicDistribution.length;
+//        topicDistances = new double[nTopics];
+//        partialTopicDistances = new double[nTopics];
+//        for(int t = 0; t < nTopics; t++){
+//            SparseVector topicVec = topicVectors.get(t);
+//            topicDistances[t] = SparseVector.HellingerDistance(topicVec, fullDocVector);
+//            if(topicCount[t] > 0) {
+//                SparseVector compDocVector = getPartialWordDistribution(topicVec.size(), t);
+//                partialTopicDistances[t] = SparseVector.HellingerDistance(topicVec, compDocVector);
+//            } else {
+//                // the document component will be empty, so distance is 1
+//                partialTopicDistances[t] = 1;
+//            }
+//        }
+//    }
 
     /**
      * Formats the document into a JSON object to write on file
@@ -438,34 +517,45 @@ public class Document {
         }
         // saving model data
         if(words!=null){
-            root.put(JSON_WORDS, JSONHelper.toJSONArray(words));
+            JSONArray wordsJSON = new JSONArray();
+            for(ModelFeature w: words){
+                wordsJSON.add(w.toJSON());
+            }
+            root.put(JSON_WORDS, wordsJSON);
         }
-        if(topicSequence!=null){
-            root.put(JSON_TOPIC_SEQ, JSONHelper.toJSONArray(topicSequence));
+        if(topics!=null){
+            JSONArray topicsJSON = new JSONArray();
+            for(ModelFeature t: topics){
+                topicsJSON.add(t.toJSON());
+            }
+            root.put(JSON_TOPICS, topicsJSON);
         }
-        if(topicCount!=null){
-            root.put(JSON_TOPIC_CNT, JSONHelper.toJSONArray(topicCount));
-        }
-        if(topicDistribution!=null) {
-            root.put(JSON_TOPIC_WEIGHTS, JSONHelper.toJSONArray(formatArray(topicDistribution)));
-        }
-        if(topicDistances != null){
-            root.put(JSON_TOPIC_DIST, JSONHelper.toJSONArray(formatArray(topicDistances)));
-        }
-        if(partialTopicDistances != null){
-            root.put(JSON_PART_TOPIC_DIST, JSONHelper.toJSONArray(formatArray(partialTopicDistances)));
-        }
+//        if(topicSequence!=null){
+//            root.put(JSON_TOPIC_SEQ, JSONHelper.toJSONArray(topicSequence));
+//        }
+//        if(topicCount!=null){
+//            root.put(JSON_TOPIC_CNT, JSONHelper.toJSONArray(topicCount));
+//        }
+//        if(topicDistribution!=null) {
+//            root.put(JSON_TOPIC_WEIGHTS, JSONHelper.toJSONArray(formatArray(topicDistribution)));
+//        }
+//        if(topicDistances != null){
+//            root.put(JSON_TOPIC_DIST, JSONHelper.toJSONArray(formatArray(topicDistances)));
+//        }
+//        if(partialTopicDistances != null){
+//            root.put(JSON_PART_TOPIC_DIST, JSONHelper.toJSONArray(formatArray(partialTopicDistances)));
+//        }
         return root;
     }
 
     // private method for formating double array
-    private double[] formatArray(double[] arr){
-        DecimalFormat df = new DecimalFormat("#.#####");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return DoubleStream.of(arr)
-                .mapToObj(df::format)
-                .mapToDouble(Double::parseDouble)
-                .toArray();
-    }
+//    private double[] formatArray(double[] arr){
+//        DecimalFormat df = new DecimalFormat("#.#####");
+//        df.setRoundingMode(RoundingMode.HALF_UP);
+//        return DoubleStream.of(arr)
+//                .mapToObj(df::format)
+//                .mapToDouble(Double::parseDouble)
+//                .toArray();
+//    }
 
 }

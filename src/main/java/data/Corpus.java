@@ -110,11 +110,13 @@ public class Corpus {
     private void buildStats(){
         // TODO: improve stats method
         int nDocs = documents.size();
+        long nModelled = documents.entrySet().parallelStream().filter(d->d.getValue().isModelled()).count();
         long nLemmatised = documents.entrySet().parallelStream().filter(d->d.getValue().hasLemmas()).count();
         long nEmpty = documents.entrySet().parallelStream().filter(d->d.getValue().emptyText()).count();
         stats.put("n",nDocs);
         stats.put("empty",nEmpty);
         stats.put("lemmatised",nLemmatised);
+        stats.put("modelled",nModelled);
         if(nLemmatised > 0) {
             JSONObject lemmaStats = new JSONObject();
             IntSummaryStatistics summaryStats = documents.entrySet().parallelStream().collect(Collectors.summarizingInt(d->d.getValue().getNumLemmas()));

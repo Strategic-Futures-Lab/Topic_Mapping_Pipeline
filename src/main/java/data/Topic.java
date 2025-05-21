@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -24,29 +25,31 @@ import java.util.stream.DoubleStream;
  */
 public class Topic implements Serializable {
 
-    // Serialisation ID
+    @Serial
     private static final long serialVersionUID = -1048734038308190794L;
 
     // List of static fields used when reading/writing JSON files
-    private static final String JSON_NUM = "id";
+    private static final String JSON_NUM = "i";
     private static final String JSON_WORDS = "w";
-    private static final String JSON_WORD_WEIGHTS = "ww";
-    private static final String JSON_WORD_IDS = "wi";
+//    private static final String JSON_WORD_WEIGHTS = "ww";
+//    private static final String JSON_WORD_IDS = "wi";
     private static final String JSON_DOCS = "d";
-    private static final String JSON_DOC_WEIGHTS = "dw";
+//    private static final String JSON_DOC_WEIGHTS = "dw";
 
     // Topic id
     private int number;
-    // Sorted list (by assignment count) of unique labels (lemmas) assigned to this topic
-    private String[] words;
-    // List of assignment counts (in order) for each unique label (lemma) assigned to this topic
-    private double[] wordWeights;
-    // Sorted list (by assignment count) of unique labels (lemmas) identifiers assigned to this topic
-    private int [] wordIds;
+//    // Sorted list (by assignment count) of unique labels (lemmas) assigned to this topic
+//    private String[] words;
+//    // List of assignment counts (in order) for each unique label (lemma) assigned to this topic
+//    private double[] wordWeights;
+//    // Sorted list (by assignment count) of unique labels (lemmas) identifiers assigned to this topic
+//    private int [] wordIds;
+
+    private ModelFeature[] words;
     // Sorted list (by weight) of documents ids where this topic is present
-    private String[] documents;
-    // List of weights (in order) for each document where this topic is present
-    private double[] docWeights;
+    private ModelFeature[] documents;
+//    // List of weights (in order) for each document where this topic is present
+//    private double[] docWeights;
 
     /**
      * Initial constructor
@@ -62,23 +65,33 @@ public class Topic implements Serializable {
      */
     public Topic(JSONObject topicObj){
         number = (int) topicObj.get(JSON_NUM);
-        words = JSONHelper.getStringArray((JSONArray) topicObj.get(JSON_WORDS));
-        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_WEIGHTS));
-        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_IDS));
-        documents = JSONHelper.getStringArray((JSONArray) topicObj.get(JSON_DOCS));
-        docWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_DOC_WEIGHTS));
+        JSONObject[] wordsJSON = JSONHelper.getJSONObjectArray((JSONArray) topicObj.get(JSON_WORDS));
+        words = new ModelFeature[wordsJSON.length];
+        for(int i=0; i< words.length; i++){
+            words[i] = new ModelFeature(wordsJSON[i]);
+        }
+        JSONObject[] docsJSON = JSONHelper.getJSONObjectArray((JSONArray) topicObj.get(JSON_DOCS));
+        documents = new ModelFeature[docsJSON.length];
+        for(int i=0; i< documents.length; i++){
+            documents[i] = new ModelFeature(docsJSON[i]);
+        }
+//        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_WEIGHTS));
+//        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_IDS));
+//        documents = JSONHelper.getStringArray((JSONArray) topicObj.get(JSON_DOCS));
+//        docWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_DOC_WEIGHTS));
     }
 
     /**
      * Setter method for word assignment
-     * @param labels list of labels
-     * @param labelIds list of label ids in the model
-     * @param labelWeights distribution of label weights across the topic
+     * @param words list of words
+     * @param wordIndices list of word ids in the model
+     * @param wordWeights distribution of word weights across the topic
      */
-    public void setWordAssignments(String[] labels, int[] labelIds, double[] labelWeights){
-        words = labels;
-        wordIds = labelIds;
-        wordWeights = labelWeights;
+    public void setWordAssignments(String[] words, int[] wordIndices, double[] wordWeights){
+        this.words = new ModelFeature[words.length];
+        for(int i=0; i<this.words.length; i++){
+            this.words[i] = new ModelFeature(words[i], wordIndices[i], wordWeights[i]);
+        }
     }
 
     /**
@@ -86,9 +99,13 @@ public class Topic implements Serializable {
      * @param documentIds list of document ids
      * @param documentWeights distribution of this topic's weight across documents
      */
-    public void setDocumentAssignments(String[] documentIds, double[] documentWeights){
-        documents = documentIds;
-        docWeights = documentWeights;
+    public void setDocumentAssignments(String[] documentIds, int[] documentIndices, double[] documentWeights){
+        documents = new ModelFeature[documentIds.length];
+        for(int i=0; i<documents.length; i++){
+            documents[i] = new ModelFeature(documentIds[i], documentIndices[i], documentWeights[i]);
+        }
+//        documents = documentIds;
+//        docWeights = documentWeights;
     }
 
     /**
@@ -98,7 +115,7 @@ public class Topic implements Serializable {
      * @throws ArrayIndexOutOfBoundsException If the index provided is out of range
      */
     public Pair<String, Double> getWord(int index) throws ArrayIndexOutOfBoundsException {
-        return new Pair<>(words[index], wordWeights[index]);
+        return new Pair<>(words[index].getLabel(), words[index].getWeight());
     }
 
     /**
@@ -128,7 +145,7 @@ public class Topic implements Serializable {
      * @return Array of top words in the topic
      */
     public String[] topWords(int maxWords){
-        return Arrays.copyOfRange(words, 0, maxWords);
+        return (String[]) Arrays.stream(Arrays.copyOfRange(words, 0, maxWords)).map(w->w.getLabel()).toArray();
     }
 
     /**
@@ -139,7 +156,7 @@ public class Topic implements Serializable {
     public SparseVector getWordDistribution(int size){
         SparseVector wordVec = new SparseVector(size);
         for(int i = 0; i < words.length; i++){
-            wordVec.put(wordIds[i], wordWeights[i]);
+            wordVec.put(words[i].getIndex(), words[i].getWeight());
         }
         return wordVec.normalise();
     }
@@ -151,7 +168,7 @@ public class Topic implements Serializable {
      * @throws ArrayIndexOutOfBoundsException If the index provided is out of range
      */
     public Pair<String, Double> getDocument(int index) throws ArrayIndexOutOfBoundsException {
-        return new Pair<>(documents[index], docWeights[index]);
+        return new Pair<>(documents[index].getLabel(), documents[index].getWeight());
     }
 
     /**
@@ -181,7 +198,7 @@ public class Topic implements Serializable {
      * @return Array of top document ids in the topic
      */
     public String[] topDocuments(int maxDocuments){
-        return Arrays.copyOfRange(documents, 0, maxDocuments);
+        return (String[]) Arrays.stream(Arrays.copyOfRange(documents, 0, maxDocuments)).map(w->w.getLabel()).toArray();
     }
 
     /**
@@ -190,23 +207,32 @@ public class Topic implements Serializable {
     public JSONObject toJSON(){
         JSONObject topicJSON = new JSONObject();
         topicJSON.put(JSON_NUM, number);
-        topicJSON.put(JSON_WORDS, JSONHelper.toJSONArray(words));
-        topicJSON.put(JSON_WORD_WEIGHTS, JSONHelper.toJSONArray(formatArray(wordWeights)));
-        topicJSON.put(JSON_WORD_IDS, JSONHelper.toJSONArray(formatArray(wordWeights)));
-        topicJSON.put(JSON_DOCS, JSONHelper.toJSONArray(documents));
-        topicJSON.put(JSON_DOC_WEIGHTS, JSONHelper.toJSONArray(formatArray(docWeights)));
+        JSONArray wordsJSON = new JSONArray();
+        for(ModelFeature w: words){
+            wordsJSON.add(w.toJSON());
+        }
+        topicJSON.put(JSON_WORDS, wordsJSON);
+        JSONArray documentsJSON = new JSONArray();
+        for(ModelFeature d: documents){
+            documentsJSON.add(d.toJSON());
+        }
+        topicJSON.put(JSON_DOCS, documentsJSON);
+//        topicJSON.put(JSON_WORD_WEIGHTS, JSONHelper.toJSONArray(formatArray(wordWeights)));
+//        topicJSON.put(JSON_WORD_IDS, JSONHelper.toJSONArray(wordIds));
+//        topicJSON.put(JSON_DOCS, JSONHelper.toJSONArray(documents));
+//        topicJSON.put(JSON_DOC_WEIGHTS, JSONHelper.toJSONArray(formatArray(docWeights)));
         return topicJSON;
     }
 
     // used to format an array of doubles into 4 decimals max
-    private double[] formatArray(double[] arr){
-        DecimalFormat df = new DecimalFormat("#.#####");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return DoubleStream.of(arr)
-                .mapToObj(df::format)
-                .mapToDouble(Double::parseDouble)
-                .toArray();
-    }
+//    private double[] formatArray(double[] arr){
+//        DecimalFormat df = new DecimalFormat("#.#####");
+//        df.setRoundingMode(RoundingMode.HALF_UP);
+//        return DoubleStream.of(arr)
+//                .mapToObj(df::format)
+//                .mapToDouble(Double::parseDouble)
+//                .toArray();
+//    }
 
     /**
      * Method to load a list of topics from a JSON file
@@ -242,13 +268,12 @@ public class Topic implements Serializable {
      * @throws IOException If writing the file fails
      */
     public static void writeTopics(String filename, List<Topic> topics) throws IOException {
-        Console.log("Saving topics");
         try{
             JSONArray topicsArray = new JSONArray();
             for(Topic t: topics){
                 topicsArray.add(t.toJSON());
             }
-            JSONHelper.saveJSONArray(topicsArray, filename, 1);
+            JSONHelper.saveJSONArray(topicsArray, filename);
         } catch (IOException e){
             Console.error("Saving topics failed");
             throw e;
