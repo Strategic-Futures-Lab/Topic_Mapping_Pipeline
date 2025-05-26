@@ -6,7 +6,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.stream.DoubleStream;
 
 /**
  * Class representing a model feature within a topic model (instance with weight)

@@ -2,10 +2,9 @@ package input;
 
 import IO.Console;
 import IO.Timer;
-import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
-import pipeline.config.modules.InputConfigTXT;
 import data.Pair;
+import pipeline.config.ModuleConfig;
+import pipeline.config.modules.InputConfigTXT;
 
 import java.io.BufferedReader;
 import java.io.File;

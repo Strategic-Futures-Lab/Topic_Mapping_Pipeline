@@ -3,9 +3,9 @@ package input;
 import IO.BIBHelper;
 import IO.Console;
 import IO.Timer;
+import data.Document;
 import pipeline.config.ModuleConfig;
 import pipeline.config.modules.InputConfigBIB;
-import data.Document;
 
 import java.io.IOException;
 import java.util.Map;

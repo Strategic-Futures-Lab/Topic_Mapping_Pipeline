@@ -3,11 +3,11 @@ package input;
 import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
-import pipeline.config.ModuleConfig;
-import pipeline.config.modules.InputConfigGTR;
 import data.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import pipeline.config.ModuleConfig;
+import pipeline.config.modules.InputConfigGTR;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

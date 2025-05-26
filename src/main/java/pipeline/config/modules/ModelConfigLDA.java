@@ -1,10 +1,10 @@
 package pipeline.config.modules;
 
 import IO.Console;
-import pipeline.config.ModuleConfig;
-import pipeline.config.ConfigParser;
 import model.ldacore.LDAParameters;
 import pipeline.ModuleType;
+import pipeline.config.ConfigParser;
+import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
 
 import java.util.HashMap;

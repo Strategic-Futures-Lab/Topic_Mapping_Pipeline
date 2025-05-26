@@ -6,10 +6,7 @@ import org.json.simple.JSONObject;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.*;
-import java.util.stream.DoubleStream;
 
 /**
  * Class representing a document.

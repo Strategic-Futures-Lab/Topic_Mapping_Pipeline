@@ -3,10 +3,10 @@ package input;
 import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
-import pipeline.config.ModuleConfig;
-import pipeline.config.modules.InputConfigHTML;
 import data.Document;
 import org.jsoup.Jsoup;
+import pipeline.config.ModuleConfig;
+import pipeline.config.modules.InputConfigHTML;
 
 import java.io.IOException;
 import java.util.Map;

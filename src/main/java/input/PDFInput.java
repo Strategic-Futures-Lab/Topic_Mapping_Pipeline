@@ -2,12 +2,11 @@ package input;
 
 import IO.Console;
 import IO.Timer;
-import pipeline.config.ModuleConfig;
-import pipeline.config.modules.InputConfigPDF;
 import data.Pair;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import pipeline.config.ModuleConfig;
+import pipeline.config.modules.InputConfigPDF;
 
 import java.io.File;
 import java.io.IOException;

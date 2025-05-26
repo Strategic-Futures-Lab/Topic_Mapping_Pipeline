@@ -1,21 +1,22 @@
 package model.ldacore;
 
 import IO.Console;
-import cc.mallet.topics.*;
-import cc.mallet.types.*;
-import data.Document;
-import data.SparseVector;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.TokenSequence2FeatureSequence;
 import cc.mallet.pipe.iterator.CsvIterator;
+import cc.mallet.topics.ParallelTopicModel;
+import cc.mallet.topics.TopicAssignment;
+import cc.mallet.topics.TopicInferencer;
+import cc.mallet.topics.TopicModelDiagnostics;
+import cc.mallet.types.*;
+import data.Document;
 import data.Topic;
 
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class LDA implements Serializable {
 

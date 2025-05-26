@@ -4,15 +4,12 @@ import IO.Console;
 import IO.JSONHelper;
 import IO.SERHelper;
 import IO.Timer;
-import data.Topic;
 import data.Document;
-import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
-import pipeline.config.modules.LemmatiseConfig;
-import pipeline.config.modules.ModelConfigLDA;
+import data.Topic;
 import model.ldacore.LDA;
-import model.ldacore.LDAParameters;
 import org.json.simple.parser.ParseException;
+import pipeline.config.ModuleConfig;
+import pipeline.config.modules.ModelConfigLDA;
 
 import java.io.IOException;
 import java.util.ArrayList;

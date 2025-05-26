@@ -6,8 +6,6 @@ import IO.Timer;
 import data.Document;
 import data.Pair;
 import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
-import pipeline.config.modules.BuildTextConfig;
 import pipeline.config.modules.NGramsConfig;
 
 import java.util.*;

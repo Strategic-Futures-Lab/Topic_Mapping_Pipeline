@@ -1,9 +1,9 @@
 package pipeline.config.modules;
 
 import IO.Console;
+import pipeline.ModuleType;
 import pipeline.config.ConfigParser;
 import pipeline.config.ModuleConfig;
-import pipeline.ModuleType;
 import pipeline.config.ProjectConfig;
 
 import java.util.HashMap;

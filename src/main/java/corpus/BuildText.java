@@ -2,9 +2,9 @@ package corpus;
 
 import IO.Console;
 import IO.Timer;
+import data.Document;
 import pipeline.config.ModuleConfig;
 import pipeline.config.modules.BuildTextConfig;
-import data.Document;
 
 import java.util.Map;
 

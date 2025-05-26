@@ -9,12 +9,9 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.DoubleStream;
 
 /**
  * Class representing a topic.

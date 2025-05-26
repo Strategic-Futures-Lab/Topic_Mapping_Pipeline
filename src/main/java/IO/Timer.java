@@ -2,7 +2,6 @@ package IO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Utility class for logging times;
