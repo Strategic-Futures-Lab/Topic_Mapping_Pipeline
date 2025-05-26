@@ -8,6 +8,7 @@ import data.Topic;
 import data.Document;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
+import pipeline.config.modules.LemmatiseConfig;
 import pipeline.config.modules.ModelConfigLDA;
 import model.ldacore.LDA;
 import model.ldacore.LDAParameters;
@@ -26,6 +27,9 @@ import java.util.Map;
  */
 public class LDAModel extends ModelModule {
 
+    // module parameters
+    private ModelConfigLDA config;
+
     // Flag for processing documents in parallel
     private static final boolean RUN_IN_PARALLEL = false;
 
@@ -38,24 +42,21 @@ public class LDAModel extends ModelModule {
     // instance of lda topic model
     private LDA tModel;
 
-    // model settings
-    private LDAParameters ldaParameters;
+    private LDAModel(ModelConfigLDA c){
+        config = c;
+        config.logConfig();
+    }
 
-    private int minLemmas;
-    private boolean wordDistances;
-
-    // log settings
-    private String logDir;
-    private String serialisedFile;
-    private String loglikelihoodLogFile;
-    private String topicLogFile;
-
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    /**
+     * Main module method - processes parameters, loads corpus, model topics and save topics and documents
+     * @param moduleParameters module parameters
+     * @throws Exception If the corpus cannot load properly, model fails, or saving data fails
+     */
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        LDAModel instance = new LDAModel();
-        instance.processParameters((ModelConfigLDA) moduleParameters, projectParameters);
+        LDAModel instance = new LDAModel((ModelConfigLDA) moduleParameters);
         try{
             instance.loadDocuments();
             instance.runModel();
@@ -69,40 +70,17 @@ public class LDAModel extends ModelModule {
         Timer.stop(MODULE_NAME);
     }
 
-    private void processParameters(ModelConfigLDA moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
-        topicsFile = projectParameters.dataDirectory+moduleParameters.topics;
-        documentsFile = projectParameters.dataDirectory+moduleParameters.documents;
-        ldaParameters = moduleParameters.ldaParams;
-        minLemmas = moduleParameters.minLemmas;
-        wordDistances = moduleParameters.wordDistances;
-        logDir = projectParameters.dataDirectory+moduleParameters.logDir;
-        // keep the following as is for now
-        // module will check for null if they need to be skipped
-        serialisedFile = moduleParameters.serialised;
-        loglikelihoodLogFile = moduleParameters.loglikelihoodLogs;
-        topicLogFile = moduleParameters.topicLogs;
-        Console.tick();
-        Console.info("Modelling "+ldaParameters.nTopics+" topics from corpus "+corpusFile, 1);
-        Console.info("Saving topics in "+topicsFile, 1);
-        Console.info("Saving documents in "+documentsFile, 1);
-        if(serialisedFile != null) Console.info("Serialising model to "+logDir+serialisedFile, 2);
-        if(loglikelihoodLogFile != null) Console.info("Saving log-likelihoods to "+logDir+loglikelihoodLogFile, 2);
-        if(topicLogFile != null) Console.info("Saving topic logs to "+logDir+topicLogFile, 2);
-    }
-
     private void loadDocuments() throws IOException, ParseException {
         Console.log("Loading corpus");
         modelInput = new ArrayList<>();
         skippedDocs = new ArrayList<>();
-        loadCorpus();
+        loadCorpus(config.corpusFile);
         if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::loadDocument);
         else corpus.documents.entrySet().forEach(this::loadDocument);
         Console.tick();
         if(skipCount > 0){
-            Console.warning(skipCount+" documents skipped - not lemmatised or too few lemmas ("+minLemmas+")", 1);
-            // resting index of skipped documents
+            Console.warning(skipCount+" documents skipped - not lemmatised or too few lemmas ("+config.minLemmas+")", 1);
+            // reseting index of skipped documents
             int nDocs = modelInput.size();
             for(int i = 0; i<skippedDocs.size(); i++) skippedDocs.get(i).setIndex(nDocs+i);
         }
@@ -110,8 +88,7 @@ public class LDAModel extends ModelModule {
 
     private void loadDocument(Map.Entry<String, Document> docEntry){
         Document doc = docEntry.getValue();
-        if(doc.hasLemmas() && doc.getLemmas().size() > minLemmas){
-//            LDADocument inputDoc = new LDADocument(doc.getId(), doc.getLemmasString());
+        if(doc.hasLemmas() && doc.getLemmas().size() > config.minLemmas){
             modelInput.add(doc);
         } else {
             skippedDocs.add(doc);
@@ -124,9 +101,9 @@ public class LDAModel extends ModelModule {
         try {
             Console.note("Following output from Mallet\n", 1);
 
-            tModel = new LDA(modelInput, ldaParameters);
-            tModel.getWordDistances = wordDistances;
-            tModel.model(logDir);
+            tModel = new LDA(modelInput, config.ldaParameters);
+            tModel.getWordDistances = config.wordDistances;
+            tModel.model(config.logDirectory);
 
             Console.note("Model completed", 1);
             Console.log("LDA model");
@@ -137,14 +114,14 @@ public class LDAModel extends ModelModule {
         }
 
         try {
-            if (loglikelihoodLogFile != null) {
-                JSONHelper.saveJSON(tModel.logLikelihoodLogs.toJSON(), logDir+loglikelihoodLogFile, 1);
+            if (config.saveLogLikelihoods) {
+                JSONHelper.saveJSON(tModel.logLikelihoodLogs.toJSON(), config.loglikelihoodLogsFile, 1);
             }
-            if (topicLogFile != null) {
-                JSONHelper.saveJSON(tModel.topicLogs.toJSON(), logDir+topicLogFile, 1);
+            if (config.saveTopicHistory) {
+                JSONHelper.saveJSON(tModel.topicLogs.toJSON(), config.topicLogsFile, 1);
             }
-            if (serialisedFile != null) {
-                SERHelper.serialiseObject(tModel, logDir+serialisedFile, 1);
+            if (config.serialise) {
+                SERHelper.serialiseObject(tModel, config.serialisedFile, 1);
             }
         } catch (IOException e){
             Console.error("Saving LDA model logs or serialisation");
@@ -156,15 +133,8 @@ public class LDAModel extends ModelModule {
     private void writeModel() throws IOException {
         Console.log("Saving model");
         try{
-            Topic.writeTopics(topicsFile, tModel.getTopics());
-            corpus.writeCorpus(documentsFile);
-//            JSONArray documents = new JSONArray();
-//            for(Document d: modelInput){
-//                documents.add(d.toJSON());
-//            }
-////            root.put("topics", topics);
-////            root.put("documents",documents);
-//            JSONHelper.saveJSONArray(documents, documentsFile, 1);
+            Topic.writeTopics(config.topicsFile, tModel.getTopics());
+            corpus.writeCorpus(config.documentsFile);
         } catch (IOException e){
             Console.error("Saving model failed");
             throw e;

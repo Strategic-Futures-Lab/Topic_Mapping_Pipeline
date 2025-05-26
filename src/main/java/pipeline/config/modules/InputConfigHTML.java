@@ -1,8 +1,10 @@
 package pipeline.config.modules;
 
+import IO.Console;
 import pipeline.config.ConfigParser;
 import pipeline.config.ModuleConfig;
 import pipeline.ModuleType;
+import pipeline.config.ProjectConfig;
 
 import java.util.HashMap;
 
@@ -17,12 +19,12 @@ public class InputConfigHTML extends ModuleConfig {
     private static final String[] MANDATORY_PARAMS = new String[]{"source","output","urlField"};
 
     /** Filename of the source CSV file */
-    public final String source;
+    public final String sourceFile;
     /** Filename of the output corpus JSON file */
-    public final String output;
+    public final String outputFile;
     /** List of CSV fields to store in the  corpus JSON file; key is the name stored in the corpus JSON file,
      * value is the name found in the source CSV file */
-    public final HashMap<String, String> fields;
+    public final HashMap<String, String> documentFields;
     /** CSV field where the URL of the HTML page can be found */
     public final String urlField;
     /** DOM selector from which to parse text on the HTML file */
@@ -32,23 +34,31 @@ public class InputConfigHTML extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param moduleName Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
+     * @param projectParams Global project parameters
      * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public InputConfigHTML(String moduleName, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException{
+    public InputConfigHTML(String moduleName, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException{
         super(moduleName, type);
         for(String p: MANDATORY_PARAMS){
             if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        source = getPathParam("source", moduleParams);
-        output = getPathParam("output", moduleParams);
+        sourceFile = projectParams.sourceDirectory+getPathParam("source", moduleParams);
+        outputFile = projectParams.outputDirectory+getPathParam("output", moduleParams);
         urlField = getStringParam("urlField", moduleParams);
         domSelector = getDefaultStringParam("domSelector", moduleParams, "body");
-        fields = new HashMap<>();
+        documentFields = new HashMap<>();
         if(moduleParams.containsKey("fields")){
             HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
             for(String k: fieldsMap.keySet()){
-                fields.put(k, ConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
+                documentFields.put(k, ConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
             }
         }
+    }
+
+    /**
+     * Method logging the module parameters
+     */
+    public void logConfig(){
+        Console.info("Crawling HTML pages listed in "+sourceFile+" and saving to "+outputFile);
     }
 }

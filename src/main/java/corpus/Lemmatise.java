@@ -7,6 +7,7 @@ import pipeline.config.ProjectConfig;
 import pipeline.config.modules.LemmatiseConfig;
 import corpus.lemmatizer.StanfordLemmatizer;
 import data.Document;
+import pipeline.config.modules.MergeCorpusConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -20,14 +21,13 @@ import java.util.Map;
 public class Lemmatise extends CleaningModule {
 
     // module parameters
-    private String stopPhrasesFile;
-    private String stopWordsFile;
+    private LemmatiseConfig config;
 
     // cleaning options
-    private boolean removeStopPhrases = false;
     private StopPhrases stopPhrasesModule;
-    private boolean removeStopWords = false;
     private StopWords stopWordsModule;
+
+
 
     // for logging purposes
     long lemStartTime;
@@ -39,42 +39,31 @@ public class Lemmatise extends CleaningModule {
     // Flag for processing documents in parallel
     private final static boolean RUN_IN_PARALLEL = true;
 
+    private Lemmatise(LemmatiseConfig c){
+        config = c;
+        config.logConfig();
+    }
+
     /**
      * Main module method - processes parameters, loads corpus, lemmatise texts and save corpus again
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws Exception If the corpus cannot load properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        Lemmatise instance = new Lemmatise();
-        instance.processParameters((LemmatiseConfig) moduleParameters, projectParameters);
+        Lemmatise instance = new Lemmatise((LemmatiseConfig) moduleParameters);
         try{
-            instance.loadCorpus();
+            instance.loadCorpus(instance.config.corpusFile);
             instance.lemmatise();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
         Console.moduleComplete(MODULE_NAME);
         Timer.stop(MODULE_NAME);
-    }
-
-    // processes project and module parameters
-    private void processParameters(LemmatiseConfig moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        stopPhrasesFile = moduleParameters.stopPhrases == null ? null : projectParameters.sourceDirectory+moduleParameters.stopPhrases;
-        stopWordsFile = moduleParameters.stopWords == null ? null : projectParameters.sourceDirectory+moduleParameters.stopWords;
-        Console.tick();
-        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
-        Console.info("Lemmatising texts from corpus "+corpusFile+saveDiff, 1);
-        if(stopPhrasesFile != null) Console.info("Removing stop phrases in "+stopPhrasesFile, 2);
-        if(stopWordsFile != null) Console.info("Removing words in "+stopWordsFile, 2);
     }
 
     // launches lemmatisation process
@@ -88,16 +77,14 @@ public class Lemmatise extends CleaningModule {
         noText = 0;
         lemStartTime = System.currentTimeMillis();
         // set up stop phrase removal
-        if(stopPhrasesFile!=null){
-            removeStopPhrases = true;
+        if(config.removeStopPhrases){
             stopPhrasesModule = new StopPhrases();
-            stopPhrasesModule.loadStopPhrases(stopPhrasesFile);
+            stopPhrasesModule.loadStopPhrases(config.stopPhrasesFile);
         }
         // set up stop word removal
-        if(stopWordsFile!=null){
-            removeStopWords = true;
+        if(config.removeStopWords){
             stopWordsModule = new StopWords();
-            stopWordsModule.loadStopWords(stopWordsFile);
+            stopWordsModule.loadStopWords(config.stopWordsFile);
         }
         // launching lemmatisation
         if(RUN_IN_PARALLEL) corpus.documents.entrySet().parallelStream().forEach(this::lemmatiseDocument);
@@ -119,7 +106,7 @@ public class Lemmatise extends CleaningModule {
         } else {
             String text = doc.getText().trim().toLowerCase();
             // removing stop phrases
-            if(removeStopPhrases){
+            if(config.removeStopPhrases){
                 text = stopPhrasesModule.removeStopPhrases(text);
             }
             // removing special characters
@@ -129,7 +116,7 @@ public class Lemmatise extends CleaningModule {
             // lemmatising
             List<List<String>> lemmas = StanfordLemmatizer.removeCommonStopWords(slem.lemmatise(text));
             // remove stop words
-            if(removeStopWords){
+            if(config.removeStopWords){
                 stopWordsModule.removeStopWords(lemmas);
             }
             doc.setLemmas(lemmas);

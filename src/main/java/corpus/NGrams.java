@@ -7,6 +7,7 @@ import data.Document;
 import data.Pair;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
+import pipeline.config.modules.BuildTextConfig;
 import pipeline.config.modules.NGramsConfig;
 
 import java.util.*;
@@ -24,9 +25,7 @@ public class NGrams extends CleaningModule {
     private static final char SAVECHAR = '_';
 
     // module parameters
-    private String nGramsFile;
-    private int maxSize;
-    private boolean analysis;
+    private NGramsConfig config;
 
     // nGrams
     ConcurrentHashMap<String, Integer> unigramsFound;
@@ -42,29 +41,31 @@ public class NGrams extends CleaningModule {
     // Flag for processing documents in parallel
     private final static boolean RUN_IN_PARALLEL = false;
 
+    private NGrams(NGramsConfig c){
+        config = c;
+        config.logConfig();
+    }
+
     /**
      * Main module method - processes parameters, loads corpus, build nGrams, calculate frequency, joins n grams and save corpus again
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws Exception If the corpus cannot load properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        NGrams instance = new NGrams();
-        instance.processParameters((NGramsConfig) moduleParameters, projectParameters);
+        NGrams instance = new NGrams((NGramsConfig) moduleParameters);
         try{
-            instance.loadCorpus();
-            if(instance.analysis) {
+            instance.loadCorpus(instance.config.corpusFile);
+            if(instance.config.analysis) {
                 instance.getNGrams();
                 instance.calculateNGramsProbabilities();
                 instance.saveNGramsProbabilities();
             } else {
-                //TODO: add other pathway - save given ngrams in corpus
                 instance.loadNGrams();
                 instance.combineNGrams();
-                instance.writeCorpus();
+                instance.writeCorpus(instance.config.outputFile);
             }
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
@@ -72,26 +73,6 @@ public class NGrams extends CleaningModule {
         }
         Console.moduleComplete(MODULE_NAME);
         Timer.stop(MODULE_NAME);
-    }
-
-    // processes project and module parameters
-    private void processParameters(NGramsConfig moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        analysis = moduleParameters.analysis;
-        nGramsFile = (analysis? projectParameters.outputDirectory : projectParameters.sourceDirectory)+moduleParameters.nGrams;
-        maxSize = moduleParameters.maxSize;
-        Console.tick();
-        String task = analysis ? "Analysing" : "Building";
-        String saveDiff = corpusFile.equals(outputFile)||analysis ? "" : " and saving to "+outputFile;
-        Console.info(task+" n-grams in corpus "+corpusFile+saveDiff, 1);
-        if(analysis){
-            Console.info("Analysing n-grams up to "+maxSize+" terms", 2);
-            Console.info("Saving analysis in "+nGramsFile, 2);
-        } else {
-            Console.info("Reading n-grams from "+nGramsFile, 2);
-        }
     }
 
     private void getNGrams(){
@@ -122,7 +103,7 @@ public class NGrams extends CleaningModule {
                     if (unigramsFound.containsKey(term.toString()))
                         unigramsFound.put(term.toString(), unigramsFound.get(term.toString()) + 1);
                     else unigramsFound.put(term.toString(), 1);
-                    for (int n = 1; n < maxSize; n++) {
+                    for (int n = 1; n < config.maxNGramSize; n++) {
                         if (i + n < sentence.size()) {
                             term.append(JOINCHAR).append(sentence.get(i + n));
                             if (ngramsFound.containsKey(term.toString()))
@@ -177,11 +158,11 @@ public class NGrams extends CleaningModule {
         for(Pair<String, Double> p: sortedProbabilities){
             rows.add(new String[]{p.getLeft().replace(JOINCHAR, SAVECHAR),String.valueOf(p.getRight()),String.valueOf(ngramsFound.get(p.getLeft()))});
         }
-        CSVHelper.saveCSVFile(nGramsFile, headers, rows, 0);
+        CSVHelper.saveCSVFile(config.nGramsFile, headers, rows, 0);
     }
 
     private void loadNGrams(){
-        ngramsRead = readTextFile(nGramsFile, "n-grams");
+        ngramsRead = readTextFile(config.nGramsFile, "n-grams");
         ngramsRead = ngramsRead.stream().map(s -> s.trim().toLowerCase()).toList();
     }
 

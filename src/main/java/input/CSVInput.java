@@ -4,12 +4,10 @@ import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
 import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
 import pipeline.config.modules.InputConfigCSV;
 import data.Document;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,23 +19,26 @@ import java.util.Map;
 public class CSVInput extends InputModule {
 
     // module parameters
-    private HashMap<String, String> docFields;
+    private InputConfigCSV config;
+
+    private CSVInput(InputConfigCSV c){
+        config = c;
+        config.logConfig();
+    }
 
     /**
      * Main module method - processes parameters, reads CSV file and write JSON corpus
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws IOException If the CSV file cannot be read properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        CSVInput instance = new CSVInput();
-        instance.processParameters((InputConfigCSV) moduleParameters, projectParameters);
+        CSVInput instance = new CSVInput((InputConfigCSV) moduleParameters);
         try {
             instance.loadCSV();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -46,27 +47,17 @@ public class CSVInput extends InputModule {
         Timer.stop(MODULE_NAME);
     }
 
-    // processes project and module parameters
-    private void processParameters(InputConfigCSV moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        source = projectParameters.sourceDirectory+moduleParameters.source;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        docFields = moduleParameters.fields;
-        Console.tick();
-        Console.info("Reading CSV input from "+source+" and saving to "+outputFile, 1);
-    }
-
     // loads document data from CSV
     private void loadCSV() throws IOException {
         CSVHelper.ProcessCSVRow rowProcessor = (row, rowNum) -> {
             Document doc = new Document(Integer.toString(rowNum),rowNum);
-            for(Map.Entry<String, String> entry: docFields.entrySet()){
+            for(Map.Entry<String, String> entry: config.documentFields.entrySet()){
                 doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
             corpus.add(doc.getId(), doc);
         };
         try {
-            CSVHelper.loadCSVFile(source, rowProcessor);
+            CSVHelper.loadCSVFile(config.sourceFile, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;

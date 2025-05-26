@@ -6,6 +6,7 @@ import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
 import pipeline.config.modules.StopPhrasesConfig;
 import data.Document;
+import pipeline.config.modules.StopWordsConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class StopPhrases extends CleaningModule {
 
     // module parameters
-    private String stopPhrasesFile;
+    private StopPhrasesConfig config;
 
     private List<String> stopPhrases;
 
@@ -28,40 +29,37 @@ public class StopPhrases extends CleaningModule {
     // Flag for processing documents in parallel
     private final static boolean RUN_IN_PARALLEL = true;
 
+    private StopPhrases(StopPhrasesConfig c){
+        config = c;
+        config.logConfig();
+    }
+
+    /**
+     * Constructor for usage outside the module (e.g., if embedded in lemmatisation)
+     */
+    public StopPhrases(){}
+
     /**
      * Main module method - processes parameters, loads corpus, removes stop words and save corpus again
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws Exception If the corpus cannot load properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        StopPhrases instance = new StopPhrases();
-        instance.processParameters((StopPhrasesConfig) moduleParameters, projectParameters);
+        StopPhrases instance = new StopPhrases((StopPhrasesConfig) moduleParameters);
         try{
-            instance.loadCorpus();
-            instance.loadStopPhrases(instance.stopPhrasesFile);
+            instance.loadCorpus(instance.config.corpusFile);
+            instance.loadStopPhrases(instance.config.stopPhrasesFile);
             instance.removeStopPhrases();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
         Console.moduleComplete(MODULE_NAME);
         Timer.stop(MODULE_NAME);
-    }
-
-    // processes project and module parameters
-    private void processParameters(StopPhrasesConfig moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        stopPhrasesFile = projectParameters.sourceDirectory+moduleParameters.stopPhrases;
-        Console.tick();
-        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
-        Console.info("Removing stop phrases ("+stopPhrasesFile+") from corpus "+corpus+saveDiff, 1);
     }
 
     /**

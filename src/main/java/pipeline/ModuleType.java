@@ -26,7 +26,9 @@ public enum ModuleType {
     StopWords (corpus.StopPhrases.class, StopWordsConfig.class),
     NGrams (corpus.NGrams.class, NGramsConfig.class),
     // Modelling modules
-    LDAModel (model.LDAModel.class, ModelConfigLDA.class);
+    LDAModel (model.LDAModel.class, ModelConfigLDA.class),
+    // Analysis modules
+    TopicSimilarity (analysis.TopicSimilarity.class, TopicSimilarityConfig.class);
 
     public final Class module;
     public final Class config;
@@ -36,9 +38,9 @@ public enum ModuleType {
         config = conf;
     }
 
-    public void runModule(ModuleConfig moduleParams, ProjectConfig projectParams) throws RuntimeException {
+    public void runModule(ModuleConfig moduleParams) throws RuntimeException {
         try {
-            module.getMethod("run", ModuleConfig.class, ProjectConfig.class ).invoke(null, moduleParams, projectParams );
+            module.getMethod("run", ModuleConfig.class).invoke(null, moduleParams);
         } catch (Exception e) {
             Console.error("Error while trying to execute the module " + this);
             throw new RuntimeException(e);
@@ -60,6 +62,7 @@ public enum ModuleType {
             case "stopWords" -> StopWords;
             case "nGrams" -> NGrams;
             case "modelLDA" -> LDAModel;
+            case "topicSimilarity" -> TopicSimilarity;
             default ->
                     throw new ConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
         };

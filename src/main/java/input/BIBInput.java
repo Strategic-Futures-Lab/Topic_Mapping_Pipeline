@@ -4,12 +4,10 @@ import IO.BIBHelper;
 import IO.Console;
 import IO.Timer;
 import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
 import pipeline.config.modules.InputConfigBIB;
 import data.Document;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,23 +19,26 @@ import java.util.Map;
 public class BIBInput extends InputModule {
 
     // module parameters
-    private HashMap<String, String> docFields;
+    private InputConfigBIB config;
+
+    private BIBInput(InputConfigBIB c){
+        config = c;
+        config.logConfig();
+    }
 
     /**
      * Main module method - processes parameters, reads BibTex file and write JSON corpus
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws IOException If the BibTex file cannot be read properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        BIBInput instance = new BIBInput();
-        instance.processParameters((InputConfigBIB) moduleParameters, projectParameters);
+        BIBInput instance = new BIBInput((InputConfigBIB) moduleParameters);
         try {
             instance.loadBibTex();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -46,21 +47,11 @@ public class BIBInput extends InputModule {
         Timer.stop(MODULE_NAME);
     }
 
-    // processes project and module parameters
-    private void processParameters(InputConfigBIB moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        source = projectParameters.sourceDirectory+moduleParameters.source;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        docFields = moduleParameters.fields;
-        Console.tick();
-        Console.info("Reading BibTex input from "+source+" and saving to "+outputFile, 1);
-    }
-
     // loads documents data from BibTex
     private void loadBibTex() throws Exception {
         BIBHelper.ProcessBIBEntry entryProcessor = (key, entry, entryNum) ->{
             Document doc = new Document(key.toString(), entryNum);
-            for(Map.Entry<String, String> field: docFields.entrySet()){
+            for(Map.Entry<String, String> field: config.documentFields.entrySet()){
                 try {
                     doc.addField(field.getKey(), BIBHelper.getField(entry, field.getValue()));
                 } catch (Exception e){
@@ -71,7 +62,7 @@ public class BIBInput extends InputModule {
             corpus.add(key.toString(), doc);
         };
         try{
-            BIBHelper.loadBIBFile(source, entryProcessor);
+            BIBHelper.loadBIBFile(config.sourceFile, entryProcessor);
         } catch (Exception e) {
             Console.error("Error while reading the BibTex input", 1);
             throw e;

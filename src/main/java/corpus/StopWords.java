@@ -4,6 +4,7 @@ import IO.Console;
 import IO.Timer;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ProjectConfig;
+import pipeline.config.modules.BuildTextConfig;
 import pipeline.config.modules.StopWordsConfig;
 import data.Document;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 public class StopWords extends CleaningModule {
 
     // module parameters
-    private String stopWordsFile;
+    private StopWordsConfig config;
 
     private List<String> stopWords;
 
@@ -28,40 +29,37 @@ public class StopWords extends CleaningModule {
     // Flag for processing documents in parallel
     private final static boolean RUN_IN_PARALLEL = true;
 
+    private StopWords(StopWordsConfig c){
+        config = c;
+        config.logConfig();
+    }
+
+    /**
+     * Constructor for usage outside the module (e.g., if embedded in lemmatisation)
+     */
+    public StopWords(){}
+
     /**
      * Main module method - processes parameters, loads corpus, removes stop words and save corpus again
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws Exception If the corpus cannot load properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        StopWords instance = new StopWords();
-        instance.processParameters((StopWordsConfig) moduleParameters, projectParameters);
+        StopWords instance = new StopWords((StopWordsConfig) moduleParameters);
         try{
-            instance.loadCorpus();
-            instance.loadStopWords(instance.stopWordsFile);
+            instance.loadCorpus(instance.config.corpusFile);
+            instance.loadStopWords(instance.config.stopWordsFile);
             instance.removeStopWords();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e){
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
         Console.moduleComplete(MODULE_NAME);
         Timer.stop(MODULE_NAME);
-    }
-
-    // processes project and module parameters
-    private void processParameters(StopWordsConfig moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        corpusFile = projectParameters.dataDirectory+moduleParameters.corpus;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        stopWordsFile = projectParameters.sourceDirectory+moduleParameters.stopWords;
-        Console.tick();
-        String saveDiff = corpusFile.equals(outputFile) ? "" : " and saving to "+outputFile;
-        Console.info("Removing stop words ("+stopWordsFile+") from corpus "+corpus+saveDiff, 1);
     }
 
     /**

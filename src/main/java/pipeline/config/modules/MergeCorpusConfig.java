@@ -1,10 +1,13 @@
 package pipeline.config.modules;
 
+import IO.Console;
 import pipeline.config.ModuleConfig;
 import pipeline.config.ConfigParser;
 import pipeline.ModuleType;
+import pipeline.config.ProjectConfig;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Configuration class for MergeCorpus module
@@ -17,9 +20,9 @@ public class MergeCorpusConfig extends ModuleConfig {
     private static final String[] MANDATORY_PARAMS = new String[]{"corpora", "output"};
 
     /** Filenames of the source corpus files */
-    public final String[] corpora;
+    public final String[] corpusFiles;
     /** Filename of the output corpus file */
-    public final String output;
+    public final String outputFile;
     /** List of document fields to keep */
     public final String[] docFields;
 
@@ -27,22 +30,32 @@ public class MergeCorpusConfig extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param name Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
+     * @param projectParams Global project parameters
      * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public MergeCorpusConfig(String name, ModuleType type, HashMap<String, Object> moduleParams) throws ConfigParser.ParseException {
+    public MergeCorpusConfig(String name, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException {
         super(name, type);
         // mandatory parameters
         for(String p: MANDATORY_PARAMS){
             if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
         }
-        corpora = getPathListParam("corpora", moduleParams).toArray(new String[0]);
-        if(corpora.length < 2) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a more than 1 corpus to merge");
+        List<String> f = getPathListParam("corpora", moduleParams);
+        if(f.size() < 2) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a more than 1 corpus to merge");
+        corpusFiles = (String[]) f.stream().map(s->projectParams.dataDirectory+s).toArray();
+        outputFile = projectParams.dataDirectory+getPathParam("output", moduleParams);
         // optional parameters
-        output = getPathParam("output", moduleParams);
         if(moduleParams.containsKey("docFields")){
             docFields = getStringListParam("docFields", moduleParams).toArray(new String[0]);
         } else {
-            docFields = null;
+            docFields = projectParams.docFields;
         }
+    }
+
+    /**
+     * Method logging the module parameters
+     */
+    public void logConfig(){
+        Console.info("Merging the following corpora into "+outputFile+":");
+        for(String corpus: corpusFiles) Console.step(corpus, 1);
     }
 }

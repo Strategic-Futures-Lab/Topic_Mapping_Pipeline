@@ -4,7 +4,6 @@ import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
 import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
 import pipeline.config.modules.InputConfigGTR;
 import data.Document;
 import org.w3c.dom.NodeList;
@@ -16,7 +15,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,9 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GTRInput extends InputModule {
 
     // module parameters
-    private HashMap<String, String> docFields;
-    private String pidField;
-    private HashMap<String, String> gtrFields;
+    private InputConfigGTR config;
 
     // crawl variables
     private ConcurrentHashMap<String, String> crawlErrors;
@@ -41,22 +37,25 @@ public class GTRInput extends InputModule {
     private final static boolean RUN_IN_PARALLEL = true;
     private final static int MAX_RETRIES = 3;
 
+    private GTRInput(InputConfigGTR c){
+        config = c;
+        config.logConfig();
+    }
+
     /**
      * Main module method - processes parameters, reads CSV file, crawl GtR pages and write JSON corpus
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws IOException If the CSV file cannot be read properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        GTRInput instance = new GTRInput();
-        instance.processParameters((InputConfigGTR) moduleParameters, projectParameters);
+        GTRInput instance = new GTRInput((InputConfigGTR) moduleParameters);
         try {
             instance.loadCSV();
             instance.crawlGTR();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -65,30 +64,18 @@ public class GTRInput extends InputModule {
         Timer.stop(MODULE_NAME);
     }
 
-    // processes project and module parameters
-    private void processParameters(InputConfigGTR moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        source = projectParameters.sourceDirectory+moduleParameters.source;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        docFields = moduleParameters.fields;
-        pidField = moduleParameters.pidField;
-        gtrFields = moduleParameters.gtrFields;
-        Console.tick();
-        Console.info("Crawling GtR projects listed in "+source+" and saving to "+outputFile, 1);
-    }
-
     // loads document data from CSV
     private void loadCSV() throws IOException {
         CSVHelper.ProcessCSVRow rowProcessor = (row, rowNum) -> {
             Document doc = new Document(Integer.toString(rowNum),rowNum);
-            for(Map.Entry<String, String> entry: docFields.entrySet()){
+            for(Map.Entry<String, String> entry: config.documentFields.entrySet()){
                 doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
-            doc.addField("pid", row.getField(pidField));
+            doc.addField("pid", row.getField(config.pidField));
             corpus.add(doc.getId(), doc);
         };
         try {
-            CSVHelper.loadCSVFile(source, rowProcessor);
+            CSVHelper.loadCSVFile(config.sourceFile, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;
@@ -127,7 +114,7 @@ public class GTRInput extends InputModule {
 
     // parses XML for document data
     private void getDataFromXML(Document doc, org.w3c.dom.Document xml) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-        for(Map.Entry<String, String> entry: gtrFields.entrySet()){
+        for(Map.Entry<String, String> entry: config.gtrFields.entrySet()){
             String key = entry.getKey();
             String val = entry.getValue();
             switch (val){

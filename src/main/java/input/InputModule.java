@@ -16,12 +16,8 @@ public abstract class InputModule {
     // every input module fills a list with document
     protected final Corpus corpus = new Corpus();
 
-    // every input module has a source (file or directory name) and output file name
-    protected String source;
-    protected String outputFile;
-
     // every input module write the corpus on a JSON file
-    protected void writeCorpus() throws IOException {
-        corpus.writeCorpus(outputFile);
+    protected void writeCorpus(String file) throws IOException {
+        corpus.writeCorpus(file);
     }
 }

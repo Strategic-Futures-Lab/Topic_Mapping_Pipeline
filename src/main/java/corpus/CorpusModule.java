@@ -19,25 +19,20 @@ public abstract class CorpusModule {
     // corpus modules typically handle a list of documents and keep track of the corpus metadata
     protected Corpus corpus;
 
-    // typical corpus module parameters
-    protected String corpusFile;
-    protected String outputFile;
-    protected String[] docFields;
-
     // method for reading a corpus JSON file and generating a list of documents using default properties
-    protected void loadCorpus() throws IOException, ParseException {
-        corpus = new Corpus(corpusFile);
+    protected void loadCorpus(String file) throws IOException, ParseException {
+        corpus = new Corpus(file);
     }
 
     // Method for filtering document data
-    protected void filterDocumentFields(Document doc){
-        List<String> fieldsFilter = docFields == null ? doc.getFieldsKey().stream().toList() : Arrays.stream(docFields).toList();
+    protected void filterDocumentFields(Document doc, String[] fields){
+        List<String> fieldsFilter = fields == null ? doc.getFieldsKey().stream().toList() : Arrays.stream(fields).toList();
         doc.filterFields(fieldsFilter);
     }
 
     // method for writing the (transformed) corpus JSON file using default properties
-    protected void writeCorpus() throws IOException {
-        corpus.writeCorpus(outputFile);
+    protected void writeCorpus(String file) throws IOException {
+        corpus.writeCorpus(file);
     }
 
 }

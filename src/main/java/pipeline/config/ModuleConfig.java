@@ -36,14 +36,14 @@ public class ModuleConfig {
      * @throws ConfigParser.ParseException If the module type is absent or not recognised or if the module subclass threw an exception
      * @throws RuntimeException If the module configuration class instantiation fails
      */
-    public static ModuleConfig createModuleConfig(String moduleName, HashMap<String, Object> moduleParams) throws Exception {
+    public static ModuleConfig createModuleConfig(String moduleName, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws Exception {
         if(moduleParams.containsKey("type")){
             String type = ConfigParser.parseString(moduleParams.get("type"), moduleName+"/type");
             try {
                 ModuleType moduleType = ModuleType.getType(type);
                 Class configClass = moduleType.config;
-                Constructor configCtor = configClass.getConstructor(String.class, ModuleType.class, HashMap.class);
-                return (ModuleConfig) configCtor.newInstance(moduleName, moduleType, moduleParams);
+                Constructor configCtor = configClass.getConstructor(String.class, ModuleType.class, HashMap.class, ProjectConfig.class);
+                return (ModuleConfig) configCtor.newInstance(moduleName, moduleType, moduleParams, projectParams);
             } catch (InvocationTargetException e) {
                 // wraps normal parserconfig exceptions
                 throw (Exception) e.getTargetException();

@@ -3,7 +3,6 @@ package input;
 import IO.Console;
 import IO.Timer;
 import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
 import pipeline.config.modules.InputConfigPDF;
 import data.Pair;
 
@@ -23,44 +22,37 @@ import java.util.HashMap;
 public class PDFInput extends FileInput {
 
     // module parameters
-    private int splitPages;
+    private InputConfigPDF config;
 
     // Flag for processing PDFs in parallel (may affect order of documents)
     private final static boolean RUN_IN_PARALLEL = true;
 
+    private PDFInput(InputConfigPDF c){
+        config = c;
+        config.logConfig();
+    }
+
     /**
      * Main module method - processes parameters, reads PDF file/folder and writes JSON corpus
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws IOException If the file(s) type is unexpected
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        PDFInput instance = new PDFInput();
-        instance.processParameters((InputConfigPDF) moduleParameters, projectParameters);
+        PDFInput instance = new PDFInput((InputConfigPDF) moduleParameters);
         instance.extension = ".pdf";
         try {
-            instance.findFiles();
+            instance.findFiles(instance.config.sourceFile);
             instance.loadFiles(instance::loadPDF, RUN_IN_PARALLEL);
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
         Console.moduleComplete(MODULE_NAME);
         Timer.stop(MODULE_NAME);
-    }
-
-    // processes project and module parameters
-    private void processParameters(InputConfigPDF moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        source = projectParameters.sourceDirectory+moduleParameters.source;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        splitPages = moduleParameters.splitPages;
-        Console.tick();
-        Console.info("Reading PDF input from "+source+" and saving to "+outputFile, 1);
     }
 
     // process one .pdf file
@@ -74,7 +66,7 @@ public class PDFInput extends FileInput {
             PDFTextStripper s = new PDFTextStripper();
             HashMap<String, String> docFields = new HashMap<>();
             int subDocCount = 0;
-            if(splitPages<1){
+            if(config.splitPages<1){
                 // read PDF in single block
                 String text = cleanText(s.getText(doc));
                 docFields.put("text", text);
@@ -83,9 +75,9 @@ public class PDFInput extends FileInput {
                 addDocument(docFields);
             } else {
                 // read PDF by block of pages
-                for(int pageStart = 1; pageStart<doc.getNumberOfPages(); pageStart+=splitPages){
+                for(int pageStart = 1; pageStart<doc.getNumberOfPages(); pageStart+=config.splitPages){
                     s.setStartPage(pageStart);
-                    int pageEnd = Math.min(pageStart+splitPages-1, doc.getNumberOfPages());
+                    int pageEnd = Math.min(pageStart+config.splitPages-1, doc.getNumberOfPages());
                     s.setEndPage(pageEnd);
                     String text = cleanText(s.getText(doc));
                     docFields.put("text", text);

@@ -23,9 +23,9 @@ public abstract class FileInput extends InputModule {
     protected String extension;
 
     // some input modules explore the source and locate all files of a given type
-    protected void findFiles() throws IOException {
+    protected void findFiles(String file) throws IOException {
         Console.log("Locating "+extension+" files");
-        File sourceFile = new File(source);
+        File sourceFile = new File(file);
         if(!sourceFile.isDirectory()){
             // source is not a directory, check if it is a txt file
             if(sourceFile.getName().toLowerCase().endsWith(extension)) {
@@ -44,7 +44,7 @@ public abstract class FileInput extends InputModule {
                 Console.note("Found "+fileList.size()+" "+extension+" files", 1);
             } else {
                 // did not find any txt file in the directory
-                Console.warning("Provided directory "+source+" does not contain any "+extension+" files");
+                Console.warning("Provided directory "+file+" does not contain any "+extension+" files");
             }
         }
     }

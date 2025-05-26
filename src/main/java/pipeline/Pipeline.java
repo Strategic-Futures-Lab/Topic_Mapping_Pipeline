@@ -44,7 +44,7 @@ public class Pipeline {
                     Console.warning("Skipping module "+module+" - run set to false", 1);
                 } else {
                     Console.log("Configuring module "+module, 1);
-                    moduleConfigs.add(ModuleConfig.createModuleConfig(module, moduleParams));
+                    moduleConfigs.add(ModuleConfig.createModuleConfig(module, moduleParams, projectConfig));
                     Console.tick();
                 }
             }
@@ -63,7 +63,7 @@ public class Pipeline {
     public void runPipeline() throws Exception{
         try{
             for(ModuleConfig moduleConfig : moduleConfigs){
-                moduleConfig.moduleType.runModule(moduleConfig, projectConfig);
+                moduleConfig.moduleType.runModule(moduleConfig);
             }
         } catch (Exception e){
             throw e;

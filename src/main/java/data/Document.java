@@ -232,9 +232,9 @@ public class Document implements Serializable {
      * Ignores keys not found in fields
      * @param keys Field keys to copy
      */
-    public void addTexts(List<String> keys){
+    public void addTexts(String[] keys){
         initText();
-        keys.forEach(this::addText);
+        for(String key:keys) this.addText(key);
     }
 
     /**

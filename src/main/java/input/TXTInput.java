@@ -22,44 +22,37 @@ import java.util.HashMap;
 public class TXTInput extends FileInput {
 
     // module parameters
-    private boolean splitEmptyLines;
+    private InputConfigTXT config;
 
     // Flag for processing TXTs in parallel (may affect order of documents)
     private final static boolean RUN_IN_PARALLEL = true;
 
+    private TXTInput(InputConfigTXT c){
+        config = c;
+        config.logConfig();
+    }
+
     /**
      * Main module method - processes parameters, reads TXT file/folder and writes JSON corpus
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws IOException If the file(s) type is unexpected
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        TXTInput instance = new TXTInput();
-        instance.processParameters((InputConfigTXT) moduleParameters, projectParameters);
+        TXTInput instance = new TXTInput((InputConfigTXT) moduleParameters);
         instance.extension = ".txt";
         try {
-            instance.findFiles();
+            instance.findFiles(instance.config.sourceFile);
             instance.loadFiles(instance::loadTXT, RUN_IN_PARALLEL);
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
         }
         Console.moduleComplete(MODULE_NAME);
         Timer.stop(MODULE_NAME);
-    }
-
-    // processes project and module parameters
-    private void processParameters(InputConfigTXT moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        source = projectParameters.sourceDirectory+moduleParameters.source;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        splitEmptyLines = moduleParameters.splitEmptyLines;
-        Console.tick();
-        Console.info("Reading TXT input from "+source+" and saving to "+outputFile, 1);
     }
 
     // process one .txt file
@@ -77,7 +70,7 @@ public class TXTInput extends FileInput {
             HashMap<String, String> docFields = new HashMap<>();
             // read the text line by line
             while ((line = reader.readLine()) != null){
-                if(splitEmptyLines && line.isEmpty() && !newDocString.isEmpty()){
+                if(config.splitEmptyLines && line.isEmpty() && !newDocString.isEmpty()){
                     // if it's an empty line and we need to split
                     docFields.put("text", newDocString);
                     docFields.put("folder", directory);

@@ -17,13 +17,13 @@ public class ModelModule {
     protected Corpus corpus;
 
     // typical model module parameters
-    protected String corpusFile;
-    protected String topicsFile;
-    protected String documentsFile;
-    protected String logDirectory;
+//    protected String corpusFile;
+//    protected String topicsFile;
+//    protected String documentsFile;
+//    protected String logDirectory;
 
     // method for reading a corpus JSON file and generating a list of documents using default properties
-    protected void loadCorpus() throws IOException, ParseException {
-        corpus = new Corpus(corpusFile);
+    protected void loadCorpus(String file) throws IOException, ParseException {
+        corpus = new Corpus(file);
     }
 }

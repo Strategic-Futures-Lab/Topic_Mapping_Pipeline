@@ -4,13 +4,11 @@ import IO.CSVHelper;
 import IO.Console;
 import IO.Timer;
 import pipeline.config.ModuleConfig;
-import pipeline.config.ProjectConfig;
 import pipeline.config.modules.InputConfigHTML;
 import data.Document;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,9 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HTMLInput extends InputModule {
 
     // module parameters
-    private HashMap<String, String> docFields;
-    private String urlField;
-    private String domSelector;
+    private InputConfigHTML config;
 
     // crawl variables
     private ConcurrentHashMap<String, String> crawlErrors;
@@ -35,22 +31,25 @@ public class HTMLInput extends InputModule {
     private final static boolean RUN_IN_PARALLEL = true;
     private final static int MAX_RETRIES = 3;
 
+    private HTMLInput(InputConfigHTML c){
+        config = c;
+        config.logConfig();
+    }
+
     /**
      * Main module method - processes parameters, reads CSV file, crawl HTML pages and write JSON corpus
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws IOException If the CSV file cannot be read properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws IOException {
+    public static void run(ModuleConfig moduleParameters) throws IOException {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
-        HTMLInput instance = new HTMLInput();
-        instance.processParameters((InputConfigHTML) moduleParameters, projectParameters);
+        HTMLInput instance = new HTMLInput((InputConfigHTML) moduleParameters);
         try {
             instance.loadCSV();
             instance.crawlHTML();
-            instance.writeCorpus();
+            instance.writeCorpus(instance.config.outputFile);
         } catch (Exception e) {
             Console.moduleFail(MODULE_NAME);
             throw e;
@@ -59,30 +58,18 @@ public class HTMLInput extends InputModule {
         Timer.stop(MODULE_NAME);
     }
 
-    // processes project and module parameters
-    private void processParameters(InputConfigHTML moduleParameters, ProjectConfig projectParameters){
-        Console.log("Processing parameters");
-        source = projectParameters.sourceDirectory+moduleParameters.source;
-        outputFile = projectParameters.dataDirectory+moduleParameters.output;
-        docFields = moduleParameters.fields;
-        urlField = moduleParameters.urlField;
-        domSelector = moduleParameters.domSelector;
-        Console.tick();
-        Console.info("Crawling HTML pages listed in "+source+" and saving to "+outputFile, 1);
-    }
-
     // loads document data from CSV
     private void loadCSV() throws IOException {
         CSVHelper.ProcessCSVRow rowProcessor = (row, rowNum) -> {
             Document doc = new Document(Integer.toString(rowNum),rowNum);
-            for(Map.Entry<String, String> entry: docFields.entrySet()){
+            for(Map.Entry<String, String> entry: config.documentFields.entrySet()){
                 doc.addField(entry.getKey(), row.getField(entry.getValue()));
             }
-            doc.addField("url", row.getField(urlField));
+            doc.addField("url", row.getField(config.urlField));
             corpus.add(doc.getId(), doc);
         };
         try {
-            CSVHelper.loadCSVFile(source, rowProcessor);
+            CSVHelper.loadCSVFile(config.sourceFile, rowProcessor);
         } catch (IOException e) {
             Console.error("Error while reading the CSV input");
             throw e;
@@ -109,7 +96,7 @@ public class HTMLInput extends InputModule {
         String url = doc.getField("url");
         try{
             org.jsoup.nodes.Document HTMLDoc = Jsoup.connect(url).get();
-            org.jsoup.nodes.Element HTMLBody = HTMLDoc.selectFirst(domSelector);
+            org.jsoup.nodes.Element HTMLBody = HTMLDoc.selectFirst(config.domSelector);
             String text = "";
             if (HTMLBody != null) text = HTMLBody.text();
             else Console.warning("The HTML page associated with document "+id+" returned an empty text, check that the domSelector is correct", 1);
