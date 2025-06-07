@@ -110,6 +110,8 @@ public class YAMLHelper {
                     throw new WrongValueTypeException("String expected");
                 }
             }
+        } else if(o instanceof String){
+            res.add((String) o);
         } else {
             throw new NotAListException("List of strings expected");
         }
