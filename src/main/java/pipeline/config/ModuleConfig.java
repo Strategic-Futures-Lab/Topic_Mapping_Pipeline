@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Superclass for parsing and storing module parameters, contains a factory static method for creating specialised subclasses
@@ -21,9 +22,12 @@ public class ModuleConfig {
     /** Type of module (internal pipeline name) */
     public final ModuleType moduleType;
 
-    protected ModuleConfig(String moduleName, ModuleType moduleType){
+    protected ModuleConfig(String moduleName, ModuleType moduleType, Set<String> moduleParams, String[] mandatoryParams) throws ConfigParser.ParseException {
         this.moduleName = moduleName;
         this.moduleType = moduleType;
+        for(String p: mandatoryParams){
+            if(!moduleParams.contains(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
+        }
     }
 
     /**

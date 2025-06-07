@@ -34,11 +34,8 @@ public class MergeCorpusConfig extends ModuleConfig {
      * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
     public MergeCorpusConfig(String name, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException {
-        super(name, type);
+        super(name, type, moduleParams.keySet(), MANDATORY_PARAMS);
         // mandatory parameters
-        for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
-        }
         List<String> f = getPathListParam("corpora", moduleParams);
         if(f.size() < 2) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a more than 1 corpus to merge");
         corpusFiles = (String[]) f.stream().map(s->projectParams.dataDirectory+s).toArray();

@@ -33,10 +33,8 @@ public class InputConfigPDF extends ModuleConfig {
      * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
     public InputConfigPDF(String name, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException {
-        super(name, type);
-        for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
-        }
+        super(name, type, moduleParams.keySet(), MANDATORY_PARAMS);
+        // mandatory parameters
         sourceFile = projectParams.sourceDirectory+getPathParam("source", moduleParams);
         outputFile = projectParams.dataDirectory+getPathParam("output", moduleParams);
         splitPages = getDefaultIntParam("splitPages", moduleParams, 0);

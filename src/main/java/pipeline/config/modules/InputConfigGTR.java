@@ -33,16 +33,14 @@ public class InputConfigGTR extends ModuleConfig {
 
     /**
      * Constructor, parses and stores module parameters
-     * @param moduleName Module name as described in the YAML config file
+     * @param name Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
      * @param projectParams Global project parameters
      * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
-    public InputConfigGTR(String moduleName, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException{
-        super(moduleName, type);
-        for(String p: MANDATORY_PARAMS){
-            if(!moduleParams.containsKey(p)) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a \""+p+"\" parameter");
-        }
+    public InputConfigGTR(String name, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException{
+        super(name, type, moduleParams.keySet(), MANDATORY_PARAMS);
+        // mandatory parameters
         sourceFile = projectParams.sourceDirectory+getPathParam("source", moduleParams);
         outputFile = projectParams.dataDirectory+getPathParam("output", moduleParams);
         pidField = getStringParam("pidField", moduleParams);
