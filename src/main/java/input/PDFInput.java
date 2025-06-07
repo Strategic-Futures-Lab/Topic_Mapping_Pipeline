@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class PDFInput extends FileInput {
 
     // module parameters
-    private InputConfigPDF config;
+    private final InputConfigPDF config;
 
     // Flag for processing PDFs in parallel (may affect order of documents)
     private final static boolean RUN_IN_PARALLEL = true;
@@ -29,6 +29,7 @@ public class PDFInput extends FileInput {
     private PDFInput(InputConfigPDF c){
         config = c;
         config.logConfig();
+        corpus.name = config.corpusName;
     }
 
     /**

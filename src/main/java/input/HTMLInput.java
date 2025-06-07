@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HTMLInput extends InputModule {
 
     // module parameters
-    private InputConfigHTML config;
+    private final InputConfigHTML config;
 
     // crawl variables
     private ConcurrentHashMap<String, String> crawlErrors;
@@ -34,6 +34,7 @@ public class HTMLInput extends InputModule {
     private HTMLInput(InputConfigHTML c){
         config = c;
         config.logConfig();
+        corpus.name = config.corpusName;
     }
 
     /**

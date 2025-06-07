@@ -20,11 +20,14 @@ public class MergeCorpusConfig extends ModuleConfig {
     private static final String[] MANDATORY_PARAMS = new String[]{"corpora", "output"};
 
     /** Filenames of the source corpus files */
-    public final String[] corpusFiles;
+    public final List<String> corpusFiles;
     /** Filename of the output corpus file */
     public final String outputFile;
+
     /** List of document fields to keep */
     public final String[] docFields;
+    /** Name of the corpus */
+    public final String corpusName;
 
     /**
      * Constructor, parses and stores module parameters
@@ -38,9 +41,10 @@ public class MergeCorpusConfig extends ModuleConfig {
         // mandatory parameters
         List<String> f = getPathListParam("corpora", moduleParams);
         if(f.size() < 2) throw new ConfigParser.ParseException("Module of type \""+moduleType+"\" must have a more than 1 corpus to merge");
-        corpusFiles = (String[]) f.stream().map(s->projectParams.dataDirectory+s).toArray();
+        corpusFiles = f.stream().map(s->projectParams.dataDirectory+s).toList();
         outputFile = projectParams.dataDirectory+getPathParam("output", moduleParams);
         // optional parameters
+        corpusName = getDefaultStringParam("name", moduleParams, name);
         if(moduleParams.containsKey("docFields")){
             docFields = getStringListParam("docFields", moduleParams).toArray(new String[0]);
         } else {
@@ -53,6 +57,7 @@ public class MergeCorpusConfig extends ModuleConfig {
      */
     public void logConfig(){
         Console.info("Merging the following corpora into "+outputFile+":");
-        for(String corpus: corpusFiles) Console.step(corpus, 1);
+        for(String corpus: corpusFiles) Console.info("- "+corpus, 1);
+        Console.info("Renaming corpus to "+corpusName);
     }
 }

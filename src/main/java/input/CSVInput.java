@@ -19,11 +19,12 @@ import java.util.Map;
 public class CSVInput extends InputModule {
 
     // module parameters
-    private InputConfigCSV config;
+    private final InputConfigCSV config;
 
     private CSVInput(InputConfigCSV c){
         config = c;
         config.logConfig();
+        corpus.name = config.corpusName;
     }
 
     /**

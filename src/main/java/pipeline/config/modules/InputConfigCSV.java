@@ -26,6 +26,9 @@ public class InputConfigCSV extends ModuleConfig {
      * value is the name found in the source CSV file */
     public final HashMap<String, String> documentFields;
 
+    /** Name of the corpus */
+    public final String corpusName;
+
     /**
      * Constructor, parses and stores module parameters
      * @param name Module name as described in the YAML config file
@@ -43,12 +46,15 @@ public class InputConfigCSV extends ModuleConfig {
         for(String k: fieldsMap.keySet()){
             documentFields.put(k, ConfigParser.parseString(fieldsMap.get(k), moduleName+"/fields/"+k));
         }
+        // optional parameters
+        corpusName = getDefaultStringParam("name", moduleParams, name);
     }
 
     /**
      * Method logging the module parameters
      */
     public void logConfig(){
-        Console.info("Reading CSV input from "+sourceFile+" and saving to "+outputFile);
+        Console.info("Reading corpus "+corpusName);
+        Console.info("Parsing CSV input from "+sourceFile+" and saving to "+outputFile);
     }
 }

@@ -19,11 +19,12 @@ import java.util.Map;
 public class BIBInput extends InputModule {
 
     // module parameters
-    private InputConfigBIB config;
+    private final InputConfigBIB config;
 
     private BIBInput(InputConfigBIB c){
         config = c;
         config.logConfig();
+        corpus.name = config.corpusName;
     }
 
     /**

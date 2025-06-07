@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GTRInput extends InputModule {
 
     // module parameters
-    private InputConfigGTR config;
+    private final InputConfigGTR config;
 
     // crawl variables
     private ConcurrentHashMap<String, String> crawlErrors;
@@ -40,6 +40,7 @@ public class GTRInput extends InputModule {
     private GTRInput(InputConfigGTR c){
         config = c;
         config.logConfig();
+        corpus.name = config.corpusName;
     }
 
     /**

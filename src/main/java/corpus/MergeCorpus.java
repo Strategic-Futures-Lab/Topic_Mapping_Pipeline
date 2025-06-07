@@ -21,7 +21,7 @@ import java.util.Map;
 public class MergeCorpus extends CorpusModule {
 
     // module parameters
-    private MergeCorpusConfig config;
+    private final MergeCorpusConfig config;
 
     private MergeCorpus(MergeCorpusConfig c){
         config = c;
@@ -31,10 +31,9 @@ public class MergeCorpus extends CorpusModule {
     /**
      * Main module method - processes parameters, loads corpora in one document list, save in one corpus output
      * @param moduleParameters module parameters
-     * @param projectParameters project meta parameters
      * @throws Exception If the corpora cannot load properly
      */
-    public static void run(ModuleConfig moduleParameters, ProjectConfig projectParameters) throws Exception {
+    public static void run(ModuleConfig moduleParameters) throws Exception {
         String MODULE_NAME = moduleParameters.moduleName+" ("+moduleParameters.moduleType+")";
         Console.moduleStart(MODULE_NAME);
         Timer.start(MODULE_NAME);
@@ -55,6 +54,7 @@ public class MergeCorpus extends CorpusModule {
         int corpusIndex = 0;
         int docIndex = 0;
         corpus = new Corpus();
+        corpus.name = config.corpusName;
         for(String filename: config.corpusFiles){
             Corpus loadedCorpus = new Corpus(filename);
             for(Map.Entry<String, Document> entry: loadedCorpus.documents.entrySet()){

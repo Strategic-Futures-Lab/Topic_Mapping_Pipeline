@@ -22,14 +22,17 @@ public class InputConfigGTR extends ModuleConfig {
     public final String sourceFile;
     /** Filename of the output corpus JSON file */
     public final String outputFile;
-    /** List of CSV fields to store in the  corpus JSON file; key is the name stored in the corpus JSON file,
-     * value is the name found in the source CSV file */
-    public final HashMap<String, String> documentFields;
     /** CSV field where the project ID of the GtR project can be found */
     public final String pidField;
     /** List of GtR fields to query and store in the corpus JSON file; key is the name stored in the corpus JSON file,
      * value is the GtR field name */
     public final HashMap<String, String> gtrFields;
+
+    /** Name of the corpus */
+    public final String corpusName;
+    /** List of CSV fields to store in the  corpus JSON file; key is the name stored in the corpus JSON file,
+     * value is the name found in the source CSV file */
+    public final HashMap<String, String> documentFields;
 
     /**
      * Constructor, parses and stores module parameters
@@ -49,6 +52,8 @@ public class InputConfigGTR extends ModuleConfig {
         for(String k: gtrFieldsMap.keySet()){
             gtrFields.put(k, ConfigParser.parseString(gtrFieldsMap.get(k), moduleName+"/gtrFields/"+k));
         }
+        // optional parameters
+        corpusName = getDefaultStringParam("name", moduleParams, name);
         documentFields = new HashMap<>();
         if(moduleParams.containsKey("fields")){
             HashMap<String,Object> fieldsMap = getMapParam("fields", moduleParams);
@@ -62,6 +67,7 @@ public class InputConfigGTR extends ModuleConfig {
      * Method logging the module parameters
      */
     public void logConfig(){
+        Console.info("Reading corpus "+corpusName);
         Console.info("Crawling GtR projects listed in "+sourceFile+" and saving to "+outputFile);
     }
 }

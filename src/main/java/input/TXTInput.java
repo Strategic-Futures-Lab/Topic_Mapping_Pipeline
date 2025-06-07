@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class TXTInput extends FileInput {
 
     // module parameters
-    private InputConfigTXT config;
+    private final InputConfigTXT config;
 
     // Flag for processing TXTs in parallel (may affect order of documents)
     private final static boolean RUN_IN_PARALLEL = true;
@@ -29,6 +29,7 @@ public class TXTInput extends FileInput {
     private TXTInput(InputConfigTXT c){
         config = c;
         config.logConfig();
+        corpus.name = config.corpusName;
     }
 
     /**

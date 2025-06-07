@@ -22,6 +22,9 @@ public class InputConfigPDF extends ModuleConfig {
     public final String sourceFile;
     /** Filename of the output corpus JSON file */
     public final String outputFile;
+
+    /** Name of the corpus */
+    public final String corpusName;
     /** Consider split X pages as a separate document */
     public final int splitPages;
 
@@ -37,6 +40,8 @@ public class InputConfigPDF extends ModuleConfig {
         // mandatory parameters
         sourceFile = projectParams.sourceDirectory+getPathParam("source", moduleParams);
         outputFile = projectParams.dataDirectory+getPathParam("output", moduleParams);
+        // optional parameters
+        corpusName = getDefaultStringParam("name", moduleParams, name);
         splitPages = getDefaultIntParam("splitPages", moduleParams, 0);
     }
 
@@ -44,6 +49,7 @@ public class InputConfigPDF extends ModuleConfig {
      * Method logging the module parameters
      */
     public void logConfig(){
-        Console.info("Reading PDF input from "+sourceFile+" and saving to "+outputFile);
+        Console.info("Reading corpus "+corpusName);
+        Console.info("Parsing PDF input from "+sourceFile+" and saving to "+outputFile);
     }
 }

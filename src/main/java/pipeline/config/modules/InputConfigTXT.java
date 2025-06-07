@@ -22,6 +22,9 @@ public class InputConfigTXT extends ModuleConfig {
     public final String sourceFile;
     /** Filename of the output corpus JSON file */
     public final String outputFile;
+
+    /** Name of the corpus */
+    public final String corpusName;
     /** Flag for considering empty lines as document separators */
     public final boolean splitEmptyLines;
 
@@ -37,6 +40,8 @@ public class InputConfigTXT extends ModuleConfig {
         // mandatory parameters
         sourceFile = projectParams.sourceDirectory+getPathParam("source", moduleParams);
         outputFile = projectParams.dataDirectory+getPathParam("output", moduleParams);
+        // optional parameters
+        corpusName = getDefaultStringParam("name", moduleParams, name);
         splitEmptyLines = getDefaultBooleanParam("emptyLineSplit", moduleParams, false);
     }
 
@@ -44,6 +49,7 @@ public class InputConfigTXT extends ModuleConfig {
      * Method logging the module parameters
      */
     public void logConfig(){
-        Console.info("Reading TXT input from "+sourceFile+" and saving to "+outputFile);
+        Console.info("Reading corpus "+corpusName);
+        Console.info("Parsing TXT input from "+sourceFile+" and saving to "+outputFile);
     }
 }

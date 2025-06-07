@@ -22,11 +22,14 @@ public class InputConfigHTML extends ModuleConfig {
     public final String sourceFile;
     /** Filename of the output corpus JSON file */
     public final String outputFile;
+    /** CSV field where the URL of the HTML page can be found */
+    public final String urlField;
+
+    /** Name of the corpus */
+    public final String corpusName;
     /** List of CSV fields to store in the  corpus JSON file; key is the name stored in the corpus JSON file,
      * value is the name found in the source CSV file */
     public final HashMap<String, String> documentFields;
-    /** CSV field where the URL of the HTML page can be found */
-    public final String urlField;
     /** DOM selector from which to parse text on the HTML file */
     public final String domSelector;
 
@@ -43,6 +46,8 @@ public class InputConfigHTML extends ModuleConfig {
         sourceFile = projectParams.sourceDirectory+getPathParam("source", moduleParams);
         outputFile = projectParams.outputDirectory+getPathParam("output", moduleParams);
         urlField = getStringParam("urlField", moduleParams);
+        // optional parameters
+        corpusName = getDefaultStringParam("name", moduleParams, name);
         domSelector = getDefaultStringParam("domSelector", moduleParams, "body");
         documentFields = new HashMap<>();
         if(moduleParams.containsKey("fields")){
@@ -57,6 +62,7 @@ public class InputConfigHTML extends ModuleConfig {
      * Method logging the module parameters
      */
     public void logConfig(){
+        Console.info("Reading corpus "+corpusName);
         Console.info("Crawling HTML pages listed in "+sourceFile+" and saving to "+outputFile);
     }
 }

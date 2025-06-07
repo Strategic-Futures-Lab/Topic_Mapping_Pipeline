@@ -21,6 +21,13 @@ import java.util.stream.Collectors;
  */
 public class Corpus {
 
+    // List of static fields used when reading/writing JSON files
+    private static final String JSON_NAME = "name";
+    private static final String JSON_STATS = "stats";
+    private static final String JSON_DOCS = "documents";
+
+    /** Corpus name */
+    public String name;
     /** List of documents in the corpus, identified with a String */
     public ConcurrentHashMap<String, Document> documents;
     /** Stats attached to the corpus */
@@ -28,6 +35,7 @@ public class Corpus {
 
     /** Basic constructor, creates empty corpus */
     public Corpus(){
+        name = "corp"+this.hashCode();
         stats = new JSONObject();
         documents = new ConcurrentHashMap<>();
     }
@@ -69,8 +77,9 @@ public class Corpus {
     public void loadCorpus(String filename) throws IOException, ParseException {
         try {
             JSONObject input = JSONHelper.loadJSON(filename);
-            stats = (JSONObject) input.getOrDefault("stats", new JSONObject());
-            JSONArray corpus = (JSONArray) input.get("corpus");
+            name = (String) input.get(JSON_NAME);
+            stats = (JSONObject) input.getOrDefault(JSON_STATS, new JSONObject());
+            JSONArray corpus = (JSONArray) input.get(JSON_DOCS);
             for(JSONObject jsonDoc: (Iterable<JSONObject>) corpus){
                 Document doc = new Document(jsonDoc);
                 documents.put(doc.getId(), doc);
@@ -94,12 +103,13 @@ public class Corpus {
         try {
             JSONObject root = new JSONObject();
             JSONArray corpus = new JSONArray();
+            root.put(JSON_NAME, name);
             buildStats();
-            root.put("stats", stats);
+            root.put(JSON_STATS, stats);
             for (Map.Entry<String, Document> doc : documents.entrySet()) {
                 corpus.add(doc.getValue().toJSON());
             }
-            root.put("corpus", corpus);
+            root.put(JSON_DOCS, corpus);
             JSONHelper.saveJSON(root, filename);
         } catch (IOException e){
             Console.error("Saving corpus file "+filename+" failed");
