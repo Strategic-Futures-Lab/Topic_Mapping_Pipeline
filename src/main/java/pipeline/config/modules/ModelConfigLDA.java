@@ -25,12 +25,12 @@ public class ModelConfigLDA extends ModuleConfig {
     public final String topicsFile;
     /** Filename of the output document file */
     public final String documentsFile;
+    /** Name of model (to later identify in analyses */
+    public final String modelName;
     /** LDA parameters */
     public final LDAParameters ldaParameters;
     /** Minimum number of lemmas for a document to be included in the model */
     public final int minLemmas;
-    /** Flag for generating document to topic distance based on word distributions */
-    public final boolean wordDistances;
     /** Name of directory where to save log files */
     public final String logDirectory;
     /** Filename of serialised model object */
@@ -70,8 +70,8 @@ public class ModelConfigLDA extends ModuleConfig {
         ldaParameters.beta = getDefaultDoubleParam("beta", moduleParams, 0.01);
         ldaParameters.optimisationInterval = getDefaultIntParam("optimisationInterval", moduleParams, 50);
         ldaParameters.seed = getDefaultIntParam("seed", moduleParams, 151);
+        modelName = getDefaultStringParam("name", moduleParams, name);
         minLemmas = getDefaultIntParam("minLemmas", moduleParams, 10);
-        wordDistances = getDefaultBooleanParam("wordDistances", moduleParams, false);
         // log options
         logDirectory = projectParams.dataDirectory+ConfigParser.checkDirectory(getDefaultPathParam("logs", moduleParams, ""));
         String p = getDefaultPathParam("serialised", moduleParams, null);
