@@ -46,7 +46,7 @@ public class ModelFeature implements Serializable {
      */
     public ModelFeature(JSONObject obj){
         label = obj.get(JSON_LABEL).toString();
-        index = (int) obj.get(JSON_INDEX);
+        index = (int) (long) obj.get(JSON_INDEX);
         weight = (double) obj.get(JSON_WEIGHTS);
     }
 

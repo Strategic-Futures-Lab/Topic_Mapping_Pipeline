@@ -23,12 +23,12 @@ public class Document implements Serializable {
 
     // List of static fields used when reading/writing JSON files
     private static final String JSON_ID = "id";
-    private static final String JSON_IDX = "i";
+    private static final String JSON_INDEX = "i";
     private static final String JSON_DATA = "d";
-    private static final String JSON_TEXT = "txt";
+    private static final String JSON_TEXT = "t";
     private static final String JSON_LEMMAS = "l";
     private static final String JSON_WORDS = "w";
-    private static final String JSON_TOPICS = "t";
+    private static final String JSON_MODELS = "m";
 //    private static final String JSON_TOPIC_SEQ = "ts";
 //    private static final String JSON_TOPIC_CNT = "tc";
 //    private static final String JSON_TOPIC_WEIGHTS = "tw";
@@ -46,7 +46,7 @@ public class Document implements Serializable {
     private List<List<String>> lemmasList;
     // created by model module
     private ModelFeature[] words;
-    private ModelFeature[] topics;
+    private HashMap<String, ModelFeature[]> models;
 //    private int[] topicCount;
 //    private double[] topicDistribution;
     // TODO might not be needed
@@ -73,7 +73,7 @@ public class Document implements Serializable {
      */
     public Document(JSONObject doc){
         id = (String) doc.get(JSON_ID);
-        index = Math.toIntExact((long) doc.get(JSON_IDX));
+        index = Math.toIntExact((long) doc.get(JSON_INDEX));
         fields = JSONHelper.getStringMap((JSONObject) doc.get(JSON_DATA));
         // set by text builder module
         text = (String) doc.get(JSON_TEXT);
@@ -87,11 +87,17 @@ public class Document implements Serializable {
                 words[i] = new ModelFeature(wordsJSON[i]);
             }
         }
-        JSONObject[] topicsJSON = JSONHelper.getJSONObjectArray((JSONArray) doc.get(JSON_TOPICS));
-        if(topicsJSON != null) {
-            topics = new ModelFeature[topicsJSON.length];
-            for (int i = 0; i < topics.length; i++) {
-                topics[i] = new ModelFeature(topicsJSON[i]);
+        models = new HashMap<>();
+        HashMap<String, Object> modelsJSON = JSONHelper.getJSONObjectMap((JSONObject) doc.get(JSON_MODELS));
+        if(modelsJSON != null) {
+            for(Map.Entry<String, Object> model: modelsJSON.entrySet()){
+                String modelName = model.getKey();
+                JSONObject[] topics = JSONHelper.getJSONObjectArray((JSONArray) model.getValue());
+                ModelFeature[] features = new ModelFeature[topics.length];
+                for (int i = 0; i < features.length; i++) {
+                    features[i] = new ModelFeature(topics[i]);
+                }
+                models.put(modelName, features);
             }
         }
 //        topicSequence = JSONHelper.getIntArray((JSONArray) doc.get(JSON_TOPIC_SEQ));
@@ -126,7 +132,7 @@ public class Document implements Serializable {
         lemmasList = doc.lemmasList;
         // set by model
         words = doc.words;
-        topics = doc.topics;
+        models = doc.models;
     }
 
     /**
@@ -390,14 +396,17 @@ public class Document implements Serializable {
     }
 
     /**
-     * Setter method for the document's topic distribution
+     * Setter method for a topic distribution
      * @param distribution list of topic weights
+     * @param modelName name of model
      */
-    public void setTopics(double[] distribution){
-        topics = new ModelFeature[distribution.length];
+    public void setTopics(double[] distribution, String modelName){
+        if(models == null) models = new HashMap<>();
+        ModelFeature[] topics = new ModelFeature[distribution.length];
         for(int i=0; i<distribution.length; i++){
-            topics[i] = new ModelFeature(Integer.toString(i), i, distribution[i]);
+            topics[i] = new ModelFeature(modelName+"_"+i, i, distribution[i]);
         }
+        models.put(modelName, topics);
     }
 
     /**
@@ -416,9 +425,11 @@ public class Document implements Serializable {
     /**
      * Getter for vector representation of topic distribution.
      * The SparseVector theoretical size is automatically derived from the number of topics.
+     * @param modelName Name of the model to get the topic distribution from
      * @return SparseVector of topic distribution
      */
-    public SparseVector getTopicsVector(){
+    public SparseVector getTopicsVector(String modelName){
+        ModelFeature[] topics = models.get(modelName);
         SparseVector topicVec = new SparseVector(topics.length);
         for(ModelFeature t: topics){
             topicVec.put(t.getIndex(), t.getWeight());
@@ -431,7 +442,7 @@ public class Document implements Serializable {
      * @return True if a topic distribution is present
      */
     public boolean isModelled(){
-        return topics != null;
+        return models != null && !models.isEmpty();
     }
 
 //    /**
@@ -495,7 +506,7 @@ public class Document implements Serializable {
         JSONObject root = new JSONObject();
         // Saving id and index
         root.put(JSON_ID, id);
-        root.put(JSON_IDX, index);
+        root.put(JSON_INDEX, index);
         // Saving fields
         JSONObject data = new JSONObject();
         data.putAll(fields);
@@ -520,12 +531,16 @@ public class Document implements Serializable {
             }
             root.put(JSON_WORDS, wordsJSON);
         }
-        if(topics!=null){
-            JSONArray topicsJSON = new JSONArray();
-            for(ModelFeature t: topics){
-                topicsJSON.add(t.toJSON());
+        if(models!=null){
+            JSONObject modelsJSON = new JSONObject();
+            for(Map.Entry<String, ModelFeature[]> model: models.entrySet()) {
+                JSONArray topicsJSON = new JSONArray();
+                for (ModelFeature t : model.getValue()) {
+                    topicsJSON.add(t.toJSON());
+                }
+                modelsJSON.put(model.getKey(), topicsJSON);
             }
-            root.put(JSON_TOPICS, topicsJSON);
+            root.put(JSON_MODELS, modelsJSON);
         }
 //        if(topicSequence!=null){
 //            root.put(JSON_TOPIC_SEQ, JSONHelper.toJSONArray(topicSequence));
@@ -544,15 +559,4 @@ public class Document implements Serializable {
 //        }
         return root;
     }
-
-    // private method for formating double array
-//    private double[] formatArray(double[] arr){
-//        DecimalFormat df = new DecimalFormat("#.#####");
-//        df.setRoundingMode(RoundingMode.HALF_UP);
-//        return DoubleStream.of(arr)
-//                .mapToObj(df::format)
-//                .mapToDouble(Double::parseDouble)
-//                .toArray();
-//    }
-
 }

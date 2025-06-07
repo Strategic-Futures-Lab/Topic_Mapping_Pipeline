@@ -32,11 +32,14 @@ public class LDA implements Serializable {
     @Serial
     private static final long serialVersionUID = -8983749417082119056L;
 
+    /** Model name */
+    private String name;
+
     /** LDA parameters */
     public LDAParameters ldaParameters;
 
-    /** Flag for calculating the word distribution differences between documents and topics */
-    public boolean getWordDistances = false;
+//    /** Flag for calculating the word distribution differences between documents and topics */
+//    public boolean getWordDistances = false;
 
     /** List of documents */
     public HashMap<String, Document> documents;
@@ -72,11 +75,26 @@ public class LDA implements Serializable {
     /**
      * Constructor taking a list of documents to model
      * @param docs List of documents to model topics from
+     * @param ldaParams Parameters object for LDA
      */
     public LDA(List<Document> docs, LDAParameters ldaParams){
         ldaParameters = ldaParams;
         setDocuments(docs);
+        name = "lda"+this.hashCode();
     }
+
+    /**
+     * Constructor taking a list of documents to model
+     * @param docs List of documents to model topics from
+     * @param ldaParams Parameters object for LDA
+     * @param modelName Custom name of model
+     */
+    public LDA(List<Document> docs, LDAParameters ldaParams, String modelName){
+        ldaParameters = ldaParams;
+        setDocuments(docs);
+        name = modelName;
+    }
+
 
     /**
      * Method loading a list of documents
@@ -195,7 +213,7 @@ public class LDA implements Serializable {
             // update original document
             doc.setIndex(idx);
             doc.setWords(docLabels, docFeatures);
-            doc.setTopics(topicDistrib);
+            doc.setTopics(topicDistrib, name);
         }
 
         // initialise topics
@@ -207,6 +225,7 @@ public class LDA implements Serializable {
         // For each topic
         for(int idx = 0; idx < model.numTopics; idx++){
             Topic topic = new Topic(idx);
+            topic.setModelName(name);
 
             // instantiate lists of labels, indices and weights
             int labelNum = topicSortedWords.get(idx).size();

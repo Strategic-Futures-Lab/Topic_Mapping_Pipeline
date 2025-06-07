@@ -34,7 +34,8 @@ public class Topic implements Serializable {
 //    private static final String JSON_DOC_WEIGHTS = "dw";
 
     // Topic id
-    private int number;
+    private final int number;
+    private String model;
 //    // Sorted list (by assignment count) of unique labels (lemmas) assigned to this topic
 //    private String[] words;
 //    // List of assignment counts (in order) for each unique label (lemma) assigned to this topic
@@ -61,7 +62,7 @@ public class Topic implements Serializable {
      * @param topicObj JSON object representing the topic
      */
     public Topic(JSONObject topicObj){
-        number = (int) topicObj.get(JSON_NUM);
+        number = (int) (long) topicObj.get(JSON_NUM);
         JSONObject[] wordsJSON = JSONHelper.getJSONObjectArray((JSONArray) topicObj.get(JSON_WORDS));
         words = new ModelFeature[wordsJSON.length];
         for(int i=0; i< words.length; i++){
@@ -76,6 +77,48 @@ public class Topic implements Serializable {
 //        wordWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_WORD_IDS));
 //        documents = JSONHelper.getStringArray((JSONArray) topicObj.get(JSON_DOCS));
 //        docWeights = JSONHelper.getDoubleArray((JSONArray) topicObj.get(JSON_DOC_WEIGHTS));
+    }
+
+    /**
+     * Setter method of the model name.
+     * Should only be used for model modules
+     * @param modelName
+     */
+    public void setModelName(String modelName){
+        model = modelName;
+    }
+
+    /**
+     * Getter for the topic number/index
+     * @return The topic number
+     */
+    public int getNumber(){
+        return number;
+    }
+
+    /**
+     * Getter for the topic's identifier (model+number)
+     * @return topic identifier
+     */
+    public String getTopicId(){
+        return model+"_"+number;
+    }
+
+    /**
+     * Getter for the topic's identifier (model+number) and top words
+     * @param numWords number of words to append to identifier
+     * @return topic identifier + top words
+     */
+    public String getTopicIdWords(int numWords){
+        return model+"_"+number+"-"+String.join("_", topWords(numWords));
+    }
+
+    /**
+     * Getter for the topic's identifier (model+number) and top 3 words
+     * @return topic identifier + top words
+     */
+    public String getTopicIdWords(){
+        return getTopicIdWords(3);
     }
 
     /**
@@ -200,6 +243,20 @@ public class Topic implements Serializable {
     }
 
     /**
+     * Method generating a SparseVector of the documents' distribution
+     * @param size Size of the corpus
+     * @return SparseVector of the documents' distribution
+     */
+    public SparseVector getDocumentDistribution(int size){
+        SparseVector docVec = new SparseVector(size);
+        for(int i = 0; i < documents.length; i++){
+            docVec.put(documents[i].getIndex(), documents[i].getWeight());
+        }
+        docVec.normalise();
+        return docVec;
+    }
+
+    /**
      * @return The JSON formatted topic
      */
     public JSONObject toJSON(){
@@ -222,59 +279,4 @@ public class Topic implements Serializable {
         return topicJSON;
     }
 
-    // used to format an array of doubles into 4 decimals max
-//    private double[] formatArray(double[] arr){
-//        DecimalFormat df = new DecimalFormat("#.#####");
-//        df.setRoundingMode(RoundingMode.HALF_UP);
-//        return DoubleStream.of(arr)
-//                .mapToObj(df::format)
-//                .mapToDouble(Double::parseDouble)
-//                .toArray();
-//    }
-
-    /**
-     * Method to load a list of topics from a JSON file
-     * @param filename Name of topic JSON file
-     * @return The list of topics
-     * @throws IOException If reading the file fails
-     * @throws ParseException If parsing JSON fails
-     */
-    public static List<Topic> loadTopics(String filename) throws IOException, ParseException {
-        ArrayList<Topic> topics = new ArrayList<>();
-        try {
-            JSONArray input = JSONHelper.loadJSONArray(filename);
-            for(int i = 0; i<input.size(); i++){
-                JSONObject t = (JSONObject) input.get(i);
-                topics.add(new Topic(t));
-            }
-            Console.note("Loaded "+topics.size()+" topics", 1);
-        } catch (IOException e) {
-            Console.error("Loading model topic file "+filename+" failed");
-            throw e;
-        } catch (ParseException e) {
-            Console.error("Parsing model topic file "+filename+" failed");
-            throw e;
-        }
-
-        return topics;
-    }
-
-    /**
-     * Method to write a list of topics on a JSON file
-     * @param filename Name of topic JSON file
-     * @param topics The list of topics to save
-     * @throws IOException If writing the file fails
-     */
-    public static void writeTopics(String filename, List<Topic> topics) throws IOException {
-        try{
-            JSONArray topicsArray = new JSONArray();
-            for(Topic t: topics){
-                topicsArray.add(t.toJSON());
-            }
-            JSONHelper.saveJSONArray(topicsArray, filename);
-        } catch (IOException e){
-            Console.error("Saving topics failed");
-            throw e;
-        }
-    }
 }

@@ -1,6 +1,7 @@
 package model;
 
 import data.Corpus;
+import data.Model;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -15,6 +16,8 @@ public class ModelModule {
 
     // Model modules will use a corpus
     protected Corpus corpus;
+    // Model modules will generate a model
+    protected Model model;
 
     // typical model module parameters
 //    protected String corpusFile;
@@ -25,5 +28,9 @@ public class ModelModule {
     // method for reading a corpus JSON file and generating a list of documents using default properties
     protected void loadCorpus(String file) throws IOException, ParseException {
         corpus = new Corpus(file);
+    }
+
+    protected void writeModel(String file) throws IOException, ParseException {
+
     }
 }

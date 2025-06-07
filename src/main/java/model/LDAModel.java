@@ -5,7 +5,7 @@ import IO.JSONHelper;
 import IO.SERHelper;
 import IO.Timer;
 import data.Document;
-import data.Topic;
+import data.Model;
 import model.ldacore.LDA;
 import org.json.simple.parser.ParseException;
 import pipeline.config.ModuleConfig;
@@ -98,9 +98,15 @@ public class LDAModel extends ModelModule {
         try {
             Console.note("Following output from Mallet\n", 1);
 
-            tModel = new LDA(modelInput, config.ldaParameters);
-            tModel.getWordDistances = config.wordDistances;
+            // running the Mallet topic model
+            tModel = new LDA(modelInput, config.ldaParameters, config.modelName);
             tModel.model(config.logDirectory);
+
+            // Instantiating a new Model data instance
+            model = new Model();
+            model.name = config.modelName;
+            model.corpus = corpus.name;
+            model.topics = tModel.getTopics();
 
             Console.note("Model completed", 1);
             Console.log("LDA model");
@@ -130,7 +136,7 @@ public class LDAModel extends ModelModule {
     private void writeModel() throws IOException {
         Console.log("Saving model");
         try{
-            Topic.writeTopics(config.topicsFile, tModel.getTopics());
+            model.writeModel(config.topicsFile);
             corpus.writeCorpus(config.documentsFile);
         } catch (IOException e){
             Console.error("Saving model failed");
