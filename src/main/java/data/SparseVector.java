@@ -12,7 +12,7 @@ import java.util.TreeMap;
  */
 public class SparseVector {
 
-    private static final double espilon = 0.0001;
+    public static final double espilon = 0.0001;
 
     // container for non-zero values
     private TreeMap<Integer, Double> st;
@@ -257,54 +257,5 @@ public class SparseVector {
         for(Map.Entry<Integer, Double> entry: st.entrySet()){
             this.put(entry.getKey(), entry.getValue()/n);
         }
-    }
-
-    /**
-     * Static method calculating the Hellinger distance between two sparse vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return The Hellinger distance between a and b
-     */
-    public static double HellingerDistance(SparseVector a, SparseVector b){
-        // Checking that vector a and b have been normalised
-        if(a.total() > 1+espilon || a.total() < 1-espilon){
-            a.normalise();
-        }
-        if(b.total() > 1+espilon || b.total() < 1-espilon){
-            b.normalise();
-        }
-        // Get the square root of both vectors
-        SparseVector a_r = a.sqrt();
-        SparseVector b_r = b.sqrt();
-        // Calculate the difference
-        SparseVector d = a_r.diff(b_r);
-        // Return the difference norm divided by sqrt(2)
-        return d.norm()/Math.sqrt(2);
-    }
-
-    /**
-     * Static method calculating the Cosine similarity between two sparse vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return The Cosine similarity between a and b
-     */
-    public static double CosineSimilarity(SparseVector a, SparseVector b){
-        // get numerator: dot product
-        double num = a.dot(b);
-        // get denominator: product of magnitudes
-        double denom = a.norm() * b.norm();
-        // Return dot product over product of magnitudes
-        return num/denom;
-    }
-
-    /**
-     * Static method calculating the Cosine distance between two sparse vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return The Cosine distance between a and b
-     */
-    public static double CosineDistance(SparseVector a, SparseVector b){
-        // reverse of similarity
-        return 1 - CosineSimilarity(a,b);
     }
 }

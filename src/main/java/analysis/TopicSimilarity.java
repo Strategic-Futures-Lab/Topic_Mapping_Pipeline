@@ -3,6 +3,7 @@ package analysis;
 import IO.Console;
 import IO.JSONHelper;
 import IO.Timer;
+import analytics.Similarities;
 import data.Model;
 import data.SimilarityMatrix;
 import data.SparseVector;
@@ -103,8 +104,8 @@ public class TopicSimilarity extends AnalysisModule {
             b = topicB.getWordDistribution(0);
         }
         return switch (config.similarity) {
-            case "cosine" -> SparseVector.CosineSimilarity(a, b);
-            case "hellinger" -> 1 - SparseVector.HellingerDistance(a, b);
+            case "cosine" -> Similarities.CosineSimilarity(a, b);
+            case "hellinger" -> Similarities.HellingerSimilarity(a, b);
             default -> throw new IllegalArgumentException("Invalid similarity method: " + config.similarity);
         };
     }
