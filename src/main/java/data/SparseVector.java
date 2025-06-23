@@ -1,5 +1,6 @@
 package data;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -79,6 +80,15 @@ public class SparseVector {
     }
 
     /**
+     * Method returning all values in the vector as a List, does not return 0 values, the returned list is therefore an
+     * incomplete representation of the vector, indices in the list don't reflect indices in the vector
+     * @return List of values in the vector
+     */
+    public List<Double> getValues(){
+        return st.values().stream().toList();
+    }
+
+    /**
      * Getter method for the size of the vector
      * @return The vector size
      */
@@ -143,7 +153,7 @@ public class SparseVector {
     /**
      * Method calculating the sum of this and another SparseVector
      * @param b Other SparseVector of the same size
-     * @param safe Flag for safe product: if true throws exception if the two vectors are not of the same size, if false theoretical sizes are automatically adjusted to match the greater
+     * @param safe Flag for safe sum: if true throws exception if the two vectors are not of the same size, if false theoretical sizes are automatically adjusted to match the greater
      * @return Sum of the two SparseVectors
      */
     public SparseVector sum(SparseVector b, boolean safe) {
@@ -179,7 +189,7 @@ public class SparseVector {
     /**
      * Method calculating the difference between this and another SparseVector
      * @param b Other SparseVector of the same size
-     * @param safe Flag for safe product: if true throws exception if the two vectors are not of the same size, if false theoretical sizes are automatically adjusted to match the greater
+     * @param safe Flag for safe difference: if true throws exception if the two vectors are not of the same size, if false theoretical sizes are automatically adjusted to match the greater
      * @return Difference between the two SparseVectors
      */
     public SparseVector diff(SparseVector b, boolean safe) {

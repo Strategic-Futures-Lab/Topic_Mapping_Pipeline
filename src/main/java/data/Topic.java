@@ -1,15 +1,11 @@
 package data;
 
-import IO.Console;
 import IO.JSONHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -110,7 +106,7 @@ public class Topic implements Serializable {
      * @return topic identifier + top words
      */
     public String getTopicIdWords(int numWords){
-        return model+"_"+number+"-"+String.join("_", topWords(numWords));
+        return model+"_"+number+"-"+String.join("_", getTopWords(numWords));
     }
 
     /**
@@ -148,53 +144,60 @@ public class Topic implements Serializable {
 //        docWeights = documentWeights;
     }
 
-    /**
-     * Returns a single word-weight pair given a word index
-     * @param index Index of word to retrieve
-     * @return Pair of word and associated weight
-     * @throws ArrayIndexOutOfBoundsException If the index provided is out of range
-     */
-    public Pair<String, Double> getWord(int index) throws ArrayIndexOutOfBoundsException {
-        return new Pair<>(words[index].getLabel(), words[index].getWeight());
-    }
+//    /**
+//     * Returns a single word-weight pair given a word index
+//     * @param index Index of word to retrieve
+//     * @return Pair of word and associated weight
+//     * @throws ArrayIndexOutOfBoundsException If the index provided is out of range
+//     */
+//    public Pair<String, Double> getWord(int index) throws ArrayIndexOutOfBoundsException {
+//        return new Pair<>(words[index].getLabel(), words[index].getWeight());
+//    }
+//
+//    /**
+//     * Returns a list of word-weight pairs
+//     * @param maxWords Maximum number of words to return
+//     * @return List of word and their associated weights
+//     */
+//    public List<Pair<String, Double>> getWords(int maxWords){
+//        List<Pair<String, Double>> wordPairs = new ArrayList<>();
+//        for(int i = 0; i < maxWords; i++){
+//            wordPairs.add(getWord(i));
+//        }
+//        return wordPairs;
+//    }
+//
+//    /**
+//     * Returns a list of word-weight pairs
+//     * @return List of word and their associated weights
+//     */
+//    public List<Pair<String, Double>> getWords(){
+//        return getWords(words.length);
+//    }
 
     /**
-     * Returns a list of word-weight pairs
-     * @param maxWords Maximum number of words to return
-     * @return List of word and their associated weights
-     */
-    public List<Pair<String, Double>> getWords(int maxWords){
-        List<Pair<String, Double>> wordPairs = new ArrayList<>();
-        for(int i = 0; i < maxWords; i++){
-            wordPairs.add(getWord(i));
-        }
-        return wordPairs;
-    }
-
-    /**
-     * Returns a list of word-weight pairs
-     * @return List of word and their associated weights
-     */
-    public List<Pair<String, Double>> getWords(){
-        return getWords(words.length);
-    }
-
-    /**
-     * Returns an array of top words
+     * Returns a list of top words, sorted by weight
      * @param maxWords maximum number of words to return
-     * @return Array of top words in the topic
+     * @return List of top words in the topic
      */
-    public String[] topWords(int maxWords){
-        return (String[]) Arrays.stream(Arrays.copyOfRange(words, 0, maxWords)).map(w->w.getLabel()).toArray();
+    public List<String> getTopWords(int maxWords){
+        return Arrays.stream(Arrays.copyOfRange(words, 0, maxWords)).map(w->w.getLabel()).toList();
+    }
+
+    /**
+     * Returns a list of all words, sorted by weight
+     * @return List of all words in the topic
+     */
+    public List<String> getWords(){
+        return Arrays.stream(words).map(w->w.getLabel()).toList();
     }
 
     /**
      * Method generating a SparseVector of the words' distribution
-     * @param size Size of the vocabulary
      * @return SparseVector of the words' distribution
      */
-    public SparseVector getWordDistribution(int size){
-        SparseVector wordVec = new SparseVector(size);
+    public SparseVector getWordDistribution(){
+        SparseVector wordVec = new SparseVector(0);
         for(int i = 0; i < words.length; i++){
             wordVec.put(words[i].getIndex(), words[i].getWeight());
         }
@@ -202,53 +205,60 @@ public class Topic implements Serializable {
         return wordVec;
     }
 
-    /**
-     * Returns a single document-weight pair given a document index
-     * @param index Index of document to retrieve
-     * @return Pair of document and associated weight
-     * @throws ArrayIndexOutOfBoundsException If the index provided is out of range
-     */
-    public Pair<String, Double> getDocument(int index) throws ArrayIndexOutOfBoundsException {
-        return new Pair<>(documents[index].getLabel(), documents[index].getWeight());
-    }
+//    /**
+//     * Returns a single document-weight pair given a document index
+//     * @param index Index of document to retrieve
+//     * @return Pair of document and associated weight
+//     * @throws ArrayIndexOutOfBoundsException If the index provided is out of range
+//     */
+//    public Pair<String, Double> getDocument(int index) throws ArrayIndexOutOfBoundsException {
+//        return new Pair<>(documents[index].getLabel(), documents[index].getWeight());
+//    }
+//
+//    /**
+//     * Returns a list of document-weight pairs
+//     * @param maxDocuments Maximum number of documents to return
+//     * @return List of document and their associated weights
+//     */
+//    public List<Pair<String, Double>> getDocuments(int maxDocuments){
+//        List<Pair<String, Double>> docPairs = new ArrayList<>();
+//        for(int i = 0; i < maxDocuments; i++){
+//            docPairs.add(getDocument(i));
+//        }
+//        return docPairs;
+//    }
+//
+//    /**
+//     * Returns a list of document-weight pairs
+//     * @return List of document and their associated weights
+//     */
+//    public List<Pair<String, Double>> getDocuments(){
+//        return getDocuments(documents.length);
+//    }
 
     /**
-     * Returns a list of document-weight pairs
-     * @param maxDocuments Maximum number of documents to return
-     * @return List of document and their associated weights
-     */
-    public List<Pair<String, Double>> getDocuments(int maxDocuments){
-        List<Pair<String, Double>> docPairs = new ArrayList<>();
-        for(int i = 0; i < maxDocuments; i++){
-            docPairs.add(getDocument(i));
-        }
-        return docPairs;
-    }
-
-    /**
-     * Returns a list of document-weight pairs
-     * @return List of document and their associated weights
-     */
-    public List<Pair<String, Double>> getDocuments(){
-        return getDocuments(documents.length);
-    }
-
-    /**
-     * Returns an array of top document ids
+     * Returns a list of top document ids, sorted by weight
      * @param maxDocuments maximum number of documents to return
-     * @return Array of top document ids in the topic
+     * @return List of top document ids in the topic
      */
-    public String[] topDocuments(int maxDocuments){
-        return (String[]) Arrays.stream(Arrays.copyOfRange(documents, 0, maxDocuments)).map(w->w.getLabel()).toArray();
+    public List<String> getTopDocuments(int maxDocuments){
+        return Arrays.stream(Arrays.copyOfRange(documents, 0, maxDocuments)).map(d->d.getLabel()).toList();
+    }
+
+    /**
+     * Returns a list of all document ids, sorted by weight
+     * @return List of all document ids in the topic
+     */
+    public List<String> getDocuments(){
+        return Arrays.stream(documents).map(d->d.getLabel()).toList();
     }
 
     /**
      * Method generating a SparseVector of the documents' distribution
-     * @param size Size of the corpus
      * @return SparseVector of the documents' distribution
      */
-    public SparseVector getDocumentDistribution(int size){
-        SparseVector docVec = new SparseVector(size);
+    public SparseVector getDocumentDistribution(){
+        SparseVector docVec = new SparseVector(0);
         for(int i = 0; i < documents.length; i++){
             docVec.put(documents[i].getIndex(), documents[i].getWeight());
         }

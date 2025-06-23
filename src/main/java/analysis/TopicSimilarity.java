@@ -94,20 +94,23 @@ public class TopicSimilarity extends AnalysisModule {
     }
 
     private double getSimilarity(Topic topicA, Topic topicB){
-        SparseVector a;
-        SparseVector b;
-        if(config.useDocuments){
-            a = topicA.getDocumentDistribution(0);
-            b = topicB.getDocumentDistribution(0);
-        } else {
-            a = topicA.getWordDistribution(0);
-            b = topicB.getWordDistribution(0);
-        }
         return switch (config.similarity) {
-            case "cosine" -> Similarities.CosineSimilarity(a, b);
-            case "hellinger" -> Similarities.HellingerSimilarity(a, b);
+            case "cosine" -> Similarities.CosineSimilarity(getFeatureVector(topicA), getFeatureVector(topicB));
+            case "hellinger" -> Similarities.HellingerSimilarity(getFeatureVector(topicA), getFeatureVector(topicB));
+            case "jaccard" -> Similarities.JaccardSimilarity(getFeatureList(topicA), getFeatureList(topicB));
+            case "average_jaccard" -> Similarities.AverageJaccardSimilarity(getFeatureList(topicA), getFeatureList(topicB));
             default -> throw new IllegalArgumentException("Invalid similarity method: " + config.similarity);
         };
+    }
+
+    private SparseVector getFeatureVector(Topic t){
+        if(config.useDocuments) return t.getDocumentDistribution();
+        else return t.getWordDistribution();
+    }
+
+    private List<String> getFeatureList(Topic t){
+        if(config.useDocuments) return t.getDocuments();
+        else return t.getWords();
     }
 
     private void writeSimilarities() throws IOException {
