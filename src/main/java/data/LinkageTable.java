@@ -100,6 +100,16 @@ public class LinkageTable extends Clusters {
         }
     }
 
+    /**
+     * Method adding a new node in the linkage table
+     * @param child1 node index of first child
+     * @param child2 node index of second child
+     * @param distance join distance
+     */
+    public void addNode(int child1, int child2, double distance){
+        nodes.add(new LinkageNode(child1, child2, distance));
+    }
+
 //    /**
 //     * Method adding a new cluster assignment
 //     * @param item ID of item assigned to cluster
