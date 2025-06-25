@@ -9,6 +9,9 @@ import pipeline.config.ProjectConfig;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Configuration class for Topic Similarity module
+ */
 public class TopicSimilarityConfig extends ModuleConfig {
 
     private static final String[] MANDATORY_PARAMS = new String[]{"topics", "output"};
