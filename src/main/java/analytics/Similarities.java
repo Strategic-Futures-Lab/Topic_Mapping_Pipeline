@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 
 /**
  * Class providing static methods for computing similarity and distance measures
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class Similarities {
 
