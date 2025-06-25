@@ -1,22 +1,17 @@
 package analysis;
 
 import IO.Console;
-import IO.JSONHelper;
 import IO.Timer;
 import analytics.Similarities;
 import data.Model;
 import data.SimilarityMatrix;
 import data.SparseVector;
 import data.Topic;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import pipeline.config.ModuleConfig;
 import pipeline.config.modules.TopicSimilarityConfig;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
