@@ -7,9 +7,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Class representing a similarity matrix.
@@ -212,11 +212,12 @@ public class SimilarityMatrix {
                 return matrix.get(columnIndex-1).get(rowIndex);
             } else if(rowIndex > columnIndex){
                 return matrix.get(rowIndex-1).get(columnIndex);
+            } else {
+                return 1;
             }
         } else {
             return matrix.get(rowIndex).get(columnIndex);
         }
-        return 0;
     }
 
     /**
@@ -235,6 +236,56 @@ public class SimilarityMatrix {
             columnIndex = columnItems.lastIndexOf(columnItem);
         }
         return getSimilarity(rowIndex, columnIndex);
+    }
+
+    /**
+     * Method returning the similarity matrix as a 2-dimensional array
+     * @return The similarity matrix
+     */
+    public double[][] getSimilarityMatrix(){
+        double[][] sMatrix;
+        if(symmetric) {
+            sMatrix = new double[items.size()][items.size()];
+            for(int i = 0; i < items.size(); i++){
+                for(int j = i; j < items.size(); j++){
+                    sMatrix[i][j] = getSimilarity(i, j);
+                    sMatrix[j][i] = getSimilarity(i, j);
+                }
+            }
+        } else {
+            sMatrix = new double[rowItems.size()][columnItems.size()];
+            for(int i = 0; i < rowItems.size(); i++){
+                for(int j = 0; j < columnItems.size(); j++){
+                    sMatrix[i][j] = getSimilarity(i, j);
+                }
+            }
+        }
+        return sMatrix;
+    }
+
+    /**
+     * Method returning the distance matrix as a 2-dimensional array
+     * @return The distance matrix
+     */
+    public double[][] getDistanceMatrix(){
+        double[][] dMatrix;
+        if(symmetric) {
+            dMatrix = new double[items.size()][items.size()];
+            for(int i = 0; i < items.size(); i++){
+                for(int j = i; j < items.size(); j++){
+                    dMatrix[i][j] = 1 - getSimilarity(i, j);
+                    dMatrix[j][i] = 1 - getSimilarity(i, j);
+                }
+            }
+        } else {
+            dMatrix = new double[rowItems.size()][columnItems.size()];
+            for(int i = 0; i < rowItems.size(); i++){
+                for(int j = 0; j < columnItems.size(); j++){
+                    dMatrix[i][j] = 1 - getSimilarity(i, j);
+                }
+            }
+        }
+        return dMatrix;
     }
 
     /**
@@ -292,7 +343,7 @@ public class SimilarityMatrix {
             JSONArray matrixJson = new JSONArray();
             for(List<Double> row: matrix) {
                 JSONArray rowJson = new JSONArray();
-                rowJson.addAll(row);
+                rowJson.addAll(row.stream().map(this::formatDouble).toList());
                 matrixJson.add(rowJson);
             }
             root.put(JSON_MATRIX, matrixJson);
@@ -301,6 +352,12 @@ public class SimilarityMatrix {
             Console.error("Saving model file "+filename+" failed");
             throw e;
         }
+    }
+
+    private double formatDouble(double in){
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return Double.parseDouble(df.format(in));
     }
 
 }
