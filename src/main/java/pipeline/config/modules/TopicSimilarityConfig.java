@@ -11,6 +11,9 @@ import java.util.List;
 
 /**
  * Configuration class for Topic Similarity module
+ *
+ * @author P. Le Bras
+ * @version 1
  */
 public class TopicSimilarityConfig extends ModuleConfig {
 
@@ -20,7 +23,7 @@ public class TopicSimilarityConfig extends ModuleConfig {
     public final List<String> topicFiles;
     /** Filename of the output similarity file */
     public final String outputFile;
-    /** Method for estimating similarity */
+    /** Method for estimating similarity: cosine, hellinger, jaccard or average_jaccard */
     public final String similarity;
     /** Basis of similarity, documents (true) or words (false) */
     public final boolean useDocuments;
@@ -29,6 +32,7 @@ public class TopicSimilarityConfig extends ModuleConfig {
      * Constructor, parses and stores module parameters
      * @param name Module name as described in the YAML config file
      * @param moduleParams Map of unparsed YAML parameters
+     * @param projectParams Global project parameters
      * @throws ConfigParser.ParseException If the configuration does not include all mandatory parameters or if a parameter is not found
      */
     public TopicSimilarityConfig(String name, ModuleType type, HashMap<String, Object> moduleParams, ProjectConfig projectParams) throws ConfigParser.ParseException {
@@ -42,6 +46,9 @@ public class TopicSimilarityConfig extends ModuleConfig {
         useDocuments = getDefaultBooleanParam("useDocuments", moduleParams, true);
     }
 
+    /**
+     * Method logging the module parameters
+     */
     public void logConfig(){
         Console.info("Loading topics from:", 1);
         for(String f: topicFiles) Console.info(" - "+f, 2);
