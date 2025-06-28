@@ -49,8 +49,8 @@ public class Agglomerative {
         while(workingMatrix.length > 1){
             // find the shortest remaining distance in the working matrix
             minDistance = Double.MAX_VALUE;
-            for(int x = 0; x < distanceMatrix.length-1; x++){
-                for(int y = x+1; y < distanceMatrix.length; y++){
+            for(int x = 0; x < workingMatrix.length-1; x++){
+                for(int y = x+1; y < workingMatrix.length; y++){
                     if(workingMatrix[x][y] < minDistance){
                         minDistance = workingMatrix[x][y];
                         X = x;
