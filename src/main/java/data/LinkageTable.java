@@ -7,6 +7,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,8 +59,14 @@ public class LinkageTable extends Clusters {
             JSONArray res = new JSONArray();
             res.add(0, node1);
             res.add(1, node2);
-            res.add(2, distance);
+            res.add(2, formatDouble(distance));
             return res;
+        }
+
+        private double formatDouble(double in){
+            DecimalFormat df = new DecimalFormat("#.#####");
+            df.setRoundingMode(RoundingMode.HALF_UP);
+            return Double.parseDouble(df.format(in));
         }
     }
 
@@ -120,20 +128,28 @@ public class LinkageTable extends Clusters {
 //    }
 
     /**
-     * Method writing the cluster assignments on a JSON file
+     * Method generating a JSON object with the cluster information
+     */
+    @Override
+    public JSONObject toJSON() {
+        JSONObject root = super.toJSON();
+        JSONArray linkages = new JSONArray();
+        for(LinkageNode n: nodes){
+            linkages.add(n.toJSON());
+        }
+        root.put(JSON_LINKAGE, linkages);
+        return root;
+    }
+
+    /**
+     * Method writing the cluster information on a JSON file
      * @param filename File to write clusters on
      * @throws IOException If there is an error with writing the file
      */
     @Override
     public void writeClusters(String filename) throws IOException{
         try{
-            JSONObject root = super.toJSON();
-            JSONArray linkages = new JSONArray();
-            for(LinkageNode n: nodes){
-                linkages.add(n.toJSON());
-            }
-            root.put(JSON_LINKAGE, linkages);
-            JSONHelper.saveJSON(root, filename);
+            JSONHelper.saveJSON(this.toJSON(), filename);
         } catch (IOException e){
             Console.error("Saving cluster file "+filename+" failed");
             throw e;

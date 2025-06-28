@@ -27,7 +27,8 @@ public enum ModuleType {
     // Modelling modules
     LDAModel (model.LDAModel.class, ModelConfigLDA.class),
     // Analysis modules
-    TopicSimilarity (analysis.TopicSimilarity.class, TopicSimilarityConfig.class);
+    TopicSimilarity (analysis.TopicSimilarity.class, TopicSimilarityConfig.class),
+    TopicCluster (analysis.TopicCluster.class, TopicClusterConfig.class);
 
     public final Class module;
     public final Class config;
@@ -62,6 +63,7 @@ public enum ModuleType {
             case "nGrams" -> NGrams;
             case "modelLDA" -> LDAModel;
             case "topicSimilarity" -> TopicSimilarity;
+            case "topicCluster" -> TopicCluster;
             default ->
                     throw new ConfigParser.ParseException("Module type \"" + typeName + "\" is not recognised");
         };

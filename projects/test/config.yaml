@@ -12,9 +12,14 @@ run:
 #  - txtInput1
 #  - buildText1
 #  - lemmatise1
-#  - ngrams1
+#  - ngramsAnalysis1
 #  - ngramsBuild1
-  - ldaModel1
+#  - ldaModel1
+#  - ldaModel2
+#  - topicSim1
+#  - topicSim2
+#  - topicSim3
+  - topicClust1
 #  - bibInput2
 #  - buildText2
 #  - lemmatise2
@@ -30,42 +35,75 @@ run:
 # Text file input
 txtInput1:
   type: inputTXT
+  name: BBC_dataset
   source: bbc-fulltext/bbc
-  output: corpus_txt.json
+  output: corpus_bbc.json
   emptyLineSplit: false
 
 buildText1:
   type: buildText
-  corpus: corpus_txt.json
+  corpus: corpus_bbc.json
   textFields: [ text ]
   docFields: [ folder, file ]
 
 lemmatise1:
   type: lemmatise
-  corpus: corpus_txt.json
+  corpus: corpus_bbc.json
 
-ngrams1:
+ngramsAnalysis1:
   type: nGrams
   size: 2
-  corpus: corpus_txt.json
+  corpus: corpus_bbc.json
   nGrams: nGrams.csv
   analysis: true
 
 ngramsBuild1:
   type: nGrams
-  corpus: corpus_txt.json
+  corpus: corpus_bbc.json
   nGrams: nGrams.txt
   analysis: false
 
 ldaModel1:
   type: modelLDA
-  corpus: corpus_txt.json
-  topics: model_topics_txt.json
-  documents: model_documents_txt.json
+  name: main
+  corpus: corpus_bbc.json
+  topics: model_bbc_main.json
+  documents: corpus_bbc.json
+  nTopics: 5
+  iterations: 100
+
+ldaModel2:
+  type: modelLDA
+  name: sub
+  corpus: corpus_bbc.json
+  topics: model_bbc_sub.json
+  documents: corpus_bbc.json
   nTopics: 10
-  iterations: 200
-#  wordDistances: true
-#  logs: modelLogs
+  iterations: 100
+
+topicSim1:
+  type: topicSimilarity
+  topics: model_bbc_main.json
+  output: main_topic_similarities.json
+
+topicSim2:
+  type: topicSimilarity
+  topics: model_bbc_sub.json
+  output: sub_topic_similarities.json
+
+topicSim3:
+  type: topicSimilarity
+  topics: [model_bbc_main.json, model_bbc_sub.json]
+  similarity: "average_jaccard"
+  output: topic_similarities.json
+
+topicClust1:
+  type: topicCluster
+  similarities: main_topic_similarities.json
+  output: main_topic_clusters.json
+  linkage: "max"
+  clusters: 3
+
 
 # BiBTex input module
 bibInput2:
@@ -95,7 +133,7 @@ ngrams2:
   size: 2
   corpus: corpus_bib.json
 
-ldaModel2:
+ldaModel3:
   type: modelLDA
   corpus: corpus_csv.json
   model: model.json
@@ -118,6 +156,7 @@ csvInput1:
 
 csvInput2:
   type: inputCSV
+  name: csv_test
   source: csv_input_2.csv
   output: corpus_csv_2.json
   fields:
@@ -129,6 +168,7 @@ csvInput2:
 
 mergeCorpus1:
   type: mergeCorpus
+  name: csv_example
   corpora: [ corpus_csv_1.json, corpus_csv_2.json ]
   output: corpus_csv.json
   docFields: [ title, abstract, authors, organisation, value ]
