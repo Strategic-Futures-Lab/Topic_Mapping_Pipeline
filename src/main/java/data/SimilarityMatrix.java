@@ -68,6 +68,76 @@ public class SimilarityMatrix {
     }
 
     /**
+     * JSON file constructor
+     * @param filename Filename of the JSON file containing the similarity matrix
+     * @throws IOException If there is an error while loading the file
+     * @throws ParseException If there is an error while parsing the file
+     */
+    public SimilarityMatrix(String filename) throws IOException, ParseException {
+        loadSimilarities(filename);
+    }
+
+    /**
+     * Method check that the similarity matrix is symmetric (and square)
+     * @return True for symmetric, false otherwise
+     */
+    public boolean isSymmetric(){
+        return symmetric;
+    }
+
+    /**
+     * Method returning the number of rows
+     * @return Number of rows in the matrix
+     */
+    public int sizeRows(){
+        return symmetric ? items.size() : rowItems.size();
+    }
+
+    /**
+     * Method returning the row items in the matrix
+     * @return Row items in the matrix
+     */
+    public List<String> getRowItems(){
+        return symmetric ? items : rowItems;
+    }
+
+    /**
+     * Method returning the number of columns
+     * @return Number of columns in the matrix
+     */
+    public int sizeColumns(){
+        return symmetric ? items.size() : columnItems.size();
+    }
+
+    /**
+     * Method returning the column items in the matrix
+     * @return Column items in the matrix
+     */
+    public List<String> getColumnItems(){
+        return symmetric ? items : columnItems;
+    }
+
+    /**
+     * Method returning the matrix size
+     * @return Number of items in the matrix
+     * @throws RuntimeException if the matrix isn't symmetric
+     */
+    public int size() throws RuntimeException {
+        if(!symmetric) throw new RuntimeException("Matrix isn't symmetric, use sizeRows or sizeColumns instead");
+        return items.size();
+    }
+
+    /**
+     * Method returning the items in the matrix
+     * @return Items in the matrix
+     * @throws RuntimeException if the matrix isn't symmetric
+     */
+    public List<String> getItems() throws RuntimeException {
+        if(!symmetric) throw new RuntimeException("Matrix isn't symmetric, use getRowItems or getColumnItems instead");
+        return items;
+    }
+
+    /**
      * Adds an item to the list of items
      * @param name Name of item to add
      * @throws RuntimeException if the matrix is asymmetric or if the item is already present in list
@@ -297,7 +367,7 @@ public class SimilarityMatrix {
     public void loadSimilarities(String filename) throws IOException, ParseException {
         try {
             JSONObject input = JSONHelper.loadJSON(filename);
-            if(input.containsValue(JSON_ITEMS)){
+            if(input.containsKey(JSON_ITEMS)){
                 symmetric = true;
                 items = Arrays.stream(JSONHelper.getStringArray((JSONArray) input.get(JSON_ITEMS))).toList();
             } else {
